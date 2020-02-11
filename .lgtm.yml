@@ -1,0 +1,11 @@
+path_classifiers:
+  test:
+    - exclude: /
+    - XUnitTester
+extraction:
+  csharp:
+    index:
+      solution:
+        - Gliep.Full.sln
+      dotnet:
+        version: 3.1.101

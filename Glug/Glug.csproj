@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>GeminiLab.Glug</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GeminiLab.Core2" Version="1.0.0-preview-20191013-238" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Glos\Glos.csproj" />
+  </ItemGroup>
+
+</Project>

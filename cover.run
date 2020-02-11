@@ -1,0 +1,2 @@
+dotnet test -nologo -p:CollectCoverage=true -p:CoverletOutputFormat=opencover -p:Exclude=[xunit.*]* -v=normal XUnitTester/XUnitTester.csproj
+reportgenerator -reports:./XUnitTester/coverage.opencover.xml -targetdir:report.ignore

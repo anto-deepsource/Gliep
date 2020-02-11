@@ -1,0 +1,830 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using GeminiLab.Glos.CodeGenerator;
+using GeminiLab.Glos.ViMa;
+using Xunit;
+using XUnitTester.Checker;
+
+namespace XUnitTester {
+    public class ExecutionWithCodeGeneratorTest : GlosTestBase {
+        [Fact]
+        public void IntegerArithmeticOp() {
+            var fgen = Builder.AddFunction();
+            var locs = new LocalVariable[5] {
+                fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable(),
+                fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable()
+            };
+            
+            fgen.AppendLd(0xefcdab8967452301);
+            fgen.AppendStLoc(locs[0]);
+            fgen.AppendLd(0x0123456789abcdef);
+            fgen.AppendStLoc(locs[1]);
+            fgen.AppendLd(-1);
+            fgen.AppendStLoc(locs[2]);
+            fgen.AppendLd(0x11111111);
+            fgen.AppendStLoc(locs[3]);
+            fgen.AppendLd(2);
+            fgen.AppendStLoc(locs[4]);
+
+            fgen.AppendLdDel();
+
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendAdd(); // expected: 0x0000000022222222
+            fgen.AppendLdLoc(locs[0]);
+            fgen.AppendLdLoc(locs[0]);
+            fgen.AppendAdd(); // expected: 0xdf9b5712ce8a4602
+            fgen.AppendLdLoc(locs[0]);
+            fgen.AppendLdLoc(locs[1]);
+            fgen.AppendAdd(); // expected: 0xf0f0f0f0f0f0f0f0
+
+            fgen.AppendLdLoc(locs[2]);
+            fgen.AppendLdLoc(locs[2]);
+            fgen.AppendSub(); // expected: 0x0000000000000000
+            fgen.AppendLdLoc(locs[1]);
+            fgen.AppendLdLoc(locs[2]);
+            fgen.AppendSub(); // expected: 0x0123456789abcdf0
+            fgen.AppendLdLoc(locs[1]);
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendSub(); // expected: 0x01234567789abcde
+
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendMul(); // expected: 0x0123456787654321
+            fgen.AppendLdLoc(locs[1]);
+            fgen.AppendLdLoc(locs[0]);
+            fgen.AppendMul(); // expected: 0xa9cf824ab13e7aef
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendLdLoc(locs[2]);
+            fgen.AppendMul(); // expected: 0xffffffffeeeeeeef
+
+            fgen.AppendLdLoc(locs[1]);
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendDiv(); // expected: 0x0000000011111111
+            fgen.AppendLdLoc(locs[2]);
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendDiv(); // expected: 0x0000000000000000
+            fgen.AppendLdLoc(locs[0]);
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendDiv(); // expected: 0xffffffff0d0d0d0d
+
+            fgen.AppendLdLoc(locs[1]);
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendMod(); // expected: 0x0000000002468ace
+            fgen.AppendLdLoc(locs[0]);
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendMod(); // expected: 0xfffffffff0ac6824
+            fgen.AppendLdLoc(locs[0]);
+            fgen.AppendLdLoc(locs[4]);
+            fgen.AppendMod(); // expected: 0xffffffffffffffff
+
+            fgen.AppendLdLoc(locs[2]);
+            fgen.AppendNeg(); // expected: 0x0000000000000001
+            fgen.AppendLd(long.MinValue);
+            fgen.AppendNeg(); // expected: 0x8000000000000000
+
+            fgen.AppendRet();
+
+            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+
+            unchecked {
+                GlosValueArrayChecker.Create(res)
+                    .First().AssertInteger((long)0x0000000022222222ul)
+                    .MoveNext().AssertInteger((long)0xdf9b5712ce8a4602ul)
+                    .MoveNext().AssertInteger((long)0xf0f0f0f0f0f0f0f0ul)
+                    .MoveNext().AssertInteger((long)0x0000000000000000ul)
+                    .MoveNext().AssertInteger((long)0x0123456789abcdf0ul)
+                    .MoveNext().AssertInteger((long)0x01234567789abcdeul)
+                    .MoveNext().AssertInteger((long)0x0123456787654321ul)
+                    .MoveNext().AssertInteger((long)0xa9cf824ab13e7aeful)
+                    .MoveNext().AssertInteger((long)0xffffffffeeeeeeeful)
+                    .MoveNext().AssertInteger((long)0x0000000011111111ul)
+                    .MoveNext().AssertInteger((long)0x0000000000000000ul)
+                    .MoveNext().AssertInteger((long)0xffffffff0d0d0d0dul)
+                    .MoveNext().AssertInteger((long)0x0000000002468aceul)
+                    .MoveNext().AssertInteger((long)0xfffffffff0ac6824ul)
+                    .MoveNext().AssertInteger((long)0xfffffffffffffffful)
+                    .MoveNext().AssertInteger((long)0x0000000000000001ul)
+                    .MoveNext().AssertInteger((long)0x8000000000000000ul)
+                    .MoveNext().AssertEnd();
+            }
+        }
+
+        [Fact]
+        public void IntegerBitwiseOp() {
+            var fgen = Builder.AddFunction();
+            var locs = new LocalVariable[5] {
+                fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable(),
+                fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable()
+            };
+
+            fgen.AppendLd(0xefcdab8967452301);
+            fgen.AppendStLoc(locs[0]);
+            fgen.AppendLd(0x0123456789abcdef);
+            fgen.AppendStLoc(locs[1]);
+            fgen.AppendLd(-1);
+            fgen.AppendStLoc(locs[2]);
+            fgen.AppendLd(0x11111111);
+            fgen.AppendStLoc(locs[3]);
+            fgen.AppendLd(2);
+            fgen.AppendStLoc(locs[4]);
+
+            fgen.AppendLdDel();
+
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendLdLoc(locs[4]);
+            fgen.AppendLsh(); // expected: 0x0000000044444444
+            fgen.AppendLdLoc(locs[3]);
+            fgen.AppendLdLoc(locs[4]);
+            fgen.AppendRsh(); // expected: 0x0000000004444444
+            fgen.AppendLdLoc(locs[0]);
+            fgen.AppendLdLoc(locs[1]);
+            fgen.AppendAnd(); // expected: 0x0101010101010101
+            fgen.AppendLdLoc(locs[0]);
+            fgen.AppendLdLoc(locs[1]);
+            fgen.AppendOrr(); // expected: 0xefefefefefefefef
+            fgen.AppendLdLoc(locs[0]);
+            fgen.AppendLdLoc(locs[1]);
+            fgen.AppendXor(); // expected: 0xeeeeeeeeeeeeeeee
+            fgen.AppendLdLoc(locs[2]);
+            fgen.AppendNot(); // expected: 0x0000000000000000
+
+            fgen.AppendRet();
+
+            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+
+            unchecked {
+                GlosValueArrayChecker.Create(res)
+                    .First().AssertInteger((long)0x0000000044444444ul)
+                    .MoveNext().AssertInteger((long)0x0000000004444444ul)
+                    .MoveNext().AssertInteger((long)0x0101010101010101ul)
+                    .MoveNext().AssertInteger((long)0xefefefefefefefeful)
+                    .MoveNext().AssertInteger((long)0xeeeeeeeeeeeeeeeeul)
+                    .MoveNext().AssertInteger((long)0x0000000000000000ul)
+                    .MoveNext().AssertEnd();
+            }
+        }
+
+        [Fact]
+        public void IntegerComparisonOp() {
+            var fgen = Builder.AddFunction();
+            var a = fgen.AllocateLocalVariable();
+            var b = fgen.AllocateLocalVariable();
+
+            fgen.AppendLd(0xefcdab8967452301);
+            fgen.AppendStLoc(a);
+            fgen.AppendLd(0x123456789abcdef);
+            fgen.AppendStLoc(b);
+
+            fgen.AppendLdDel();
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(a);
+            fgen.AppendGtr(); // F
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(a);
+            fgen.AppendLss(); // F
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(a);
+            fgen.AppendGeq(); // T
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(a);
+            fgen.AppendLeq(); // T
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(a);
+            fgen.AppendEqu(); // T
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(a);
+            fgen.AppendNeq(); // F
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendGtr(); // F
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendLss(); // T
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendGeq(); // F
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendLeq(); // T
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendEqu(); // F
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendNeq(); // T
+
+            fgen.AppendRet();
+
+            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertFalse()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertTrue()
+                .MoveNext().AssertTrue()
+                .MoveNext().AssertTrue()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertTrue()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertTrue()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertTrue()
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void NumericArithmeticOp() {
+            var fgen = Builder.AddFunction();
+            var a = fgen.AllocateLocalVariable();
+            var b = fgen.AllocateLocalVariable();
+            var c = fgen.AllocateLocalVariable();
+
+            fgen.AppendLd(0x1248);
+            fgen.AppendStLoc(a);
+            fgen.AppendLdFltRaw(0x40b2480000000000);
+            fgen.AppendStLoc(b);
+            fgen.AppendLdFltRaw(0x40b2480000000001);
+            fgen.AppendStLoc(c);
+
+            fgen.AppendLdDel();
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendAdd(); // expected: 9360.0
+            fgen.AppendLdLoc(c);
+            fgen.AppendLdLoc(b);
+            fgen.AppendAdd(); // expected: 9360.0
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendSub(); // expected: 0.0
+            fgen.AppendLdLoc(c);
+            fgen.AppendLdLoc(b);
+            fgen.AppendSub(); // expected: 0x3d70000000000000 as float / 9.0949470177292824E-13
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendMul(); // expected: 21902400.0
+            fgen.AppendLdLoc(c);
+            fgen.AppendLdLoc(b);
+            fgen.AppendMul(); // expected: 0x4174e34400000001 as float / 21902400.000000004
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendDiv(); // expected: 1.0
+            fgen.AppendLdLoc(c);
+            fgen.AppendLdLoc(b);
+            fgen.AppendDiv(); // expected: 0x3ff0000000000001 as float / 1.0000000000000002
+
+            fgen.AppendLdLoc(b);
+            fgen.AppendNeg(); // expected: -4680.0
+
+            fgen.AppendRet();
+
+            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertFloat(9360.0)
+                .MoveNext().AssertFloat(9360.0)
+                .MoveNext().AssertFloat(0.0)
+                .MoveNext().AssertFloat(0x3d70000000000000ul)
+                .MoveNext().AssertFloat(21902400.0)
+                .MoveNext().AssertFloat(0x4174e34400000001ul)
+                .MoveNext().AssertFloat(1.0)
+                .MoveNext().AssertFloat(0x3ff0000000000001ul)
+                .MoveNext().AssertFloat(-4680.0)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void StringLoadAndOp() {
+            var s1 = "str1";
+            var s2 = "字符串";
+
+            var fgen = Builder.AddFunction();
+            var a = fgen.AllocateLocalVariable();
+            var b = fgen.AllocateLocalVariable();
+
+            fgen.AppendLdStr(s1);
+            fgen.AppendStLoc(a);
+            fgen.AppendLdStr(s2);
+            fgen.AppendStLoc(b);
+
+            // remove to test default return delimiter
+            // fgen.AppendLdDel();
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendAdd();
+
+            fgen.AppendRet();
+
+            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertString(s1)
+                .MoveNext().AssertString(s1 + s2)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void FunctionCall() {
+            var inc = Builder.AddFunction();
+
+            inc.AppendLdArg(0);
+            inc.AppendLd(1);
+            inc.AppendAdd();
+            inc.AppendLd(1);
+            inc.AppendRet();
+
+            var fgen = Builder.AddFunction();
+
+            var incLoc = fgen.AllocateLocalVariable();
+
+            fgen.AppendLdFun(inc);
+            fgen.AppendLdNTbl();
+            fgen.AppendBind();
+            fgen.AppendStLoc(incLoc);
+
+            fgen.AppendLdDel();
+
+            fgen.AppendLdDel();
+            fgen.AppendLd(1);
+            fgen.AppendLdLoc(incLoc);
+            fgen.AppendCall();
+            fgen.AppendShpRv(1);
+
+            fgen.AppendLdDel();
+            fgen.AppendLd(2);
+            fgen.AppendLd(3);
+            fgen.AppendLdLoc(incLoc);
+            fgen.AppendCall();
+            fgen.AppendShpRv(3);
+
+            fgen.AppendRet();
+
+            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertInteger(2)
+                .MoveNext().AssertInteger(3)
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertNil()
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void TableWithUenAndRenMetamethods() {
+            var metaUen = Builder.AddFunction();
+
+            metaUen.AppendLdArg(0);
+            metaUen.AppendLdArg(1);
+            metaUen.AppendLdArg(2);
+            metaUen.AppendLd(1);
+            metaUen.AppendAdd();
+            metaUen.AppendUenL();
+            metaUen.AppendRet();
+
+            var metaRen = Builder.AddFunction();
+
+            metaRen.AppendLdFalse();
+            metaRen.AppendRet();
+
+            var fgen = Builder.AddFunction();
+            var at = fgen.AllocateLocalVariable();
+            var a = fgen.AllocateLocalVariable();
+            var bt = fgen.AllocateLocalVariable();
+            var b = fgen.AllocateLocalVariable();
+            var ct = fgen.AllocateLocalVariable();
+            var c = fgen.AllocateLocalVariable();
+
+            fgen.AppendLdNTbl();
+            fgen.AppendStLoc(at);
+            fgen.AppendLdNTbl();
+            fgen.AppendStLoc(a);
+            fgen.AppendLdNTbl();
+            fgen.AppendStLoc(bt);
+            fgen.AppendLdNTbl();
+            fgen.AppendStLoc(b);
+            fgen.AppendLdNTbl();
+            fgen.AppendStLoc(ct);
+            fgen.AppendLdNTbl();
+            fgen.AppendStLoc(c);
+
+            fgen.AppendLdLoc(at);
+            fgen.AppendLdStr(GlosMetamethodNames.Uen);
+            fgen.AppendLdFun(metaUen);
+            fgen.AppendUenL();
+
+            fgen.AppendLdLoc(at);
+            fgen.AppendLdStr(GlosMetamethodNames.Ren);
+            fgen.AppendLdFun(metaRen);
+            fgen.AppendUenL();
+
+            fgen.AppendLdLoc(bt);
+            fgen.AppendLdStr(GlosMetamethodNames.Uen);
+            fgen.AppendLdFun(metaUen);
+            fgen.AppendUenL();
+
+            fgen.AppendLdLoc(ct);
+            fgen.AppendLdStr(GlosMetamethodNames.Ren);
+            fgen.AppendLdFun(metaRen);
+            fgen.AppendUenL();
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(at);
+            fgen.AppendSmt();
+            fgen.AppendPop();
+
+            fgen.AppendLdLoc(b);
+            fgen.AppendLdLoc(bt);
+            fgen.AppendSmt();
+            fgen.AppendPop();
+
+            fgen.AppendLdLoc(c);
+            fgen.AppendLdLoc(ct);
+            fgen.AppendSmt();
+            fgen.AppendPop();
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLd(0);
+            fgen.AppendLd(0);
+            fgen.AppendUen();
+            fgen.AppendLdLoc(a);
+            fgen.AppendLd(1);
+            fgen.AppendLd(1);
+            fgen.AppendUenL();
+
+            fgen.AppendLdLoc(b);
+            fgen.AppendLd(0);
+            fgen.AppendLd(0);
+            fgen.AppendUen();
+            fgen.AppendLdLoc(b);
+            fgen.AppendLd(1);
+            fgen.AppendLd(1);
+            fgen.AppendUenL();
+
+            fgen.AppendLdLoc(c);
+            fgen.AppendLd(0);
+            fgen.AppendLd(0);
+            fgen.AppendUen();
+            fgen.AppendLdLoc(c);
+            fgen.AppendLd(1);
+            fgen.AppendLd(1);
+            fgen.AppendUenL();
+
+            fgen.AppendLdDel();
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(b);
+            fgen.AppendLdLoc(c);
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLd(0);
+            fgen.AppendRenL();
+            fgen.AppendLdLoc(a);
+            fgen.AppendLd(0);
+            fgen.AppendRen();
+
+            fgen.AppendLdLoc(b);
+            fgen.AppendLd(0);
+            fgen.AppendRenL();
+            fgen.AppendLdLoc(b);
+            fgen.AppendLd(0);
+            fgen.AppendRen();
+
+            fgen.AppendLdLoc(c);
+            fgen.AppendLd(0);
+            fgen.AppendRenL();
+            fgen.AppendLdLoc(c);
+            fgen.AppendLd(0);
+            fgen.AppendRen();
+
+            fgen.AppendRet();
+
+            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertTable(t => {
+                    GlosTableChecker.Create(t)
+                        .Has(0, v => v.AssertInteger() == 1)
+                        .Has(1, v => v.AssertInteger() == 1)
+                        .AssertAllKeyChecked();
+                })
+                .MoveNext().AssertTable(t => {
+                    GlosTableChecker.Create(t)
+                        .Has(0, v => v.AssertInteger() == 1)
+                        .Has(1, v => v.AssertInteger() == 1)
+                        .AssertAllKeyChecked();
+                })
+                .MoveNext().AssertTable(t => {
+                    GlosTableChecker.Create(t)
+                        .Has(0, v => v.AssertInteger() == 0)
+                        .Has(1, v => v.AssertInteger() == 1)
+                        .AssertAllKeyChecked();
+                })
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(0)
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void TableWithExternalMetamethods() {
+            var fgen = Builder.AddFunction();
+            var at = fgen.AllocateLocalVariable();
+            var a = fgen.AllocateLocalVariable();
+
+            fgen.AppendLdNTbl();
+            fgen.AppendStLoc(at);
+            fgen.AppendLdNTbl();
+            fgen.AppendStLoc(a);
+
+            fgen.AppendLdLoc(at);
+            fgen.AppendLdStr(GlosMetamethodNames.Uen);
+            fgen.AppendLdArg(0);
+            fgen.AppendUenL();
+
+            fgen.AppendLdLoc(at);
+            fgen.AppendLdStr(GlosMetamethodNames.Ren);
+            fgen.AppendLdArg(1);
+            fgen.AppendUenL();
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdLoc(at);
+            fgen.AppendSmt();
+            fgen.AppendPop();
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLd(3);
+            fgen.AppendLd(0);
+            fgen.AppendUen();
+
+            fgen.AppendLdDel();
+            fgen.AppendLdLoc(a);
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendLdNil();
+            fgen.AppendRen();
+
+            fgen.AppendLdLoc(a);
+            fgen.AppendGmt();
+
+            fgen.AppendRet();
+
+            GlosExternalFunction uen = arg => {
+                var t = arg[0].AssertTable();
+                var k = arg[1];
+                var v = arg[2];
+
+                t.UpdateEntryLocally(v, k);
+                return Array.Empty<GlosValue>();
+            };
+
+            GlosExternalFunction ren = arg => {
+                return new[] { arg[1] };
+            };
+
+            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), new GlosValue[] { uen, ren });
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertTable(t => {
+                    GlosTableChecker.Create(t)
+                        .Has(0, v => v.AssertInteger() == 3)
+                        .AssertAllKeyChecked();
+                })
+                .MoveNext().AssertNil()
+                .MoveNext().AssertTable(t => {
+                    GlosTableChecker.Create(t)
+                        .Has(GlosMetamethodNames.Uen, v => v.AssertExternalFunction() == uen)
+                        .Has(GlosMetamethodNames.Ren, v => v.AssertExternalFunction() == ren)
+                        .AssertAllKeyChecked();
+                })
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void Closure() {
+            var cnt = Builder.AddFunction();
+            var ctr = cnt.AllocateLocalVariable();
+
+            cnt.AppendLdEnv();
+            cnt.AppendLd(0);
+            cnt.AppendRenL();
+            cnt.AppendDup();
+
+            cnt.AppendLdNil();
+            cnt.AppendEqu();
+
+            var rt = cnt.AllocateLabel();
+            
+            cnt.AppendBf(rt);
+
+            cnt.AppendPop();
+            cnt.AppendLd(0);
+
+            cnt.InsertLabel(rt);
+
+            cnt.AppendLd(1);
+            cnt.AppendAdd();
+            cnt.AppendStLoc(ctr);
+
+            cnt.AppendLdEnv();
+            cnt.AppendLd(0);
+            cnt.AppendLdLoc(ctr);
+            cnt.AppendUenL();
+
+            cnt.AppendLdDel();
+            cnt.AppendLdLoc(ctr);
+            cnt.AppendRet();
+
+            var fgen = Builder.AddFunction();
+            var cntA = fgen.AllocateLocalVariable();
+            var cntB = fgen.AllocateLocalVariable();
+
+            fgen.AppendLdFun(cnt);
+            fgen.AppendLdNTbl();
+            fgen.AppendBind();
+            fgen.AppendStLoc(cntA);
+
+            fgen.AppendLdFun(cnt);
+            fgen.AppendLdNTbl();
+            fgen.AppendBind();
+            fgen.AppendStLoc(cntB);
+
+            fgen.AppendLdDel();
+
+            fgen.AppendLdDel();
+            fgen.AppendLdLoc(cntA);
+            fgen.AppendCall();
+            fgen.AppendShpRv(1);
+
+            fgen.AppendLdDel();
+            fgen.AppendLdLoc(cntA);
+            fgen.AppendCall();
+            fgen.AppendShpRv(1);
+
+            fgen.AppendLdDel();
+            fgen.AppendLdLoc(cntB);
+            fgen.AppendCall();
+            fgen.AppendShpRv(1);
+
+            fgen.AppendLdDel();
+            fgen.AppendLdLoc(cntA);
+            fgen.AppendCall();
+            fgen.AppendShpRv(1);
+
+            fgen.AppendRet();
+
+            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertInteger(1)
+                .MoveNext().AssertInteger(2)
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(3)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void GlobalEnvironment() {
+            var sub = Builder.AddFunction();
+
+            sub.AppendLdGlb();
+            sub.AppendLd(0);
+            sub.AppendLdGlb();
+            sub.AppendLd(0);
+            sub.AppendRenL();
+            sub.AppendLd(1);
+            sub.AppendAdd();
+            sub.AppendUenL();
+            sub.AppendRet();
+            
+            var fgen = Builder.AddFunction();
+            var subLoc = fgen.AllocateLocalVariable();
+
+            fgen.AppendLdFun(sub);
+            fgen.AppendStLoc(subLoc);
+
+            fgen.AppendLdDel();
+            fgen.AppendLdLoc(subLoc);
+            fgen.AppendCall();
+            fgen.AppendShpRv(0);
+
+            fgen.AppendLdGlb();
+            fgen.AppendLd(0);
+            fgen.AppendLdGlb();
+            fgen.AppendLd(0);
+            fgen.AppendRenL();
+            fgen.AppendLd(1);
+            fgen.AppendAdd();
+            fgen.AppendUenL();
+
+            fgen.AppendLdDel();
+            fgen.AppendLdLoc(subLoc);
+            fgen.AppendCall();
+            fgen.AppendShpRv(0);
+
+            fgen.AppendLdGlb();
+            fgen.AppendLd(0);
+            fgen.AppendLdGlb();
+            fgen.AppendLd(0);
+            fgen.AppendRenL();
+            fgen.AppendLd(1);
+            fgen.AppendAdd();
+            fgen.AppendUenL();
+
+            fgen.AppendLdGlb();
+            fgen.AppendLd(0);
+            fgen.AppendRenL();
+
+            fgen.AppendRet();
+            
+            var glb = new GlosTable(ViMa);
+            ViMa.GlobalEnvironment = glb;
+            glb.UpdateEntryLocally(0, 0);
+            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+
+            GlosTableChecker.Create(glb)
+                .Has(0, v => v.AssertInteger() == 4)
+                .AssertAllKeyChecked();
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertInteger(4)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void LdArgATest() {
+            var fgen = Builder.AddFunction();
+            
+            // this function return the value and index first negative integer of integer-only arguments
+            var iter = fgen.AllocateLocalVariable();
+
+            fgen.AppendLd(0);
+            fgen.AppendStLoc(iter);
+
+            var loop = fgen.AllocateAndInsertLabel();
+            var ret = fgen.AllocateLabel();
+            var failed = fgen.AllocateLabel();
+
+            fgen.AppendLdLoc(iter);
+            fgen.AppendLdArgc();
+            fgen.AppendLss();
+            fgen.AppendBf(failed);
+            fgen.AppendLdLoc(iter);
+            fgen.AppendDup();
+            fgen.AppendLdArgA();
+            fgen.AppendDup();
+            fgen.AppendLd(0);
+            fgen.AppendLss();
+            fgen.AppendBt(ret);
+            fgen.AppendPop();
+            fgen.AppendLd(1);
+            fgen.AppendAdd();
+            fgen.AppendStLoc(iter);
+            fgen.AppendB(loop);
+
+            fgen.InsertLabel(failed);
+            fgen.AppendLdNeg1();
+            fgen.AppendLdNeg1();
+
+            fgen.InsertLabel(ret);
+            fgen.AppendRet();
+            
+            var ran = new Random();
+            for (int i = 0; i < 1024; ++i) {
+                var len = ran.Next(0, i * 16);
+
+                var args = new List<GlosValue>();
+                var list = new List<int>();
+
+                for (int j = 0; j < len; ++j) {
+                    var v = ran.Next(int.MinValue, int.MaxValue);
+
+                    args.Add(v);
+                    list.Add(v);
+                }
+
+                var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), args.ToArray());
+                var idx = list.FindIndex(x => x < 0);
+                var val = idx >= 0 ? list[idx] : -1;
+
+                GlosValueArrayChecker.Create(res)
+                    .First().AssertInteger(idx)
+                    .MoveNext().AssertInteger(val)
+                    .MoveNext().AssertEnd();
+            }
+        }
+    }
+}
