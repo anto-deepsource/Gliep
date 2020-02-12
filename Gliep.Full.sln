@@ -4,7 +4,7 @@ VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Glos", "Glos\Glos.csproj", "{71D01961-5BC4-4952-9F11-49D3B4E65597}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XUnitTester", "XUnitTester\XUnitTester.csproj", "{10EAC871-3ECE-4CA1-B225-50165B34F8A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XUnitTester", "XUnitTester\XUnitTester.csproj", "{10EAC871-3ECE-4CA1-B225-50165B34F8A3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Glug", "Glug\Glug.csproj", "{C5DC1205-B2EC-4CBA-B441-D4C149C94043}"
 EndProject

@@ -62,6 +62,40 @@ namespace GeminiLab.Glos.ViMa {
         public GlosTable? GlobalEnvironment { get; set; }
         #endregion
 
+        #region delimiter stack
+        private readonly long[] _delStack = new long[MaxStack];
+        private long _dptr = 0;
+
+        private bool hasDelimiter() {
+            return _dptr > callStackTop().DelimiterStackBase;
+        }
+
+        private long peekDelimiter() {
+            return hasDelimiter() ? _delStack[_dptr - 1] : callStackTop().PrivateStackBase;
+        }
+
+        private long popDelimiter() {
+            long rv;
+            
+            if (hasDelimiter()) {
+                rv = _delStack[_dptr - 1];
+                --_dptr;
+            } else {
+                rv = callStackTop().PrivateStackBase;
+            }
+
+            return rv;
+        }
+
+        private void pushDelimiter() {
+            _delStack[_dptr++] = _sptr;
+        }
+
+        private void pushDelimiter(long pos) {
+            _delStack[_dptr++] = pos;
+        }
+        #endregion                                                                                                                                                     
+
         public GlosValue.Comparer Comparer => new GlosValue.Comparer(this);
     }
 }

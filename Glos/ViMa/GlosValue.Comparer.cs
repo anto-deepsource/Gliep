@@ -64,7 +64,6 @@ namespace GeminiLab.Glos.ViMa {
             #endregion
 
             public bool LessThan(in GlosValue x, in GlosValue y) {
-                ThrowIfOperandsDelimiter(x, y);
                 if (BothInteger(x, y, out var xint, out var yint)) return xint < yint;
                 if (BothNumeric(x, y, out var xfloat, out var yfloat)) return xfloat < yfloat;
                 if (BothString(x, y, out var xstr, out var ystr)) return string.Compare(xstr, ystr, StringComparison.Ordinal) < 0;
@@ -75,7 +74,6 @@ namespace GeminiLab.Glos.ViMa {
             }
 
             public bool GreaterThan(in GlosValue x, in GlosValue y) {
-                ThrowIfOperandsDelimiter(x, y);
                 if (BothInteger(x, y, out var xint, out var yint)) return xint > yint;
                 if (BothNumeric(x, y, out var xfloat, out var yfloat)) return xfloat > yfloat;
                 if (BothString(x, y, out var xstr, out var ystr)) return string.Compare(xstr, ystr, StringComparison.Ordinal) > 0;
@@ -86,7 +84,6 @@ namespace GeminiLab.Glos.ViMa {
             }
 
             public bool EqualTo(in GlosValue x, in GlosValue y) {
-                ThrowIfOperandsDelimiter(x, y);
                 if (BothNil(x, y)) return true;
                 if (BothInteger(x, y, out var xint, out var yint)) return xint == yint;
                 if (BothNumeric(x, y, out var xfloat, out var yfloat)) return xfloat == yfloat;
@@ -100,7 +97,6 @@ namespace GeminiLab.Glos.ViMa {
             }
 
             public bool UnequalTo(in GlosValue x, in GlosValue y) {
-                ThrowIfOperandsDelimiter(x, y);
                 if (BothNil(x, y)) return false;
                 if (BothInteger(x, y, out var xint, out var yint)) return xint != yint;
                 if (BothNumeric(x, y, out var xfloat, out var yfloat)) return xfloat != yfloat;

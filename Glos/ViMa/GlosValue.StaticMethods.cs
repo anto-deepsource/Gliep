@@ -37,13 +37,7 @@
             rv.SetExternalFunction(value);
             return rv;
         }
-
-        public static GlosValue NewDelimiter() {
-            var rv = new GlosValue();
-            rv.SetDelimiter();
-            return rv;
-        }
-
+        
         public static GlosValue NewTable(GlosTable value) {
             var rv = new GlosValue();
             rv.SetTable(value);

@@ -8,6 +8,7 @@ namespace GeminiLab.Glos.ViMa {
         public long LocalVariablesBase;
         public long PrivateStackBase;
         public int InstructionPointer;
+        public long DelimiterStackBase;
         public GlosFunction Function;
     }
 

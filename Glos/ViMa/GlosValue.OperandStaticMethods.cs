@@ -2,14 +2,6 @@
 
 namespace GeminiLab.Glos.ViMa {
     public partial struct GlosValue {
-        public static void ThrowIfOperandsDelimiter(in GlosValue x) {
-            if (x.Type == GlosValueType.Delimiter) throw new InvalidOperandTypeException();
-        }
-
-        public static void ThrowIfOperandsDelimiter(in GlosValue x, in GlosValue y) {
-            if (x.Type == GlosValueType.Delimiter || y.Type == GlosValueType.Delimiter) throw new InvalidOperandTypeException();
-        }
-
         public static bool BothNil(in GlosValue x, in GlosValue y) {
             return x.Type == GlosValueType.Nil && y.Type == GlosValueType.Nil;
         }

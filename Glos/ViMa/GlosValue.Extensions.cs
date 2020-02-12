@@ -48,15 +48,7 @@ namespace GeminiLab.Glos.ViMa {
 
             return ref v;
         }
-
-        public static ref GlosValue SetDelimiter(this ref GlosValue v) {
-            v.ValueNumber.Integer = 0;
-            v.ValueObject = null;
-            v.Type = GlosValueType.Delimiter;
-
-            return ref v;
-        }
-
+        
         public static ref GlosValue SetTable(this ref GlosValue v, GlosTable value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
@@ -122,30 +114,22 @@ namespace GeminiLab.Glos.ViMa {
         }
 
         public static bool Truthy(this in GlosValue v) {
-            GlosValue.ThrowIfOperandsDelimiter(v);
-
             if (v.Type == GlosValueType.Nil) return false;
             if (v.Type == GlosValueType.Boolean) return v.ValueNumber.Integer != 0;
             return true;
         }
 
         public static bool Falsey(this in GlosValue v) {
-            GlosValue.ThrowIfOperandsDelimiter(v);
-
             if (v.Type == GlosValueType.Nil) return true;
             if (v.Type == GlosValueType.Boolean) return v.ValueNumber.Integer == 0;
             return false;
         }
 
         public static bool IsNil(this in GlosValue v) {
-            GlosValue.ThrowIfOperandsDelimiter(v);
-
             return v.Type == GlosValueType.Nil;
         }
 
         public static bool IsNonNil(this in GlosValue v) {
-            GlosValue.ThrowIfOperandsDelimiter(v);
-
             return v.Type != GlosValueType.Nil;
         }
 

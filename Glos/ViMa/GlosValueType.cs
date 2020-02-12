@@ -4,7 +4,7 @@
         Integer = 0x01,
         Float = 0x02,
         Boolean = 0x03,
-        Delimiter = 0x05,
+        // Delimiter = 0x05,
 
         Table = 0x80,
         String = 0x81,
