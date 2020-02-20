@@ -1,5 +1,4 @@
 ﻿namespace GeminiLab.Glos.ViMa {
-
     public enum GlosOpCategory : byte {
         NotUsed,
         BinaryArithmeticOperator,
@@ -61,13 +60,13 @@
             GlosOpCategory.UnaryOperator,
             GlosOpCategory.NotUsed, 
             GlosOpCategory.NotUsed,
-            GlosOpCategory.NotUsed,
-            GlosOpCategory.NotUsed, 
-            GlosOpCategory.NotUsed, 
-            GlosOpCategory.NotUsed,
-            // 0x20
             GlosOpCategory.Others,
             GlosOpCategory.Others, 
+            GlosOpCategory.Others, 
+            GlosOpCategory.Others,
+            // 0x20
+            GlosOpCategory.NotUsed,
+            GlosOpCategory.NotUsed, 
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,
@@ -223,7 +222,7 @@
             GlosOpCategory.Others,
             GlosOpCategory.Others,
             GlosOpCategory.Others,
-            GlosOpCategory.NotUsed,
+            GlosOpCategory.Others,
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,

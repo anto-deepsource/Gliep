@@ -27,8 +27,9 @@ namespace XUnitTester {
                 }
             }
 
+            fgen.SetEntry();
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertInteger(expected)
@@ -56,7 +57,9 @@ namespace XUnitTester {
                 }
             }
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertString(expected)
@@ -90,7 +93,9 @@ namespace XUnitTester {
 
             fgen.AppendRet();
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), new GlosValue[] { 1024 });
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, new GlosValue[] { 1024 });
 
             var checker = GlosValueArrayChecker.Create(res);
             var it = checker.First();

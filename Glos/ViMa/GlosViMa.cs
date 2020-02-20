@@ -57,11 +57,7 @@ namespace GeminiLab.Glos.ViMa {
 
         private ref GlosValue pushNil() => ref pushStack();
         #endregion
-
-        #region global
-        public GlosTable? GlobalEnvironment { get; set; }
-        #endregion
-
+        
         #region delimiter stack
         private readonly long[] _delStack = new long[MaxStack];
         private long _dptr = 0;

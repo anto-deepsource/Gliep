@@ -1,21 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace GeminiLab.Glos.ViMa {
     public class GlosFunctionPrototype {
-        private byte[] _op = null!;
-        internal GlosFunctionPrototype(GlosUnit unit, int localVariableSize, ReadOnlySpan<byte> op) {
-            Unit = unit;
-            Op = op;
+        // making this ctor internal here is not quite a good choice. TODO: reconsider it 
+        internal GlosFunctionPrototype(ReadOnlySpan<byte> op, int localVariableSize, IReadOnlyCollection<string> variableInContext) {
+            _op = op.ToArray();
             LocalVariableSize = localVariableSize;
+            VariableInContext = new HashSet<string>(variableInContext);
         }
 
-        public GlosUnit Unit { get; set; }
+        public GlosUnit Unit { get; internal set; }
 
-        public ReadOnlySpan<byte> Op {
-            get => new ReadOnlySpan<byte>(_op);
-            set => _op = value.ToArray();
-        }
+        private readonly byte[] _op;
+        public ReadOnlySpan<byte> Op => new ReadOnlySpan<byte>(_op);
 
-        public int LocalVariableSize { get; set; }
+        public int LocalVariableSize { get; }
+
+        public IReadOnlyCollection<string> VariableInContext { get; }
     }
 }

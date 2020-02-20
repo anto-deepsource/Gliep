@@ -44,7 +44,7 @@ namespace GeminiLab.Glos.ViMa {
         // it's named 'Update' but it can also create new index
         public void UpdateEntry(GlosValue key, GlosValue value) {
             if (TryGetMetamethod(GlosMetamethodNames.Uen, out var metaUen)) {
-                metaUen.Invoke(_vm, new[] {GlosValue.NewTable(this), key, value});
+                metaUen.Invoke(_vm, new[] { GlosValue.NewTable(this), key, value });
             } else {
                 _values[key] = value;
             }

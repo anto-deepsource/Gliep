@@ -90,7 +90,7 @@ namespace GeminiLab.Glos.ViMa {
                 if (BothString(x, y, out var xstring, out var ystring)) return xstring == ystring;
                 if (BothBoolean(x, y, out var xbool, out var ybool)) return xbool == ybool;
 
-                if (BothFunction(x, y, out var xfun, out var yfun)) return xfun.Prototype == yfun.Prototype && xfun.Environment == yfun.Environment;
+                if (BothFunction(x, y, out var xfun, out var yfun)) return xfun.Prototype == yfun.Prototype && xfun.ParentContext == yfun.ParentContext;
                 if (tryInvokeMetaEqualTo(x, y, false, out var metaResult)) return metaResult;
 
                 return x.Type == y.Type && object.ReferenceEquals(x.ValueObject, y.ValueObject);
@@ -103,7 +103,7 @@ namespace GeminiLab.Glos.ViMa {
                 if (BothString(x, y, out var xstring, out var ystring)) return xstring != ystring;
                 if (BothBoolean(x, y, out var xbool, out var ybool)) return xbool != ybool;
 
-                if (BothFunction(x, y, out var xfun, out var yfun)) return xfun.Prototype != yfun.Prototype || xfun.Environment != yfun.Environment;
+                if (BothFunction(x, y, out var xfun, out var yfun)) return xfun.Prototype != yfun.Prototype || xfun.ParentContext != yfun.ParentContext;
                 if (tryInvokeMetaEqualTo(x, y, false, out var metaResult)) return !metaResult;
 
                 return x.Type != y.Type || !object.ReferenceEquals(x.ValueObject, y.ValueObject);

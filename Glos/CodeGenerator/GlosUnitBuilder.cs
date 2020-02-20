@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using GeminiLab.Glos.ViMa;
 
 namespace GeminiLab.Glos.CodeGenerator {
     public class GlosUnitBuilder {
-        #region unit
-        private readonly GlosUnit _unit;
-        #endregion
-
         #region string table
-        private readonly Dictionary<string, int> _stringTable;
-        private readonly List<string> _stringList;
+        private readonly Dictionary<string, int> _stringTable = new Dictionary<string, int>();
+        private readonly List<string> _stringList = new List<string>();
 
         public bool TryGetStringId(string str, out int id) => _stringTable.TryGetValue(str, out id);
 
@@ -23,41 +20,32 @@ namespace GeminiLab.Glos.CodeGenerator {
 
         #region function table
         private int _func = 0;
-        private readonly List<FunctionBuilder> _builders;
-        private readonly List<GlosFunctionPrototype> _functions;
+        private readonly List<FunctionBuilder> _builders = new List<FunctionBuilder>();
+        private readonly List<GlosFunctionPrototype> _functions = new List<GlosFunctionPrototype>();
         
         public FunctionBuilder AddFunction() {
             var fun = new FunctionBuilder(this, _func++);
             _builders.Add(fun);
-            _functions.Add(new GlosFunctionPrototype(_unit, 0, Array.Empty<byte>()));
+            _functions.Add(null!);
             return fun;
         }
 
-        public int AddFunctionRaw(int localVariableSize, ReadOnlySpan<byte> op) {
-            _functions.Add(new GlosFunctionPrototype(_unit, localVariableSize, op));
+        public int AddFunctionRaw(ReadOnlySpan<byte> op, int localVariableSize) => AddFunctionRaw(op, localVariableSize, Array.Empty<string>());
+
+        public int AddFunctionRaw(ReadOnlySpan<byte> op, int localVariableSize, IReadOnlyCollection<string> variableInContext) {
+            _functions.Add(new GlosFunctionPrototype(op, localVariableSize, variableInContext));
             return _func++;
         }
 
-        public int Entry {
-            get => _unit.Entry;
-            set => _unit.Entry = value;
-        }
+        public int Entry { get; set; }
         #endregion
-
-        public GlosUnitBuilder() {
-            _stringTable = new Dictionary<string, int>();
-            _stringList = new List<string>();
-            _builders = new List<FunctionBuilder>();
-            _functions = new List<GlosFunctionPrototype>();
-            _unit = new GlosUnit { Entry = 0, FunctionTable = _functions, StringTable = _stringList };
-        }
-
+        
         public GlosUnit GetResult() {
             foreach (var builder in _builders) {
-                _functions[builder.Id].Op = builder.GetOpArray();
-                _functions[builder.Id].LocalVariableSize = builder.LocalVariableCount;
+                _functions[builder.Id] = new GlosFunctionPrototype(builder.GetOpArray(), builder.LocalVariableCount, builder.VariableInContext ?? Array.Empty<string>());
             }
-            return _unit;
+
+            return new GlosUnit(_functions, Entry, _stringList);
         }
     }
 }

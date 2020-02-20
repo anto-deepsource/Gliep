@@ -1,0 +1,65 @@
+%token: int id
+%root: Program
+
+Program     : Block
+            ;
+
+Block       : ( Expr ';'?)*
+            ;
+
+# Expr eats tokens greedily
+# earlier appearence, higher precedence
+Expr        : ExprItem
+            | Expr Expr
+            | Expr "@" Expr
+            | Expr ( "*" | "/" | "%" ) Expr
+            | Expr ( "+" | "-" ) Expr
+            | Expr ( "<<" | ">>" ) Expr
+            | Expr ( ">" | "<" | ">=" | "<=" ) Expr
+            | Expr ( "==" | "~=" ) Expr
+            | Expr "&" Expr
+            | Expr "^" Expr
+            | Expr "|" Expr
+            | Expr "=" Expr
+            ;
+
+ExprItem    : literal
+            | identifier
+            | "$" identifier
+            | "-" ExprItem
+            | "~" ExprItem
+            | ExprInParen
+            | BlockInBra
+            | If
+            | While
+            | Return
+            | Function
+            | OnStackList
+            ;
+
+ExprInParen : "(" Expr ")"
+            ;
+
+BlockInBra  : "{" Block "}"
+            ;
+
+If          : "if" ExprInParen Expr ( "elif" ExprInParen Expr )* ( "else" Expr )?
+            ;
+
+While       : "while" ExprInParen Expr
+            ;
+
+Return      : "return" Expr
+            ;
+
+Function    : "fn" identifier? OptionalParamList OptionalRightArrow Expr
+            ;
+
+OptionalParamList   : ( "[" (identifier ("," identifier)*)? "]" )?
+                    ;
+
+OptionalRightArrow  : "->"?
+                    ;
+
+OnStackList : "[" (Expr ("," Expr)*)? "]"
+            ;

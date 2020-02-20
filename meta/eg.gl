@@ -1,0 +1,29 @@
+fn counter[ctr] {
+    return fn {
+        $rv = ctr;
+        ctr = ctr + 1;
+        return rv;
+    }
+};
+
+$a = counter[];
+$b = counter[2];
+
+print@a[];
+print@a[];
+print@b[];
+print@a[];
+
+fn counter[ctr] { ctr = ctr - 1; fn -> ctr = ctr + 1 };
+
+print @ (fn fibo[x] if (x == 0 | x == 1) 1 else fibo[x - 1] + fibo[x - 2]) 1024
+
+############################################
+
+fn beide -> [1, 2];
+fn sum[x, y] x + y;
+
+print@beide[];      # expected: 1 2
+print[beide[]];     # expected: 1
+print(beide[] - 1); # expected: 0
+print@sum@beide[];  # expected: 3

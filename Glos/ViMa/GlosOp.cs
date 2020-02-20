@@ -27,8 +27,13 @@
         Not     = 0x18,
         Neg     = 0x19,
 
-        LdEnv   = 0x20,
-        LdGlb   = 0x21,
+        Rvc     = 0x1c,
+        Uvc     = 0x1d,
+        Rvg     = 0x1e,
+        Uvg     = 0x1f,
+
+        // LdEnv   = 0x20,
+        // LdGlb   = 0x21,
 
         LdFun   = 0x28,
         LdStr   = 0x29,
@@ -105,6 +110,7 @@
         Call    = 0xa9,
         Ret     = 0xaa,
         Bind    = 0xab,
+        PopDel  = 0xac,
 
         ShpRv0  = 0xb0,
         ShpRv1  = 0xb1,

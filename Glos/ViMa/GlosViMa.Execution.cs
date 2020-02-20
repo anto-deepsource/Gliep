@@ -5,7 +5,11 @@ namespace GeminiLab.Glos.ViMa {
         private void executeFunctionOnStack(long bptr, GlosFunction function, long argc) {
             var proto = function.Prototype;
             var unit = function.Prototype.Unit;
-            var env = function.Environment;
+            var parent = function.ParentContext;
+            var ctx = new GlosContext(parent);
+            var global = ctx.Root;
+
+            foreach (var s in proto.VariableInContext) ctx.CreateVariable(s);
 
             var locc = proto.LocalVariableSize;
 
@@ -128,10 +132,16 @@ namespace GeminiLab.Glos.ViMa {
                     popStack(3);
                 } else if (cat == GlosOpCategory.UnaryOperator) {
                     unaryOperator(op, ref stackTop());
-                } else if (op == GlosOp.LdEnv) {
-                    pushStack().SetTable(env);
-                } else if (op == GlosOp.LdGlb) {
-                    pushStack().SetTable(GlobalEnvironment!);
+                } else if (op == GlosOp.Rvc) {
+                    stackTop() = ctx.GetVariableReference(stackTop().AssertString());
+                } else if (op == GlosOp.Uvc) {
+                    ctx.GetVariableReference(stackTop(1).AssertString()) = stackTop();
+                    popStack(2);
+                } else if (op == GlosOp.Rvg) {
+                    stackTop() = global.GetVariableReference(stackTop().AssertString());
+                } else if (op == GlosOp.Uvg) {
+                    global.GetVariableReference(stackTop(1).AssertString()) = stackTop();
+                    popStack(2);
                 } else if (op == GlosOp.LdFun || op == GlosOp.LdFunS) {
                     if (imms > unit.FunctionTable.Count || imms < 0) throw new ArgumentOutOfRangeException();
                     int index = (int)imms;
@@ -216,8 +226,7 @@ namespace GeminiLab.Glos.ViMa {
                 } else if (op == GlosOp.Ret) {
                     break;
                 } else if (op == GlosOp.Bind) {
-                    stackTop(1).AssertFunction().Environment = stackTop().AssertTable();
-                    popStack();
+                    stackTop().AssertFunction().ParentContext = ctx;
                 } else if (cat == GlosOpCategory.ShpRv) {
                     var count = _sptr - popDelimiter();
 
@@ -230,6 +239,8 @@ namespace GeminiLab.Glos.ViMa {
                         pushNil();
                         ++count;
                     }
+                } else if (op == GlosOp.PopDel) {
+                    popDelimiter();
                 } else if (op == GlosOp.Nop) {
                     // nop;
                 } else if (cat == GlosOpCategory.Syscall) {
@@ -248,25 +259,36 @@ namespace GeminiLab.Glos.ViMa {
             }
 
             while (_sptr > bptr + retc) popStack();
+            _dptr = frame.DelimiterStackBase;
             popCallStackFrame();
         }
 
         public GlosValue[] ExecuteFunction(GlosFunction function, GlosValue[]? args) {
-            args ??= Array.Empty<GlosValue>();
-            var argc = args.Length;
-
             var oldSptr = _sptr;
 
+            args ??= Array.Empty<GlosValue>();
+            var argc = args.Length;
             Array.Copy(args, 0, _stack, _sptr, argc);
+
+            function.ParentContext ??= new GlosContext(null);
+
             executeFunctionOnStack(oldSptr, function, argc);
 
             var retc = _sptr - oldSptr;
-
             var rv = new GlosValue[retc];
             Array.Copy(_stack, _sptr - retc, rv, 0, retc);
 
             while (_sptr > oldSptr) popStack();
             return rv;
+        }
+
+        // though ViMa shouldn't manage units, this function is necessary
+        public GlosValue[] ExecuteUnit(GlosUnit unit, GlosValue[]? args) {
+            return ExecuteFunction(new GlosFunction(unit.FunctionTable[unit.Entry], new GlosContext(null)), args);
+        }
+
+        public GlosValue[] ExecuteUnit(GlosUnit unit, GlosValue[]? args, GlosContext parentContext) {
+            return ExecuteFunction(new GlosFunction(unit.FunctionTable[unit.Entry], parentContext), args);
         }
     }
 }

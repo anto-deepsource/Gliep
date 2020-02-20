@@ -10,12 +10,14 @@ namespace XUnitTester {
     public class BasicExecutionTest : GlosTestBase {
         [Fact]
         public void Return0() {
-            var fid = Builder.AddFunctionRaw(0, new[] {
+            var fid = Builder.AddFunctionRaw(new[] {
                 (byte)GlosOp.Ld0,
                 // (byte)GlosOp.Ret, // Test default return statement
-            });
+            }, 0);
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fid], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            Builder.Entry = fid;
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertInteger(0)
@@ -25,7 +27,7 @@ namespace XUnitTester {
         
         [Fact]
         public void IntegerLoadings() {
-            var fid = Builder.AddFunctionRaw(0, new[] {
+            var fid = Builder.AddFunctionRaw(new[] {
                 (byte)GlosOp.LdDel,
                 (byte)GlosOp.Ld1,
                 (byte)GlosOp.Ld3,
@@ -47,9 +49,11 @@ namespace XUnitTester {
                 (byte)0xef,
                 (byte)GlosOp.LdNeg1,
                 (byte)GlosOp.Ret,
-            });
+            }, 0);
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fid], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            Builder.Entry = fid;
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             unchecked {
                 GlosValueArrayChecker.Create(res)
@@ -65,7 +69,7 @@ namespace XUnitTester {
 
         [Fact]
         public void StackOperations() {
-            var fid = Builder.AddFunctionRaw(3, new[] {
+            var fid = Builder.AddFunctionRaw(new[] {
                 (byte)GlosOp.LdDel,
                 (byte)GlosOp.Ld1,
                 (byte)GlosOp.Dup,
@@ -83,9 +87,11 @@ namespace XUnitTester {
                 (byte)GlosOp.LdLoc1,
                 (byte)GlosOp.LdLoc2,
                 (byte)GlosOp.Ret,
-            });
+            }, 3);
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fid], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            Builder.Entry = fid;
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             unchecked {
                 GlosValueArrayChecker.Create(res)
@@ -99,7 +105,7 @@ namespace XUnitTester {
         
         [Fact]
         public void OtherLoadings() {
-            var fid = Builder.AddFunctionRaw(0, new[] {
+            var fid = Builder.AddFunctionRaw(new[] {
                 (byte)GlosOp.LdDel,
                 (byte)GlosOp.LdNil,
                 (byte)GlosOp.LdFlt,
@@ -117,9 +123,11 @@ namespace XUnitTester {
                 (byte)GlosOp.LdArg2,
                 (byte)GlosOp.LdArg3,
                 (byte)GlosOp.Ret,
-            });
+            }, 0);
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fid], new GlosTable(ViMa)), new[] { GlosValue.NewNil(), GlosValue.NewNil(), GlosValue.NewBoolean(true) });
+            Builder.Entry = fid;
+
+            var res = ViMa.ExecuteUnit(Unit, new[] { GlosValue.NewNil(), GlosValue.NewNil(), GlosValue.NewBoolean(true) });
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertNil()
@@ -134,7 +142,7 @@ namespace XUnitTester {
 
         [Fact]
         public void TableOfInteger() {
-            var fid = Builder.AddFunctionRaw(1, new[] {
+            var fid = Builder.AddFunctionRaw(new[] {
                 (byte)GlosOp.LdNTbl,
                 (byte)GlosOp.StLoc0,
                 (byte)GlosOp.LdDel,
@@ -160,30 +168,38 @@ namespace XUnitTester {
                 (byte)GlosOp.Ld3,
                 (byte)GlosOp.Ren,
                 (byte)GlosOp.Ret,
-            });
+            }, 1);
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fid], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            Builder.Entry = fid;
 
-            GlosValueArrayChecker.Create(res).
-                First().AssertTable(t => {
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertTable(t => {
                     GlosTableChecker.Create(t).
                         Has(0, v => v.AssertInteger() == 1).
                         Has(1, v => v.AssertInteger() == 0).
                         AssertAllKeyChecked();
-                }).
-                MoveNext().AssertInteger(1).
-                MoveNext().AssertInteger(1).
-                MoveNext().AssertNil().
-                MoveNext().AssertNil().
-                MoveNext().AssertEnd();
+                })
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertNil()
+                .MoveNext().AssertNil()
+                .MoveNext().AssertEnd();
         }
 
         [Fact]
         public void ExternalFunction() {
-            var fid = Builder.AddFunctionRaw(2, new[] {
-                (byte)GlosOp.LdGlb,
-                (byte)GlosOp.Ld0,
-                (byte)GlosOp.RenL,
+            var funName = "ext_fun";
+            var str = Builder.AddOrGetString(funName);
+
+            var fid = Builder.AddFunctionRaw(new[] {
+                (byte)GlosOp.LdStr,
+                (byte)(str & 0xff),
+                (byte)((str >> 8) & 0xff),
+                (byte)((str >> 16) & 0xff),
+                (byte)((str >> 24) & 0xff),
+                (byte)GlosOp.Rvg,
                 (byte)GlosOp.StLoc0,
 
                 (byte)GlosOp.LdDel,
@@ -199,13 +215,14 @@ namespace XUnitTester {
                 (byte)GlosOp.ShpRv1,
 
                 (byte)GlosOp.Ret,
-            });
+            }, 2);
 
-            var glb = new GlosTable(ViMa);
-            ViMa.GlobalEnvironment = glb;
-            glb.UpdateEntryLocally(0, GlosValue.NewExternalFunction(args => new GlosValue[] { args.Length }));
+            var global = new GlosContext(null);
+            global.CreateVariable(funName, GlosValue.NewExternalFunction(args => new GlosValue[] { args.Length }));
+            
+            Builder.Entry = fid;
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fid], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>(), global);
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertInteger(0)
@@ -215,7 +232,7 @@ namespace XUnitTester {
 
         [Fact]
         public void Syscall() {
-            var fid = Builder.AddFunctionRaw(2, new[] {
+            var fid = Builder.AddFunctionRaw(new[] {
                 (byte)GlosOp.Ld0,
                 (byte)GlosOp.StLoc0,
 
@@ -226,13 +243,16 @@ namespace XUnitTester {
                 (byte)GlosOp.LdLoc1,
 
                 (byte)GlosOp.Ret,
-            });
+            }, 2);
 
             ViMa.SetSyscall(0, (GlosValue[] stack, ref long sptr, GlosStackFrame[] callStack, ref long cptr) => {
                 stack[callStack[cptr - 1].LocalVariablesBase].SetBoolean(true);
                 stack[callStack[cptr - 1].LocalVariablesBase + 1].SetBoolean(false);
             });
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fid], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+
+            Builder.Entry = fid;
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertTrue()

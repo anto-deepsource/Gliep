@@ -1,11 +1,11 @@
 ﻿namespace GeminiLab.Glos.ViMa {
     public class GlosFunction {
-        public GlosFunction(GlosFunctionPrototype prototype, GlosTable environment) {
+        public GlosFunction(GlosFunctionPrototype prototype, GlosContext parentContext) {
             Prototype = prototype;
-            Environment = environment;
+            ParentContext = parentContext;
         }
 
         public GlosFunctionPrototype Prototype { get; set; }
-        public GlosTable Environment { get; set; }
+        public GlosContext ParentContext { get; set; }
     }
 }

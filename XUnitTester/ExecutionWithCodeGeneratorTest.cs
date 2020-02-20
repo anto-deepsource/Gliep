@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glos.ViMa;
@@ -87,7 +88,9 @@ namespace XUnitTester {
 
             fgen.AppendRet();
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             unchecked {
                 GlosValueArrayChecker.Create(res)
@@ -153,7 +156,9 @@ namespace XUnitTester {
 
             fgen.AppendRet();
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             unchecked {
                 GlosValueArrayChecker.Create(res)
@@ -220,7 +225,9 @@ namespace XUnitTester {
 
             fgen.AppendRet();
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertFalse()
@@ -287,7 +294,9 @@ namespace XUnitTester {
 
             fgen.AppendRet();
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertFloat(9360.0)
@@ -326,7 +335,9 @@ namespace XUnitTester {
 
             fgen.AppendRet();
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertString(s1)
@@ -349,8 +360,8 @@ namespace XUnitTester {
             var incLoc = fgen.AllocateLocalVariable();
 
             fgen.AppendLdFun(inc);
-            fgen.AppendLdNTbl();
-            fgen.AppendBind();
+            // it should be ok here even if we do not bind it, test it.
+            // fgen.AppendBind();
             fgen.AppendStLoc(incLoc);
 
             fgen.AppendLdDel();
@@ -370,7 +381,9 @@ namespace XUnitTester {
 
             fgen.AppendRet();
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertInteger(2)
@@ -509,7 +522,9 @@ namespace XUnitTester {
 
             fgen.AppendRet();
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertTable(t => {
@@ -595,7 +610,9 @@ namespace XUnitTester {
                 return new[] { arg[1] };
             };
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), new GlosValue[] { uen, ren });
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, new GlosValue[] { uen, ren });
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertTable(t => {
@@ -615,105 +632,110 @@ namespace XUnitTester {
 
         [Fact]
         public void Closure() {
-            var cnt = Builder.AddFunction();
-            var ctr = cnt.AllocateLocalVariable();
+            var ctr = "ctr";
 
-            cnt.AppendLdEnv();
-            cnt.AppendLd(0);
-            cnt.AppendRenL();
-            cnt.AppendDup();
+            var ctrLambda = Builder.AddFunction();
+            var cnt = ctrLambda.AllocateLocalVariable();
 
-            cnt.AppendLdNil();
-            cnt.AppendEqu();
+            ctrLambda.AppendLdStr(ctr);
+            ctrLambda.AppendDup();
+            ctrLambda.AppendRvc();
+            ctrLambda.AppendDup();
+            ctrLambda.AppendStLoc(cnt);
+            ctrLambda.AppendLd(1);
+            ctrLambda.AppendAdd();
+            ctrLambda.AppendUvc();
+            ctrLambda.AppendLdDel();
+            ctrLambda.AppendLdLoc(cnt);
+            ctrLambda.AppendRet();
 
-            var rt = cnt.AllocateLabel();
-            
-            cnt.AppendBf(rt);
+            var counter = Builder.AddFunction();
+            counter.VariableInContext = new[] { ctr };
 
-            cnt.AppendPop();
-            cnt.AppendLd(0);
-
-            cnt.InsertLabel(rt);
-
-            cnt.AppendLd(1);
-            cnt.AppendAdd();
-            cnt.AppendStLoc(ctr);
-
-            cnt.AppendLdEnv();
-            cnt.AppendLd(0);
-            cnt.AppendLdLoc(ctr);
-            cnt.AppendUenL();
-
-            cnt.AppendLdDel();
-            cnt.AppendLdLoc(ctr);
-            cnt.AppendRet();
+            counter.AppendLdStr(ctr);
+            counter.AppendLdArg(0);
+            counter.AppendUvc();
+            counter.AppendLdDel();
+            counter.AppendLdFun(ctrLambda);
+            counter.AppendBind();
+            counter.AppendRet();
 
             var fgen = Builder.AddFunction();
-            var cntA = fgen.AllocateLocalVariable();
-            var cntB = fgen.AllocateLocalVariable();
+            var counterF = fgen.AllocateLocalVariable();
+            var counterA = fgen.AllocateLocalVariable();
+            var counterB = fgen.AllocateLocalVariable();
 
-            fgen.AppendLdFun(cnt);
-            fgen.AppendLdNTbl();
+            fgen.AppendLdFun(counter);
             fgen.AppendBind();
-            fgen.AppendStLoc(cntA);
+            fgen.AppendStLoc(counterF);
 
-            fgen.AppendLdFun(cnt);
-            fgen.AppendLdNTbl();
-            fgen.AppendBind();
-            fgen.AppendStLoc(cntB);
+            fgen.AppendLdDel();
+            fgen.AppendLd(0);
+            fgen.AppendLdLoc(counterF);
+            fgen.AppendCall();
+            fgen.AppendShpRv(1);
+            fgen.AppendStLoc(counterA);
+
+            fgen.AppendLdDel();
+            fgen.AppendLd(1);
+            fgen.AppendLdLoc(counterF);
+            fgen.AppendCall();
+            fgen.AppendShpRv(1);
+            fgen.AppendStLoc(counterB);
 
             fgen.AppendLdDel();
 
             fgen.AppendLdDel();
-            fgen.AppendLdLoc(cntA);
+            fgen.AppendLdLoc(counterA);
             fgen.AppendCall();
             fgen.AppendShpRv(1);
 
             fgen.AppendLdDel();
-            fgen.AppendLdLoc(cntA);
+            fgen.AppendLdLoc(counterA);
             fgen.AppendCall();
             fgen.AppendShpRv(1);
 
             fgen.AppendLdDel();
-            fgen.AppendLdLoc(cntB);
+            fgen.AppendLdLoc(counterB);
             fgen.AppendCall();
             fgen.AppendShpRv(1);
 
             fgen.AppendLdDel();
-            fgen.AppendLdLoc(cntA);
+            fgen.AppendLdLoc(counterA);
             fgen.AppendCall();
             fgen.AppendShpRv(1);
 
-            fgen.AppendRet();
+            fgen.SetEntry();
 
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertInteger(1)
-                .MoveNext().AssertInteger(2)
+                .First().AssertInteger(0)
                 .MoveNext().AssertInteger(1)
-                .MoveNext().AssertInteger(3)
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(2)
                 .MoveNext().AssertEnd();
         }
 
         [Fact]
         public void GlobalEnvironment() {
+            var idx = "idx";
+
             var sub = Builder.AddFunction();
 
-            sub.AppendLdGlb();
-            sub.AppendLd(0);
-            sub.AppendLdGlb();
-            sub.AppendLd(0);
-            sub.AppendRenL();
+            sub.AppendLdStr(idx);
+            sub.AppendDup();
+            sub.AppendRvg();
             sub.AppendLd(1);
             sub.AppendAdd();
-            sub.AppendUenL();
+            sub.AppendUvg();
             sub.AppendRet();
             
             var fgen = Builder.AddFunction();
             var subLoc = fgen.AllocateLocalVariable();
 
             fgen.AppendLdFun(sub);
+            fgen.AppendBind();
             fgen.AppendStLoc(subLoc);
 
             fgen.AppendLdDel();
@@ -721,43 +743,39 @@ namespace XUnitTester {
             fgen.AppendCall();
             fgen.AppendShpRv(0);
 
-            fgen.AppendLdGlb();
-            fgen.AppendLd(0);
-            fgen.AppendLdGlb();
-            fgen.AppendLd(0);
-            fgen.AppendRenL();
+            fgen.AppendLdStr(idx);
+            fgen.AppendDup();
+            fgen.AppendRvg();
             fgen.AppendLd(1);
             fgen.AppendAdd();
-            fgen.AppendUenL();
+            fgen.AppendUvg();
 
             fgen.AppendLdDel();
             fgen.AppendLdLoc(subLoc);
             fgen.AppendCall();
             fgen.AppendShpRv(0);
 
-            fgen.AppendLdGlb();
-            fgen.AppendLd(0);
-            fgen.AppendLdGlb();
-            fgen.AppendLd(0);
-            fgen.AppendRenL();
+            fgen.AppendLdStr(idx);
+            fgen.AppendDup();
+            fgen.AppendRvg();
             fgen.AppendLd(1);
             fgen.AppendAdd();
-            fgen.AppendUenL();
+            fgen.AppendUvg();
 
-            fgen.AppendLdGlb();
-            fgen.AppendLd(0);
-            fgen.AppendRenL();
+            fgen.AppendLdDel();
+            fgen.AppendLdStr(idx);
+            fgen.AppendRvg();
 
             fgen.AppendRet();
-            
-            var glb = new GlosTable(ViMa);
-            ViMa.GlobalEnvironment = glb;
-            glb.UpdateEntryLocally(0, 0);
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), Array.Empty<GlosValue>());
 
-            GlosTableChecker.Create(glb)
-                .Has(0, v => v.AssertInteger() == 4)
-                .AssertAllKeyChecked();
+            fgen.SetEntry();
+
+            var global = new GlosContext(null);
+            global.CreateVariable(idx, 0);
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>(), global);
+
+            Assert.Equal(4, global.GetVariableReference(idx).AssertInteger());
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertInteger(4)
@@ -802,6 +820,8 @@ namespace XUnitTester {
             fgen.InsertLabel(ret);
             fgen.AppendRet();
             
+            fgen.SetEntry();
+
             var ran = new Random();
             for (int i = 0; i < 1024; ++i) {
                 var len = ran.Next(0, i * 16);
@@ -816,7 +836,7 @@ namespace XUnitTester {
                     list.Add(v);
                 }
 
-                var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), args.ToArray());
+                var res = ViMa.ExecuteUnit(Unit, args.ToArray());
                 var idx = list.FindIndex(x => x < 0);
                 var val = idx >= 0 ? list[idx] : -1;
 

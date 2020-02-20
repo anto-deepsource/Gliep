@@ -14,6 +14,9 @@ namespace GeminiLab.Glos.CodeGenerator {
 
         public int Id { get; }
 
+        // TODO: replace temporary workaround
+        public IReadOnlyCollection<string> VariableInContext { get; set; }
+
         #region instruction buffer
         private class Instruction {
             public GlosOp OpCode;
@@ -89,9 +92,13 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendNot() => AppendInstruction(GlosOp.Not);
         public void AppendNeg() => AppendInstruction(GlosOp.Neg);
 
+        // 
+        public void AppendRvc() => AppendInstruction(GlosOp.Rvc);
+        public void AppendUvc() => AppendInstruction(GlosOp.Uvc);
+        public void AppendRvg() => AppendInstruction(GlosOp.Rvg);
+        public void AppendUvg() => AppendInstruction(GlosOp.Uvg);
+
         // load without immediate
-        public void AppendLdEnv() => AppendInstruction(GlosOp.LdEnv);
-        public void AppendLdGlb() => AppendInstruction(GlosOp.LdGlb);
         public void AppendLdNeg1() => AppendInstruction(GlosOp.LdNeg1);
         public void AppendLdNTbl() => AppendInstruction(GlosOp.LdNTbl);
         public void AppendLdNil() => AppendInstruction(GlosOp.LdNil);
@@ -149,6 +156,8 @@ namespace GeminiLab.Glos.CodeGenerator {
         // syscall
         public void AppendSyscall(int imm) => AppendInstruction(GlosOp.SysC0, immediate: imm);
         #endregion
+
+        public void SetEntry() => Parent.Entry = Id;
 
         // TOD O: revoke template public status 
         internal byte[] GetOpArray() {
