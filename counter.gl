@@ -1,0 +1,8 @@
+fn counter[ctr] { ctr = ctr - 1; fn -> ctr = ctr + 1 };
+$a = counter[0];
+$b = counter[7];
+
+print@a[];
+print@a[];
+print@b[];
+print@a[];

@@ -6,15 +6,15 @@ fn counter[ctr] {
     }
 };
 
-$a = counter[];
-$b = counter[2];
+
+fn counter[ctr] { ctr = ctr - 1; fn -> ctr = ctr + 1 };
+$a = counter[0];
+$b = counter[7];
 
 print@a[];
 print@a[];
 print@b[];
 print@a[];
-
-fn counter[ctr] { ctr = ctr - 1; fn -> ctr = ctr + 1 };
 
 print @ (fn fibo[x] if (x == 0 | x == 1) 1 else fibo[x - 1] + fibo[x - 2]) 1024
 

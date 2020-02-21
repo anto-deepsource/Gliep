@@ -108,19 +108,19 @@ namespace GeminiLab.Glug.Parser {
         public static Block Parse(IGlugTokenStream source) => ReadBlock(new LookAheadTokenStream(source));
 
         private static Block ReadBlock(LookAheadTokenStream stream) {
-            var rv = new Block();
+            var statements = new List<Expr>();
 
             while (true) {
                 var tok = stream.PeekToken();
                 if (tok == null || tok.Type == GlugTokenType.SymbolRBrace) break;
 
-                rv.Statements.Add(ReadExprGreedily(stream));
+                statements.Add(ReadExprGreedily(stream));
 
                 tok = stream.PeekToken();
                 if (tok?.Type == GlugTokenType.SymbolSemicolon) Consume(stream, GlugTokenType.SymbolSemicolon);
             }
 
-            return rv;
+            return new Block(statements);
         }
 
         private static Expr ReadExprGreedily(LookAheadTokenStream stream) {
@@ -248,29 +248,28 @@ namespace GeminiLab.Glug.Parser {
         }
 
         private static If ReadIf(LookAheadTokenStream stream) {
-            If rv = new If();
-            Expr expr;
-            Expr block;
+            var branches = new List<IfBranch>();
 
             Consume(stream, GlugTokenType.KeywordIf);
-            expr = ReadExprInParen(stream);
-            block = ReadExprGreedily(stream);
-            rv.Branches.Add(new IfBranch(expr, block));
+            var expr = ReadExprInParen(stream);
+            Expr? block = ReadExprGreedily(stream);
+            branches.Add(new IfBranch(expr, block));
 
             while (stream.PeekToken()?.Type == GlugTokenType.KeywordElif) {
                 Consume(stream, GlugTokenType.KeywordElif);
                 expr = ReadExprInParen(stream);
                 block = ReadExprGreedily(stream);
-                rv.Branches.Add(new IfBranch(expr, block));
+                branches.Add(new IfBranch(expr, block));
             }
 
             if (stream.PeekToken()?.Type == GlugTokenType.KeywordElse) {
                 Consume(stream, GlugTokenType.KeywordElse);
                 block = ReadExprGreedily(stream);
-                rv.ElseBranch = block;
+            } else {
+                block = null;
             }
 
-            return rv;
+            return new If(branches, block);
         }
 
         private static While ReadWhile(LookAheadTokenStream stream) {
@@ -292,15 +291,16 @@ namespace GeminiLab.Glug.Parser {
         private static Function ReadFunction(LookAheadTokenStream stream, bool skipFn = false) {
             if (!skipFn) Consume(stream, GlugTokenType.KeywordFn);
             var name = "";
-            if (stream.PeekToken().Type == GlugTokenType.Identifier) {
-                name = stream.GetToken().ValueString!;
-            }
-
-            if (stream.PeekToken().Type == GlugTokenType.SymbolRArrow) {
-                stream.GetToken();
+            if (stream.PeekTokenNonNull().Type == GlugTokenType.Identifier) {
+                name = stream.GetTokenNonNull().ValueString!;
             }
 
             var plist = ReadOptionalParamList(stream);
+
+            if (stream.PeekTokenNonNull().Type == GlugTokenType.SymbolRArrow) {
+                stream.GetToken();
+            }
+
             var block = ReadExprGreedily(stream);
 
             return new Function(name, plist, block);
@@ -309,15 +309,15 @@ namespace GeminiLab.Glug.Parser {
         private static List<string> ReadOptionalParamList(LookAheadTokenStream stream) {
             var rv = new List<string>();
 
-            if (stream.PeekToken().Type == GlugTokenType.SymbolLBracket) {
+            if (stream.PeekTokenNonNull().Type == GlugTokenType.SymbolLBracket) {
                 Consume(stream, GlugTokenType.SymbolLBracket);
-                GlugToken tok;
+                GlugToken? tok;
                 while (((tok = stream.PeekToken()) != null)) {
                     if (tok.Type == GlugTokenType.Identifier) rv.Add(tok.ValueString!);
                     else throw new ArgumentOutOfRangeException();
                     stream.GetToken();
                     tok = stream.PeekToken();
-                    if (tok.Type == GlugTokenType.SymbolComma) {
+                    if (tok?.Type == GlugTokenType.SymbolComma) {
                         Consume(stream, GlugTokenType.SymbolComma);
                         continue;
                     } else {
@@ -340,6 +340,7 @@ namespace GeminiLab.Glug.Parser {
                 if (tok.Type == GlugTokenType.SymbolRBracket) break;
                 rv.Add(ReadExprGreedily(stream));
 
+                tok = stream.PeekTokenNonNull();
                 if (tok.Type == GlugTokenType.SymbolComma) {
                     Consume(stream, GlugTokenType.SymbolComma);
                     continue;

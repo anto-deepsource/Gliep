@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GeminiLab.Core2;
+using GeminiLab.Core2.Collections;
 using GeminiLab.Core2.IO;
 using GeminiLab.Glug.Tokenizer;
 

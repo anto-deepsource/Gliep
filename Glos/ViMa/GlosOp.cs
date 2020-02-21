@@ -32,6 +32,9 @@
         Rvg     = 0x1e,
         Uvg     = 0x1f,
 
+        UvcR    = 0x20,
+        UvgR    = 0x21,
+
         // LdEnv   = 0x20,
         // LdGlb   = 0x21,
 

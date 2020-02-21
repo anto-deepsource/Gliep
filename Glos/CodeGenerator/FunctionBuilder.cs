@@ -97,6 +97,8 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendUvc() => AppendInstruction(GlosOp.Uvc);
         public void AppendRvg() => AppendInstruction(GlosOp.Rvg);
         public void AppendUvg() => AppendInstruction(GlosOp.Uvg);
+        public void AppendUvcR() => AppendInstruction(GlosOp.UvcR);
+        public void AppendUvgR() => AppendInstruction(GlosOp.UvgR);
 
         // load without immediate
         public void AppendLdNeg1() => AppendInstruction(GlosOp.LdNeg1);
@@ -155,6 +157,10 @@ namespace GeminiLab.Glos.CodeGenerator {
 
         // syscall
         public void AppendSyscall(int imm) => AppendInstruction(GlosOp.SysC0, immediate: imm);
+
+        public void AppendRetIfNone() {
+            if (_instructions[^1].OpCode != GlosOp.Ret) AppendRet();
+        }
         #endregion
 
         public void SetEntry() => Parent.Entry = Id;

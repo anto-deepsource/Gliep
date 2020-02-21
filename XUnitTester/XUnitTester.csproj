@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Glos\Glos.csproj" />
+    <ProjectReference Include="..\Glug\Glug.csproj" />
   </ItemGroup>
 
 </Project>

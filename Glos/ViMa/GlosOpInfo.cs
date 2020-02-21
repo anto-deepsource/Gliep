@@ -65,8 +65,8 @@
             GlosOpCategory.Others, 
             GlosOpCategory.Others,
             // 0x20
-            GlosOpCategory.NotUsed,
-            GlosOpCategory.NotUsed, 
+            GlosOpCategory.Others,
+            GlosOpCategory.Others, 
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,

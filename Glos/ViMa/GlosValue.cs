@@ -36,5 +36,12 @@ namespace GeminiLab.Glos.ViMa {
 
         private bool _hashCodeCalculated;
         private int _hashCode;
+
+        public override string ToString() {
+            return Type switch {
+                GlosValueType.Integer => ValueNumber.Integer.ToString(),
+                _ => ""
+            };
+        }
     }
 }

@@ -142,6 +142,12 @@ namespace GeminiLab.Glos.ViMa {
                 } else if (op == GlosOp.Uvg) {
                     global.GetVariableReference(stackTop(1).AssertString()) = stackTop();
                     popStack(2);
+                } else if (op == GlosOp.UvcR) {
+                    ctx.GetVariableReference(stackTop().AssertString()) = stackTop(1);
+                    popStack(2);
+                } else if (op == GlosOp.UvgR) {
+                    global.GetVariableReference(stackTop().AssertString()) = stackTop(1);
+                    popStack(2);
                 } else if (op == GlosOp.LdFun || op == GlosOp.LdFunS) {
                     if (imms > unit.FunctionTable.Count || imms < 0) throw new ArgumentOutOfRangeException();
                     int index = (int)imms;

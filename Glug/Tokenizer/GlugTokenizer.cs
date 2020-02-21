@@ -153,9 +153,6 @@ namespace GeminiLab.Glug.Tokenizer {
                 } else if (c == '$') {
                     ++ptr;
                     yield return new GlugToken { Type = GlugTokenType.OpDollar };
-                } else if (c == '#') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.OpHash };
                 } else if (c == ',') {
                     ++ptr;
                     yield return new GlugToken { Type = GlugTokenType.SymbolComma };
@@ -165,6 +162,8 @@ namespace GeminiLab.Glug.Tokenizer {
                 } else if (c == '@') {
                     ptr++;
                     yield return new GlugToken { Type = GlugTokenType.OpAt };
+                } else if (c == '#') {
+                    yield break;
                 } else {
                     ++ptr;
                 }
