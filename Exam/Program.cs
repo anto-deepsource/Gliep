@@ -88,7 +88,7 @@ namespace Exam {
                         opText += $" {ifu.Float:E6}";
                     } else if (GlosOpInfo.Categories[(int)op] == GlosOpCategory.Branch) {
                         var target = ip + imms;
-                        opText += $" <{ip:X6}>";
+                        opText += $" <{target:X6}>";
                     }
                 }
             } else {
@@ -107,7 +107,7 @@ namespace Exam {
             if (op == GlosOp.LdNeg1) return "ld.neg1";
 
             var s = op.ToString();
-            if (s[^1].IsUpper() || s[^1].IsDecimalDigit()) {
+            if (s.Length > 1 && (s[^1].IsUpper() || s[^1].IsDecimalDigit())) {
                 return s[..^1].ToLower() + "." + s[^1];
             }
 

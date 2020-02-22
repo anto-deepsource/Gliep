@@ -31,7 +31,6 @@
         Uvc     = 0x1d,
         Rvg     = 0x1e,
         Uvg     = 0x1f,
-
         UvcR    = 0x20,
         UvgR    = 0x21,
 

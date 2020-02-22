@@ -39,7 +39,12 @@ namespace GeminiLab.Glos.ViMa {
                     _ => throw new InvalidOperandTypeException(),
                 });
             } else if (GlosValue.BothBoolean(x, y, out var xbool, out var ybool)) {
-                throw new NotImplementedException();
+                dest.SetBoolean(op switch {
+                    GlosOp.And => xbool && ybool,
+                    GlosOp.Orr => xbool || ybool,
+                    GlosOp.Xor => xbool ^ ybool,
+                    _ => throw new InvalidOperandTypeException(),
+                });
             } else {
                 throw new InvalidOperandTypeException();
             }

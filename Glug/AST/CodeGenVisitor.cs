@@ -54,7 +54,34 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitIf(If val) {
-            base.VisitIf(val);
+            int brc = val.Branches.Count;
+            Label? nextLabel = null;
+            Label endLabel = CurrentFunction!.AllocateLabel();
+
+            for (int i = 0; i < brc; ++i) {
+                if (nextLabel != null) CurrentFunction!.InsertLabel(nextLabel);
+                nextLabel = CurrentFunction!.AllocateLabel();
+
+                var (cond, expr) = val.Branches[i];
+                visitAndConvertResultToValue(cond);
+                CurrentFunction!.AppendBf(nextLabel);
+                
+                if (val.IsOnStackList) visitAndConvertResultToOsl(expr);
+                else visitAndConvertResultToValue(expr);
+
+                CurrentFunction!.AppendB(endLabel);
+            }
+
+            CurrentFunction!.InsertLabel(nextLabel!); // brc must be at least 1 when this ast is well-formed
+            if (val.ElseBranch != null) {
+                if (val.IsOnStackList) visitAndConvertResultToOsl(val.ElseBranch);
+                else visitAndConvertResultToValue(val.ElseBranch);
+            } else {
+                if (val.IsOnStackList) CurrentFunction!.AppendLdDel();
+                else CurrentFunction!.AppendLdNil();
+            }
+
+            CurrentFunction.InsertLabel(endLabel);
         }
 
         public override void VisitWhile(While val) {
@@ -78,14 +105,18 @@ namespace GeminiLab.Glug.AST {
         public override void VisitBlock(Block val) {
             var count = val.Statements.Count;
 
-            for (int i = 0; i < count; ++i) {
-                Visit(val.Statements[i]);
+            if (count == 0) {
+                CurrentFunction!.AppendLdNil();
+            } else {
+                for (int i = 0; i < count; ++i) {
+                    Visit(val.Statements[i]);
 
-                if (i != count - 1) {
-                    if (val.Statements[i].IsOnStackList) {
-                        CurrentFunction!.AppendShpRv(0);
-                    } else {
-                        CurrentFunction!.AppendPop();
+                    if (i != count - 1) {
+                        if (val.Statements[i].IsOnStackList) {
+                            CurrentFunction!.AppendShpRv(0);
+                        } else {
+                            CurrentFunction!.AppendPop();
+                        }
                     }
                 }
             }
@@ -123,7 +154,15 @@ namespace GeminiLab.Glug.AST {
                 CurrentFunction!.AppendCall();
             } else if (val.Op == GlugBiOpType.Assign) {
                 if (val.ExprL.IsOnStackList) {
+                    visitAndConvertResultToOsl(val.ExprR);
 
+                    var list = ((OnStackList)(val.ExprL)).List;
+                    var count = list.Count;
+
+                    CurrentFunction!.AppendShpRv(count);
+                    for (int i = count - 1; i >= 0; --i) ((VarRef)(list[i])).Var.CreateStoreInstr(CurrentFunction!);
+
+                    CurrentFunction.AppendLdNil();
                 } else {
                     visitAndConvertResultToValue(val.ExprR);
                     CurrentFunction!.AppendDup();

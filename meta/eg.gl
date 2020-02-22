@@ -16,7 +16,7 @@ print@a[];
 print@b[];
 print@a[];
 
-print @ (fn fibo[x] if (x == 0 | x == 1) 1 else fibo[x - 1] + fibo[x - 2]) 1024
+print @ (fn fibo[x] if (x == 0 | x == 1) x else fibo[x - 1] + fibo[x - 2]) 20
 
 ############################################
 
