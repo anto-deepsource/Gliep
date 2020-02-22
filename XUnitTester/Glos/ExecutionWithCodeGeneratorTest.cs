@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glos.ViMa;
 using Xunit;
 using XUnitTester.Checker;
 
-namespace XUnitTester {
+namespace XUnitTester.Glos {
     public class ExecutionWithCodeGeneratorTest : GlosTestBase {
         [Fact]
         public void IntegerArithmeticOp() {

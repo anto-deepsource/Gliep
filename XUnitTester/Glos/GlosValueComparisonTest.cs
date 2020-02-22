@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using GeminiLab.Glos.ViMa;
 using Xunit;
 
-namespace XUnitTester {
+namespace XUnitTester.Glos {
     public class GlosValueComparisonTest : GlosTestBase {
         private readonly GlosValue.Comparer _cmp;
 

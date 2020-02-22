@@ -22,8 +22,8 @@ namespace GeminiLab.Glug.AST {
             var oldScope = CurrentScope;
             CurrentScope = val.VariableTable = new VariableTable(val, oldScope);
 
-            for (int i = 0; i < val.Params.Count; ++i) {
-                CurrentScope.CreateVariable(val.Params[i], i);
+            for (int i = 0; i < val.Parameters.Count; ++i) {
+                CurrentScope.CreateVariable(val.Parameters[i], i);
             }
             
             base.VisitFunction(val);
@@ -74,10 +74,10 @@ namespace GeminiLab.Glug.AST {
                 }
 
                 if (val.ExprL is VarRef vr) {
-                    vr.Var.MarkAssigned();
+                    vr.Variable.MarkAssigned();
                 } else if (val.ExprL is OnStackList osl) {
                     foreach (var expr in osl.List) {
-                        ((VarRef)expr).Var.MarkAssigned();
+                        ((VarRef)expr).Variable.MarkAssigned();
                     }
                 } else {
                     throw new ArgumentOutOfRangeException();
@@ -92,7 +92,7 @@ namespace GeminiLab.Glug.AST {
                 v = RootTable.CreateVariable(val.Id);
             }
 
-            val.Var = v;
+            val.Variable = v;
             v.HintUsedIn(CurrentScope);
         }
     }

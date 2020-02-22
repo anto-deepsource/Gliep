@@ -1,12 +1,9 @@
 using System;
-using System.Globalization;
-using System.Security.Authentication.ExtendedProtection;
-using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
 using Xunit;
 using XUnitTester.Checker;
 
-namespace XUnitTester {
+namespace XUnitTester.Glos {
     public class BasicExecutionTest : GlosTestBase {
         [Fact]
         public void Return0() {

@@ -12,7 +12,6 @@ namespace GeminiLab.Glug.AST {
     public abstract class Expr : Node {
         public virtual bool IsVarRef { get; } = false;
         public virtual bool IsOnStackList { get; } = false;
-        public virtual int VarRefOnStackListLength { get; } = 0;
     }
 
     public abstract class Literal : Expr { }
@@ -36,11 +35,10 @@ namespace GeminiLab.Glug.AST {
     public class LiteralNil : Literal { }
 
     public class VarRef : Expr {
-        public Variable Var { get; set; }
+        public Variable Variable { get; set; }
         public bool IsDef { get; set; }
 
         public override bool IsVarRef { get; } = true;
-        public override int VarRefOnStackListLength { get; } = 1;
 
         public VarRef(string id) {
             Id = id;
@@ -50,15 +48,15 @@ namespace GeminiLab.Glug.AST {
     }
 
     public struct IfBranch {
-        public IfBranch(Expr condition, Expr expression) {
+        public IfBranch(Expr condition, Expr body) {
             Condition = condition;
-            Expression = expression;
+            Body = body;
         }
 
         public Expr Condition;
-        public Expr Expression;
+        public Expr Body;
 
-        public void Deconstruct(out Expr condition, out Expr expression) => (condition, expression) = (Condition, Expression);
+        public void Deconstruct(out Expr condition, out Expr body) => (condition, body) = (Condition, Body);
     }
 
     public class If : Expr {
@@ -68,7 +66,7 @@ namespace GeminiLab.Glug.AST {
             Branches = branches;
             ElseBranch = elseBranch;
 
-            IsOnStackList = Branches.All(x => x.Expression.IsOnStackList) && (ElseBranch?.IsOnStackList ?? true);
+            IsOnStackList = Branches.Any(x => x.Body.IsOnStackList) || (ElseBranch?.IsOnStackList ?? false);
         }
 
         public IList<IfBranch> Branches { get; }
@@ -76,21 +74,21 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class While : Expr {
-        public While(Expr condition, Expr expression) {
+        public While(Expr condition, Expr body) {
             Condition = condition;
-            Expression = expression;
+            Body = body;
         }
 
         public Expr Condition { get; }
-        public Expr Expression { get; }
+        public Expr Body { get; }
     }
 
     public class Return : Expr {
-        public Return(Expr expression) {
-            Expression = expression;
+        public Return(Expr expr) {
+            Expr = expr;
         }
 
-        public Expr Expression { get; }
+        public Expr Expr { get; }
     }
     
     public class Function : Expr {
@@ -98,32 +96,25 @@ namespace GeminiLab.Glug.AST {
 
         public Variable Self { get; set; }
 
-        public Function(string name, List<string> @params, Expr expression) {
+        public Function(string name, List<string> parameters, Expr body) {
             Name = name;
-            Params = @params;
-            Expression = expression;
+            Parameters = parameters;
+            Body = body;
         }
 
         public string Name { get; }
-        public List<string> Params { get; }
-        public Expr Expression { get; }
+        public List<string> Parameters { get; }
+        public Expr Body { get; }
     }
 
     public class OnStackList : Expr {
         public override bool IsVarRef { get; }
         public override bool IsOnStackList { get; } = true;
-        public override int VarRefOnStackListLength { get; }
 
         public OnStackList(List<Expr> list) {
             List = list;
 
-            if (list.All(x => x is VarRef)) {
-                IsVarRef = true;
-                VarRefOnStackListLength = List.Count;
-            } else {
-                IsVarRef = false;
-                VarRefOnStackListLength = 0;
-            }
+            IsVarRef = list.All(x => x is VarRef);
         }
 
         public List<Expr> List { get; }
@@ -132,22 +123,27 @@ namespace GeminiLab.Glug.AST {
     public class Block : Expr {
         public override bool IsOnStackList { get; }
 
-        public Block(IList<Expr> statements) {
-            Statements = statements;
+        public Block(IList<Expr> list) {
+            List = list;
 
-            IsOnStackList = Statements.Count > 0 && Statements[^1].IsOnStackList;
+            IsOnStackList = List.Count > 0 && List[^1].IsOnStackList;
         }
 
-        public IList<Expr> Statements { get; }
+        public IList<Expr> List { get; }
+    }
+
+    public enum GlugUnOpType {
+        Not,
+        Neg,
     }
 
     public class UnOp : Expr {
-        public UnOp(GlugTokenType op, Expr expr) {
+        public UnOp(GlugUnOpType op, Expr expr) {
             Op = op;
             Expr = expr;
         }
 
-        public GlugTokenType Op { get; }
+        public GlugUnOpType Op { get; }
         public Expr Expr { get; }
     }
 

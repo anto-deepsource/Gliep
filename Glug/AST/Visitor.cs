@@ -97,15 +97,15 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitWhile(While val) {
             Visit(val.Condition);
-            Visit(val.Expression);
+            Visit(val.Body);
         }
 
         public override void VisitReturn(Return val) {
-            Visit(val.Expression);
+            Visit(val.Expr);
         }
 
         public override void VisitFunction(Function val) {
-            Visit(val.Expression);
+            Visit(val.Body);
         }
 
         public override void VisitOnStackList(OnStackList val) {
@@ -113,7 +113,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitBlock(Block val) {
-            val.Statements.ForEach(Visit);
+            val.List.ForEach(Visit);
         }
 
         public override void VisitUnOp(UnOp val) {

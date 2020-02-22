@@ -1,8 +1,7 @@
- using GeminiLab.Glos;
- using GeminiLab.Glos.CodeGenerator;
- using GeminiLab.Glos.ViMa;
+using GeminiLab.Glos.CodeGenerator;
+using GeminiLab.Glos.ViMa;
 
- namespace XUnitTester {
+namespace XUnitTester.Glos {
     public abstract class GlosTestBase {
         protected readonly GlosViMa ViMa;
         protected readonly GlosUnitBuilder Builder;

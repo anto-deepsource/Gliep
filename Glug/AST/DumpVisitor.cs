@@ -67,7 +67,7 @@ namespace GeminiLab.Glug.AST {
             Writer.DecreaseIndent();
             Writer.WriteLine("<expr>");
             Writer.IncreaseIndent();
-            Visit(val.Expression);
+            Visit(val.Body);
             Writer.DecreaseIndent();
             Writer.DecreaseIndent();
         }
@@ -75,14 +75,14 @@ namespace GeminiLab.Glug.AST {
         public override void VisitReturn(Return val) {
             Writer.WriteLine("<return>");
             Writer.IncreaseIndent();
-            Visit(val.Expression);
+            Visit(val.Expr);
             Writer.DecreaseIndent();
         }
 
         public override void VisitFunction(Function val) {
-            Writer.WriteLine($"function \"{val.Name}\" {(val.Params.Count > 0 ? $"[{val.Params.Select(x => $"\"{x}\"").JoinBy(", ")}]" : "[]")}");
+            Writer.WriteLine($"function \"{val.Name}\" {(val.Parameters.Count > 0 ? $"[{val.Parameters.Select(x => $"\"{x}\"").JoinBy(", ")}]" : "[]")}");
             Writer.IncreaseIndent();
-            Visit(val.Expression);
+            Visit(val.Body);
             Writer.DecreaseIndent();
         }
 
@@ -96,14 +96,14 @@ namespace GeminiLab.Glug.AST {
         public override void VisitBlock(Block val) {
             Writer.WriteLine("<block>");
             Writer.IncreaseIndent();
-            val.Statements.ForEach(Visit);
+            val.List.ForEach(Visit);
             Writer.DecreaseIndent();
         }
 
         public override void VisitUnOp(UnOp val) {
             Writer.WriteLine(val.Op switch {
-                GlugTokenType.OpNot => "not",
-                GlugTokenType.OpNeg => "neg",
+                GlugUnOpType.Not => "not",
+                GlugUnOpType.Neg => "neg",
                 _ => throw new ArgumentOutOfRangeException(),
             });
             Writer.IncreaseIndent();

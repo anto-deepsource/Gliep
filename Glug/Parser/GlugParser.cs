@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -29,7 +30,7 @@ namespace GeminiLab.Glug.Parser {
                 ;
         }
 
-        private static GlugBiOpType TokenToOp(GlugTokenType op) => op switch {
+        private static GlugBiOpType TokenToBiOp(GlugTokenType op) => op switch {
             GlugTokenType.SymbolAssign => GlugBiOpType.Assign,
             GlugTokenType.OpOrr => GlugBiOpType.Orr,
             GlugTokenType.OpXor => GlugBiOpType.Xor,
@@ -49,6 +50,12 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.OpMod => GlugBiOpType.Mod,
             GlugTokenType.OpAt => GlugBiOpType.Call,
             GlugTokenType.OpCall => GlugBiOpType.Call,
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+
+        private static GlugUnOpType TokenToUnOp(GlugTokenType op) => op switch {
+            GlugTokenType.OpSub => GlugUnOpType.Neg,
+            GlugTokenType.OpNot => GlugUnOpType.Not,
             _ => throw new ArgumentOutOfRangeException(),
         };
 
@@ -166,10 +173,10 @@ namespace GeminiLab.Glug.Parser {
 
                     if (LeftAssociate(s[j].op)) {
                         var temp = s[j].expr;
-                        for (int k = j; k < i; ++k) temp = new BiOp(TokenToOp(s[k].op), temp, s[k + 1].expr);
-                        expr = new BiOp(TokenToOp(s[i].op), temp, expr);
+                        for (int k = j; k < i; ++k) temp = new BiOp(TokenToBiOp(s[k].op), temp, s[k + 1].expr);
+                        expr = new BiOp(TokenToBiOp(s[i].op), temp, expr);
                     } else {
-                        for (int k = i; k >= j; --k) expr = new BiOp(TokenToOp(s[k].op), s[k].expr, expr);
+                        for (int k = i; k >= j; --k) expr = new BiOp(TokenToBiOp(s[k].op), s[k].expr, expr);
                     }
 
                     i = j - 1;
@@ -197,12 +204,12 @@ namespace GeminiLab.Glug.Parser {
 
             if (tok.Type == GlugTokenType.OpSub) {
                 stream.GetToken();
-                return new UnOp(GlugTokenType.OpNeg, ReadExprItem(stream));
+                return new UnOp(GlugUnOpType.Neg, ReadExprItem(stream));
             }
 
             if (tok.Type == GlugTokenType.OpNot) {
                 stream.GetToken();
-                return new UnOp(GlugTokenType.OpNot, ReadExprItem(stream));
+                return new UnOp(GlugUnOpType.Not, ReadExprItem(stream));
             }
 
             if (tok.Type == GlugTokenType.OpDollar) {

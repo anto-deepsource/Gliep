@@ -89,7 +89,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitReturn(Return val) {
-            visitAndConvertResultToOsl(val.Expression);
+            visitAndConvertResultToOsl(val.Expr);
 
             CurrentFunction!.AppendRet();
         }
@@ -103,16 +103,16 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitBlock(Block val) {
-            var count = val.Statements.Count;
+            var count = val.List.Count;
 
             if (count == 0) {
                 CurrentFunction!.AppendLdNil();
             } else {
                 for (int i = 0; i < count; ++i) {
-                    Visit(val.Statements[i]);
+                    Visit(val.List[i]);
 
                     if (i != count - 1) {
-                        if (val.Statements[i].IsOnStackList) {
+                        if (val.List[i].IsOnStackList) {
                             CurrentFunction!.AppendShpRv(0);
                         } else {
                             CurrentFunction!.AppendPop();
@@ -138,10 +138,10 @@ namespace GeminiLab.Glug.AST {
             visitAndConvertResultToValue(val.Expr);
 
             switch (val.Op) {
-            case GlugTokenType.OpNeg:
+            case GlugUnOpType.Neg:
                 CurrentFunction!.AppendNeg();
                 break;
-            case GlugTokenType.OpNot:
+            case GlugUnOpType.Not:
                 CurrentFunction!.AppendNot();
                 break;
             }
@@ -160,13 +160,13 @@ namespace GeminiLab.Glug.AST {
                     var count = list.Count;
 
                     CurrentFunction!.AppendShpRv(count);
-                    for (int i = count - 1; i >= 0; --i) ((VarRef)(list[i])).Var.CreateStoreInstr(CurrentFunction!);
+                    for (int i = count - 1; i >= 0; --i) ((VarRef)(list[i])).Variable.CreateStoreInstr(CurrentFunction!);
 
                     CurrentFunction.AppendLdNil();
                 } else {
                     visitAndConvertResultToValue(val.ExprR);
                     CurrentFunction!.AppendDup();
-                    ((VarRef)(val.ExprL)).Var.CreateStoreInstr(CurrentFunction!);
+                    ((VarRef)(val.ExprL)).Variable.CreateStoreInstr(CurrentFunction!);
                 }
             } else {
                 visitAndConvertResultToValue(val.ExprL);
@@ -208,7 +208,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitVarRef(VarRef val) {
-            val.Var.CreateLoadInstr(CurrentFunction!);
+            val.Variable.CreateLoadInstr(CurrentFunction!);
         }
     }
 }

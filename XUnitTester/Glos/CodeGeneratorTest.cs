@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using GeminiLab.Glos.ViMa;
 using Xunit;
 using XUnitTester.Checker;
 
-namespace XUnitTester {
+namespace XUnitTester.Glos {
     public class CodeGeneratorTest : GlosTestBase {
         [Fact]
         public void LdTest() {

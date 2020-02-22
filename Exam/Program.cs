@@ -169,7 +169,7 @@ namespace Exam {
 
             var unit = gen.Builder.GetResult();
 
-            // DumpUnit(unit);
+            DumpUnit(unit);
 
             var global = new GlosContext(null!);
             global.CreateVariable("print", GlosValue.NewExternalFunction(param => {
