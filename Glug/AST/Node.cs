@@ -96,13 +96,13 @@ namespace GeminiLab.Glug.AST {
 
         public Variable Self { get; set; }
 
-        public Function(string name, List<string> parameters, Expr body) {
+        public Function(string? name, List<string> parameters, Expr body) {
             Name = name;
             Parameters = parameters;
             Body = body;
         }
 
-        public string Name { get; }
+        public string? Name { get; }
         public List<string> Parameters { get; }
         public Expr Body { get; }
     }

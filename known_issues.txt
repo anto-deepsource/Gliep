@@ -1,1 +1,0 @@
-anonymous functions now incorrectly treated as functions named ""(empty string) in code generation, and will be stored in a local variable

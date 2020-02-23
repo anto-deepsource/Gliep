@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -297,7 +298,7 @@ namespace GeminiLab.Glug.Parser {
 
         private static Function ReadFunction(LookAheadTokenStream stream, bool skipFn = false) {
             if (!skipFn) Consume(stream, GlugTokenType.KeywordFn);
-            var name = "";
+            string? name = null;
             if (stream.PeekTokenNonNull().Type == GlugTokenType.Identifier) {
                 name = stream.GetTokenNonNull().ValueString!;
             }
