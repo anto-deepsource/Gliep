@@ -9,6 +9,7 @@ namespace GeminiLab.Glug.Tokenizer {
         LiteralTrue     = 0x000_001_00,
         LiteralFalse    = 0x000_002_00,
         LiteralInteger  = 0x000_003_02,
+        LiteralString   = 0x000_004_01,
         SymbolLParen    = 0x001_000_00,
         SymbolRParen    = 0x001_001_00,
         SymbolLBrace    = 0x001_002_00,

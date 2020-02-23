@@ -39,7 +39,9 @@ namespace GeminiLab.Glos.ViMa {
 
         public override string ToString() {
             return Type switch {
+                GlosValueType.Nil => "nil",
                 GlosValueType.Integer => ValueNumber.Integer.ToString(),
+                GlosValueType.String => (ValueObject as string)!,
                 _ => ""
             };
         }

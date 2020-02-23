@@ -5,6 +5,7 @@ using System.Linq;
 using GeminiLab.Core2;
 using GeminiLab.Core2.Collections;
 using GeminiLab.Core2.IO;
+using GeminiLab.Core2.Text;
 using GeminiLab.Glug.Tokenizer;
 
 namespace GeminiLab.Glug.AST {
@@ -19,6 +20,10 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitLiteralInteger(LiteralInteger val) {
             Writer.WriteLine(val.Value);
+        }
+
+        public override void VisitLiteralString(LiteralString val) {
+            Writer.WriteLine($"\"{EscapeSequenceConverter.Encode(val.Value)}\"");
         }
 
         public override void VisitLiteralBool(LiteralBool val) {

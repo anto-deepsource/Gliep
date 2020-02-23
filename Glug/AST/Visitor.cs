@@ -5,6 +5,7 @@ namespace GeminiLab.Glug.AST {
     public abstract class VisitorBase {
         public abstract void VisitLiteralInteger(LiteralInteger val);
         public abstract void VisitLiteralBool(LiteralBool val);
+        public abstract void VisitLiteralString(LiteralString val);
         public abstract void VisitLiteralNil(LiteralNil val);
 
         public abstract void VisitVarRef(VarRef val);
@@ -28,6 +29,9 @@ namespace GeminiLab.Glug.AST {
                 break;
             case LiteralBool lb:
                 VisitLiteralBool(lb);
+                break;
+            case LiteralString ls:
+                VisitLiteralString(ls);
                 break;
             case LiteralNil ln:
                 VisitLiteralNil(ln);
@@ -66,8 +70,9 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class Visitor : VisitorBase {
-        public override void VisitLiteralInteger(LiteralInteger val) {}
-        public override void VisitLiteralBool(LiteralBool val) {}
+        public override void VisitLiteralInteger(LiteralInteger val) { }
+        public override void VisitLiteralBool(LiteralBool val) { }
+        public override void VisitLiteralString(LiteralString val) { }
         public override void VisitLiteralNil(LiteralNil val) {}
 
         public override void VisitVarRef(VarRef val) {}

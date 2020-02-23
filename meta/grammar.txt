@@ -34,6 +34,7 @@ ExprItem    : literal
             | While
             | Return
             | Function
+            | Lambda
             | OnStackList
             ;
 
@@ -60,6 +61,9 @@ OptionalParamList   : ( "[" (identifier ("," identifier)*)? "]" )?
 
 OptionalRightArrow  : "->"?
                     ;
+
+Lambda      : (OnStackList | identifier ) "->" expr
+            ;
 
 OnStackList : "[" (Expr ("," Expr)*)? "]"
             ;

@@ -203,6 +203,10 @@ namespace GeminiLab.Glug.AST {
             else CurrentFunction!.AppendLdFalse();
         }
 
+        public override void VisitLiteralString(LiteralString val) {
+            CurrentFunction!.AppendLdStr(val.Value);
+        }
+
         public override void VisitLiteralNil(LiteralNil val) {
             CurrentFunction!.AppendLdNil();
         }

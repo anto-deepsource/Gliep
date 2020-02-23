@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using GeminiLab.Core2;
 using GeminiLab.Core2.Collections;
+using GeminiLab.Core2.Text;
 
 namespace GeminiLab.Glug.Tokenizer {
     public class GlugTokenizer: IGlugTokenStream {
@@ -157,19 +158,28 @@ namespace GeminiLab.Glug.Tokenizer {
                     ++ptr;
                     yield return new GlugToken { Type = GlugTokenType.SymbolComma };
                 } else if (c == '\\') {
-                    ptr++;
+                    ++ptr;
                     yield return new GlugToken { Type = GlugTokenType.SymbolBackslash };
                 } else if (c == '@') {
-                    ptr++;
+                    ++ptr;
                     yield return new GlugToken { Type = GlugTokenType.OpAt };
                 } else if (c == '#') {
                     yield break;
+                } else if (c == '\"') {
+                    var begin = ptr;
+                    ++ptr;
+                    while (ptr < len) {
+                        if (line[ptr] == '\"' && line[ptr - 1] != '\\') break;
+                        ++ptr;
+                    }
+
+                    yield return new GlugToken {Type = GlugTokenType.LiteralString, ValueString = EscapeSequenceConverter.Decode(line.AsSpan(begin + 1, ptr - begin - 1)) };
+                    ++ptr;
                 } else {
                     ++ptr;
                 }
             }
         }
-
         
         private static IEnumerable<string> ReadLines(TextReader reader) {
             string line;

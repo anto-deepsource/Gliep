@@ -22,7 +22,15 @@ namespace GeminiLab.Glug.AST {
         }
 
         public long Value { get; }
-    }     
+    }
+
+    public class LiteralString : Literal {
+        public LiteralString(string value) {
+            Value = value;
+        }
+
+        public string Value { get; }
+    }
 
     public class LiteralBool : Literal {
         public LiteralBool(bool value) {

@@ -79,11 +79,9 @@ namespace XUnitTester.Glug {
         [Fact]
         public void YCombinator() {
             var code = @"
-                fn Y[f] {
-                    (fn [x] f(x x))(fn [x] f[fn [v] x x v])
-                };
+                $Y = f -> (x -> f(x x))(x -> f(v -> x x v));
 
-                Y (fn[f] fn[n] if (n == 0) 1 else n * f[n - 1]) 10
+                Y (f -> n -> if (n == 0) 1 else n * f(n - 1)) 10
             ";
 
             GlosValueArrayChecker.Create(Execute(code))

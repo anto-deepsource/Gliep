@@ -177,6 +177,20 @@ namespace Exam {
 
                 return Array.Empty<GlosValue>();
             }));
+            global.CreateVariable("format", GlosValue.NewExternalFunction(param => {
+                if (param.Length <= 0) return new GlosValue[] { "" };
+
+                var format = param[0].AssertString();
+                var args = param[1..].Select(x => x.Type switch {
+                    GlosValueType.Nil => "nil",
+                    GlosValueType.Integer => x.ValueNumber.Integer,
+                    GlosValueType.Float => x.ValueNumber.Float,
+                    GlosValueType.Boolean => x.Truthy(),
+                    _ => x.ValueObject,
+                }).ToArray();
+
+                return new GlosValue[] { string.Format(format, args: args) };
+            }));
 
             var vm = new GlosViMa();
             vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);
