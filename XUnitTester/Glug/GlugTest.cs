@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using GeminiLab.Core2.Text;
 using Xunit;
 using XUnitTester.Checker;
 
@@ -63,7 +64,7 @@ namespace XUnitTester.Glug {
         [Fact]
         public void RecursiveGcd() {
             var code = @"
-                fn gcd[a, b] if (a > b) gcd[b, a] else if (~(0 < a)) b else gcd[b % a, a];
+                $gcd = [a, b] -> if (a > b) gcd[b, a] elif (~(0 < a)) b else gcd[b % a, a];
                 [gcd[4, 6], gcd[2, 1], gcd[117, 39], gcd[1, 1], gcd[15, 28]]
             ";
 
@@ -86,6 +87,38 @@ namespace XUnitTester.Glug {
 
             GlosValueArrayChecker.Create(Execute(code))
                 .First().AssertInteger(3628800)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void String() {
+            string strA = "strA", strB = "ユニコードイグザンプル";
+            string strEscape = "\\n";
+            var code = $@"
+                [""{strA}"", ""{strA}"" + ""{strB}"", ""{strEscape}""]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .First().AssertString(strA)
+                .MoveNext().AssertString(strA + strB)
+                .MoveNext().AssertString(EscapeSequenceConverter.Decode(strEscape))
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void Beide() {
+
+            var code = @"
+                fn beide -> [1, 2];
+                fn sum[x, y] x + y;
+
+                return [beide[], beide[] - 1, sum@beide[]]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .First().AssertInteger(1)
+                .MoveNext().AssertInteger(0)
+                .MoveNext().AssertInteger(3)
                 .MoveNext().AssertEnd();
         }
     }

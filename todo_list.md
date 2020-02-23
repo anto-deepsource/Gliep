@@ -10,3 +10,5 @@ REFACTOR!!!!
 ## Glug
 
 - add string support.
+- add table support.
+- add global variable write support.

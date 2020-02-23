@@ -12,7 +12,7 @@ namespace XUnitTester.Glug {
         internal GlosViMa ViMa { get; } = new GlosViMa();
 
         public GlosValue[] Execute(string source, GlosContext? context = null) {
-            var tok = new GlugTokenizer(new StringReader(source));
+            using var tok = new GlugTokenizer(new StringReader(source));
             var rootFun = new Function("<root>", new List<string>(), GlugParser.Parse(tok));
 
             var vdv = new FunctionAndVarDefVisitor();
