@@ -6,10 +6,10 @@ script:
   - mkdir tools
   - dotnet tool install coveralls.net --version 1.0.0 --tool-path tools
   - sudo apt-get install -y apt-transport-https aspnetcore-runtime-2.1
-  - cat counter.gl
-  - cat counter.gl | dotnet run -p ./Exam/Exam.csproj
   - dotnet test -nologo -p:CollectCoverage=true -p:CoverletOutputFormat=opencover -p:Exclude=[xunit.*]* -v=normal XUnitTester/XUnitTester.csproj
   - REPO_COMMIT_AUTHOR=$(git show -s --pretty=format:"%cn")
   - REPO_COMMIT_AUTHOR_EMAIL=$(git show -s --pretty=format:"%ce")
   - REPO_COMMIT_MESSAGE=$(git show -s --pretty=format:"%s")
   - ./tools/csmacnz.Coveralls --opencover -i 'XUnitTester/coverage.opencover.xml' --treatUploadErrorsAsWarnings --useRelativePaths --repoToken $COVERALLS_REPO_TOKEN --commitId $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitAuthor "$REPO_COMMIT_AUTHOR" --commitEmail "$REPO_COMMIT_AUTHOR_EMAIL" --commitMessage "$REPO_COMMIT_MESSAGE" --jobId $TRAVIS_JOB_ID  --serviceName "travis-ci"
+  - cat example.gl
+  - cat example.gl | dotnet run -p ./Exam/Exam.csproj

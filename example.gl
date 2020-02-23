@@ -1,0 +1,5 @@
+fn Y[f] {
+    (fn [x] f(x x))(fn [x] f[fn [v] x x v])
+};
+
+print @ Y (fn[f] fn[n] if (n == 0) 1 else n * f[n - 1]) 10

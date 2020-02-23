@@ -122,9 +122,14 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendLdFun(int id) => AppendInstruction(GlosOp.LdFun, immediate: id);
         public void AppendLdFun(FunctionBuilder fun) => AppendLdFun(fun.Id);
 
+        private long getIdFromLoc(LocalVariable loc) {
+            if (loc.Builder != this) throw new ArgumentOutOfRangeException(nameof(loc));
+            return loc.LocalVariableId;
+        }
+
         // load/store local variables
-        public void AppendLdLoc(LocalVariable loc) => AppendInstruction(GlosOp.LdLoc, immediate: loc.LocalVariableId);
-        public void AppendStLoc(LocalVariable loc) => AppendInstruction(GlosOp.StLoc, immediate: loc.LocalVariableId);
+        public void AppendLdLoc(LocalVariable loc) => AppendInstruction(GlosOp.LdLoc, immediate: getIdFromLoc(loc));
+        public void AppendStLoc(LocalVariable loc) => AppendInstruction(GlosOp.StLoc, immediate: getIdFromLoc(loc));
 
         // load argument/argc
         public void AppendLdArg(int imm) => AppendInstruction(GlosOp.LdArg, immediate: imm);

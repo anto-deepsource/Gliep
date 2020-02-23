@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using GeminiLab.Core2;
 using GeminiLab.Core2.Collections;
@@ -7,6 +8,8 @@ using GeminiLab.Core2.IO;
 using GeminiLab.Glug.Tokenizer;
 
 namespace GeminiLab.Glug.AST {
+    // we do not test this class
+    [ExcludeFromCodeCoverage]
     public class DumpVisitor : VisitorBase {
         public DumpVisitor(IndentedWriter writer) {
             Writer = writer;

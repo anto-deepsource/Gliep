@@ -150,7 +150,7 @@ namespace GeminiLab.Glug.AST {
         public override void VisitBiOp(BiOp val) {
             if (val.Op == GlugBiOpType.Call) {
                 visitAndConvertResultToOsl(val.ExprR);
-                Visit(val.ExprL);
+                visitAndConvertResultToValue(val.ExprL);
                 CurrentFunction!.AppendCall();
             } else if (val.Op == GlugBiOpType.Assign) {
                 if (val.ExprL.IsOnStackList) {
