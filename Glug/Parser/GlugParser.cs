@@ -140,6 +140,19 @@ namespace GeminiLab.Glug.Parser {
                 expr = ReadExprItem(stream);
                 var tok = stream.PeekToken();
                 var op = tok?.Type ?? GlugTokenType.NotAToken;
+
+                if (op == GlugTokenType.SymbolRArrow) {
+                    if (expr is VarRef vr) {
+                        stream.GetToken();
+                        expr = new Function(null, new List<string>(new[] { vr.Id }), ReadExprGreedily(stream));
+                    } else if (expr is OnStackList osl && osl.IsVarRef) {
+                        stream.GetToken();
+                        expr = new Function(null, osl.List.Cast<VarRef>().Select(x => x.Id).ToList(), ReadExprGreedily(stream));
+                    } else {
+                        break;
+                    }
+                }
+
                 int p = Precedence(op);
 
                 if (p < 0) {
@@ -186,7 +199,6 @@ namespace GeminiLab.Glug.Parser {
                 s.RemoveRange(i + 1, len - i - 1);
             }
         }
-
 
         private static Expr ReadExprItem(LookAheadTokenStream stream) {
             var tok = stream.PeekTokenNonNull();
