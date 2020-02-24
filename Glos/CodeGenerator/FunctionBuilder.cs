@@ -256,7 +256,7 @@ namespace GeminiLab.Glos.CodeGenerator {
                         _labels[target].Add(buff.Count);
                         buff.AddInteger32(int.MaxValue);
                     } else {
-                        throw new UnknownOpcodeException();
+                        // throw new UnknownOpcodeException();
                     }
                 }
             }

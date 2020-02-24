@@ -7,8 +7,23 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Version>0.0.1-dev</Version>
     <Authors>Gemini Laboratory</Authors>
-    <Description>GeminiLab's omochamitai stack-based virtual machine.</Description>
+    <Description>Glos, a stack-based virtual machine.</Description>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="i18n\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="i18n\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 
 </Project>

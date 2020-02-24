@@ -11,7 +11,7 @@ namespace GeminiLab.Glos.ViMa {
                     GlosOp.Mul => xint * yint,
                     GlosOp.Div => xint / yint,
                     GlosOp.Mod => xint % yint,
-                    _ => throw new InvalidOperandTypeException(),
+                    _ => throw new GlosInvalidBinaryOperandTypeException(this, op, x, y),
                 });
             } else if (GlosValue.BothNumeric(x, y, out var xfloat, out var yfloat)) {
                 dest.SetFloat(op switch {
@@ -19,12 +19,12 @@ namespace GeminiLab.Glos.ViMa {
                     GlosOp.Sub => xfloat - yfloat,
                     GlosOp.Mul => xfloat * yfloat,
                     GlosOp.Div => xfloat / yfloat,
-                    _ => throw new InvalidOperandTypeException(),
+                    _ => throw new GlosInvalidBinaryOperandTypeException(this, op, x, y),
                 });
             } else if (op == GlosOp.Add && GlosValue.BothString(x, y, out var xstr, out var ystr)) {
                 dest.SetString(xstr + ystr);
             } else {
-                throw new InvalidOperandTypeException();
+                throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -36,17 +36,17 @@ namespace GeminiLab.Glos.ViMa {
                     GlosOp.And => (long)((ulong)xint & (ulong)yint),
                     GlosOp.Orr => (long)((ulong)xint | (ulong)yint),
                     GlosOp.Xor => (long)((ulong)xint ^ (ulong)yint),
-                    _ => throw new InvalidOperandTypeException(),
+                    _ => throw new GlosInvalidBinaryOperandTypeException(this, op, x, y),
                 });
             } else if (GlosValue.BothBoolean(x, y, out var xbool, out var ybool)) {
                 dest.SetBoolean(op switch {
                     GlosOp.And => xbool && ybool,
                     GlosOp.Orr => xbool || ybool,
                     GlosOp.Xor => xbool ^ ybool,
-                    _ => throw new InvalidOperandTypeException(),
+                    _ => throw new GlosInvalidBinaryOperandTypeException(this, op, x, y),
                 });
             } else {
-                throw new InvalidOperandTypeException();
+                throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -58,7 +58,7 @@ namespace GeminiLab.Glos.ViMa {
                 GlosOp.Leq => Comparer.LessThanOrEqualTo(x, y),
                 GlosOp.Equ => Comparer.EqualTo(x, y),
                 GlosOp.Neq => Comparer.UnequalTo(x, y),
-                _ => throw new InvalidOperandTypeException(),
+                _ => throw new GlosInvalidBinaryOperandTypeException(this, op, x, y),
             });
         }
 
@@ -72,7 +72,7 @@ namespace GeminiLab.Glos.ViMa {
             } else if (op == GlosOp.Neg && o.Type == GlosValueType.Float) {
                 o.SetFloat(-o.ValueNumber.Float);
             } else {
-                throw new InvalidOperandTypeException();
+                throw new GlosInvalidUnaryOperandTypeException(this, op, o);
             }
         }
     }

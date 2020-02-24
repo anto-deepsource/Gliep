@@ -1,23 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Linq;
-
+using System.Text;
 using GeminiLab.Core2;
-using GeminiLab.Core2.Collections;
 using GeminiLab.Core2.IO;
 using GeminiLab.Core2.Text;
-using GeminiLab.Core2.Yielder;
-using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glos.ViMa;
-using GeminiLab.Glug;
 using GeminiLab.Glug.AST;
 using GeminiLab.Glug.Parser;
 using GeminiLab.Glug.Tokenizer;
 
-namespace Exam {
+namespace GeminiLab.Gliep {
     public static class Program {
         private static string ReadNextOp(in ReadOnlySpan<byte> ops, ref int ip) {
             var sb = new StringBuilder($"{ip:X6}: ");
@@ -126,7 +120,7 @@ namespace Exam {
 
                 Console.WriteLine($"#{i}: loc size {fun.LocalVariableSize}{(fun.VariableInContext.Count > 0 ? $", ctx var: {fun.VariableInContext.JoinBy(", ")}" : "")}{(unit.Entry == i ? ", entry" : "")}");
 
-                var ops = fun.Op;
+                var ops = fun.Code;
                 var ip = 0;
 
                 while (ip < ops.Length) {
@@ -152,7 +146,7 @@ namespace Exam {
             return;
             */
             var root = GlugParser.Parse(tok);
-            // new DumpVisitor(new IndentedWriter(Console.Out)).Visit(root);
+            new DumpVisitor(new IndentedWriter(Console.Out)).Visit(root);
 
             var rootFun = new Function("<root>", new List<string>(), root);
 

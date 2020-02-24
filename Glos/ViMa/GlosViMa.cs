@@ -2,16 +2,6 @@
 using System.Collections.Generic;
 
 namespace GeminiLab.Glos.ViMa {
-    public class UnexpectedEndOfOpsException : Exception { }
-
-    public class LocalVariableIndexOutOfRangeException : Exception { }
-
-    public class InvalidProgramCounterException : Exception { }
-
-    public class InvalidOperandTypeException : Exception { }
-
-    public class StackUnderflowException : Exception { }
-
     public partial class GlosViMa {
         #region unit
         // Answer: ViMa should not manage units.

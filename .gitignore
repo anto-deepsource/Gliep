@@ -281,3 +281,6 @@ __pycache__/
 
 #
 nuget.config
+
+# i18n designer files
+**/i18n/*.Designer.cs

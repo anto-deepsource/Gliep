@@ -107,7 +107,6 @@ namespace XUnitTester.Glug {
 
         [Fact]
         public void Beide() {
-
             var code = @"
                 fn beide -> [1, 2];
                 fn sum[x, y] x + y;
@@ -119,6 +118,28 @@ namespace XUnitTester.Glug {
                 .First().AssertInteger(1)
                 .MoveNext().AssertInteger(0)
                 .MoveNext().AssertInteger(3)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void RecursiveLoop() {
+            var code = @" 
+                fn loop[from, to, step, body] {
+                    if (from < to) {
+                        body[from];
+                        loop[from + step, to, step, body];
+                    }
+                }
+                $sum = 0;
+                loop[1, 100, 1, i -> sum = sum + i];
+                $mul = 1;
+                loop[1, 10, 1, i -> mul = mul * i];
+                return [sum, mul];
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .First().AssertInteger(4950)
+                .MoveNext().AssertInteger(362880)
                 .MoveNext().AssertEnd();
         }
     }

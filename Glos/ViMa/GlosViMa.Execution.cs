@@ -31,11 +31,11 @@ namespace GeminiLab.Glos.ViMa {
 
             _sptr = prib;
 
-            var ops = proto.Op;
+            var ops = proto.Code;
             var len = ops.Length;
             ip = 0;
             while (true) {
-                if (ip < 0 || ip > len) throw new InvalidProgramCounterException();
+                if (ip < 0 || ip > len) throw new GlosInvalidProgramCounterException(this, ip);
 
                 // the implicit return at the end of function
                 var op = ip == len ? GlosOp.Ret : (GlosOp)ops[ip++];
@@ -50,12 +50,12 @@ namespace GeminiLab.Glos.ViMa {
                     imms = ((long)op) & 0x07;
                     break;
                 case GlosOpImmediate.Byte:
-                    if (ip + 1 > len) throw new UnexpectedEndOfOpsException();
+                    if (ip + 1 > len) throw new GlosUnexpectedEndOfCodeException(this);
                     imm = ops[ip++];
                     imms = unchecked((sbyte)(byte)imm);
                     break;
                 case GlosOpImmediate.Dword:
-                    if (ip + 4 > len) throw new UnexpectedEndOfOpsException();
+                    if (ip + 4 > len) throw new GlosUnexpectedEndOfCodeException(this);
                     imm = (ulong)ops[ip]
                           | ((ulong)ops[ip + 1] << 8)
                           | ((ulong)ops[ip + 2] << 16)
@@ -64,7 +64,7 @@ namespace GeminiLab.Glos.ViMa {
                     ip += 4;
                     break;
                 case GlosOpImmediate.Qword:
-                    if (ip + 8 > len) throw new UnexpectedEndOfOpsException();
+                    if (ip + 8 > len) throw new GlosUnexpectedEndOfCodeException(this);
                     imm = (ulong)ops[ip]
                           | ((ulong)ops[ip + 1] << 8)
                           | ((ulong)ops[ip + 2] << 16)
@@ -169,10 +169,10 @@ namespace GeminiLab.Glos.ViMa {
                 } else if (op == GlosOp.LdFalse) {
                     pushStack().SetBoolean(false);
                 } else if (cat == GlosOpCategory.LoadLocalVariable) {
-                    if (imms >= locc || imms < 0) throw new LocalVariableIndexOutOfRangeException();
+                    if (imms >= locc || imms < 0) throw new GlosLocalVariableIndexOutOfRangeException(this, (int)imms);
                     copy(out pushStack(), in _stack[locb + imms]);
                 } else if (cat == GlosOpCategory.StoreLocalVariable) {
-                    if (imms >= locc || imms < 0) throw new LocalVariableIndexOutOfRangeException();
+                    if (imms >= locc || imms < 0) throw new GlosLocalVariableIndexOutOfRangeException(this, (int)imms);
                     copy(out _stack[locb + imms], in stackTop());
                     popStack();
                 } else if (cat == GlosOpCategory.LoadArgument) {
@@ -252,7 +252,7 @@ namespace GeminiLab.Glos.ViMa {
                 } else if (cat == GlosOpCategory.Syscall) {
                     _syscalls[(int)imms]?.Invoke(_stack, ref _sptr, _callStack, ref _cptr);
                 } else {
-                    throw new UnknownOpcodeException();
+                    throw new GlosUnknownOpException(this, (byte)op);
                 }
             }
 
