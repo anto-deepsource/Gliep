@@ -227,6 +227,7 @@ namespace XUnitTester.Glos {
                 .MoveNext().AssertEnd();
         }
 
+        /*
         [Fact]
         public void Syscall() {
             var fid = Builder.AddFunctionRaw(new[] {
@@ -256,5 +257,6 @@ namespace XUnitTester.Glos {
                 .MoveNext().AssertFalse()
                 .MoveNext().AssertEnd();
         }
+        */
     }
 }

@@ -2,13 +2,13 @@
 
 namespace GeminiLab.Glos.ViMa {
     public struct GlosStackFrame {
-        public long StackBase;
-        public long ArgumentsBase;
-        public long ArgumentsCount;
-        public long LocalVariablesBase;
-        public long PrivateStackBase;
+        public int StackBase;
+        public int ArgumentsBase;
+        public int ArgumentsCount;
+        public int LocalVariablesBase;
+        public int PrivateStackBase;
         public int InstructionPointer;
-        public long DelimiterStackBase;
+        public int DelimiterStackBase;
         public GlosFunction Function;
     }
 
