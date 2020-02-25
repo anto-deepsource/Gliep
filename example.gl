@@ -1,5 +1,5 @@
-$n = 10;
-$Y = f -> (x -> f(x x))(x -> f(v -> x x v));
-$ans = Y (f -> n -> if (n == 0) 1 else n * f(n - 1)) n;
+n = 10;
+Y = f -> (x -> f(x x))(x -> f(v -> x x v));
+ans = Y (f -> n -> if (n == 0) 1 else n * f(n - 1)) n;
 
-print@format["{0}! = {1}\n", n, ans]
+print$format["{0}! = {1}\n", n, ans]

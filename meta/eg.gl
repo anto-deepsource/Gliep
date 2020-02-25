@@ -1,29 +1,29 @@
 fn counter[ctr] ( ctr = ctr - 1; fn -> ctr = ctr + 1 );
-$a = counter[0];
-$b = counter[7];
+!a = counter[0];
+!b = counter[7];
 
-print@a[];
-print@a[];
-print@b[];
-print@a[];
+print$a[];
+print$a[];
+print$b[];
+print$a[];
 
-print @ (fn fibo[x] if (x == 0 | x == 1) x else fibo[x - 1] + fibo[x - 2]) 20;
+print $ (fn fibo[x] if (x == 0 | x == 1) x else fibo[x - 1] + fibo[x - 2]) 20;
 
 ############################################
 
 fn beide -> [1, 2];
 fn sum[x, y] x + y;
 
-print@beide[];      # expected: 1 2
+print$beide[];      # expected: 1 2
 print[beide[]];     # expected: 1
 print(beide[] - 1); # expected: 0
-print@sum@beide[];  # expected: 3
+print$sum$beide[];  # expected: 3
 
 ############################################
-$Y = f -> (x -> f(x x))(x -> f(v -> x x v));
-print @ Y (f -> n -> if (n == 0) 1 else n * f[n - 1]) 10;
+!Y = f -> (x -> f(x x))(x -> f(v -> x x v));
+print $ Y (f -> n -> if (n == 0) 1 else n * f[n - 1]) 10;
 
-$Y = f -> (x -> f(x x))(x -> f(v -> x x v));
+!Y = f -> (x -> f(x x))(x -> f(v -> x x v));
 print(Y (f -> n -> if (n == 0) 1 else n * f(n - 1)) 10);
 
 print "ユニコードイグザンプル\u677e"

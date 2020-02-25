@@ -173,7 +173,10 @@ namespace GeminiLab.Glug.Tokenizer {
                         ++ptr;
                     }
 
-                    yield return new GlugToken {Type = GlugTokenType.LiteralString, ValueString = EscapeSequenceConverter.Decode(line.AsSpan(begin + 1, ptr - begin - 1)) };
+                    yield return new GlugToken { Type = GlugTokenType.LiteralString, ValueString = EscapeSequenceConverter.Decode(line.AsSpan(begin + 1, ptr - begin - 1)) };
+                    ++ptr;
+                } else if (c == '!') {
+                    yield return new GlugToken { Type = GlugTokenType.SymbolBang };
                     ++ptr;
                 } else {
                     ++ptr;

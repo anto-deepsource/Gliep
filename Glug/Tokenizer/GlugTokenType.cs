@@ -1,4 +1,12 @@
 namespace GeminiLab.Glug.Tokenizer {
+    public enum GlugTokenTypeCategory {
+        Literal     = 0x000,
+        Symbol      = 0x001,
+        Op          = 0x002,
+        Keyword     = 0x003,
+        Identifier  = 0x004,
+    }
+
     // 12-bit category id + 12-bit S/N in category + 8-bit flags
     // flags:
     // bit 7 ... bit 0
@@ -21,6 +29,7 @@ namespace GeminiLab.Glug.Tokenizer {
         SymbolSemicolon = 0x001_008_00,
         SymbolComma     = 0x001_009_00,
         SymbolRArrow    = 0x001_00a_00,
+        SymbolBang      = 0x001_00b_00,
         OpAdd           = 0x002_000_00,
         OpSub           = 0x002_001_00,
         OpMul           = 0x002_002_00,
@@ -51,6 +60,6 @@ namespace GeminiLab.Glug.Tokenizer {
         KeywordReturn   = 0x003_005_00,
         KeywordWhile    = 0x003_006_00,
         Identifier      = 0x004_000_01,
-        NotAToken       = 0x7ff_000_00,
+        NotAToken       = 0x7ff_000_04,
     }
 }

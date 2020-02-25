@@ -43,7 +43,7 @@ namespace XUnitTester.Glug {
         public void Counter() {
             var code = @"
                 fn counter [begin] ( begin = begin - 1; fn -> begin = begin + 1 );
-                [$ca, $cb, $cc, $cd] = [counter 0, counter(0), counter[7], counter@-1];
+                [!ca, cb, !cc, cd] = [counter 0, counter(0), counter[7], counter$-1];
 
                 return [ca[], ca[], ca[], cb[], ca[], cc[], ca[], cd[], ca[]];
             ";
@@ -64,7 +64,7 @@ namespace XUnitTester.Glug {
         [Fact]
         public void RecursiveGcd() {
             var code = @"
-                $gcd = [a, b] -> if (a > b) gcd[b, a] elif (~(0 < a)) b else gcd[b % a, a];
+                !gcd = [a, b] -> if (a > b) gcd[b, a] elif (~(0 < a)) b else gcd[b % a, a];
                 [gcd[4, 6], gcd[2, 1], gcd[117, 39], gcd[1, 1], gcd[15, 28]]
             ";
 
@@ -80,8 +80,7 @@ namespace XUnitTester.Glug {
         [Fact]
         public void YCombinator() {
             var code = @"
-                $Y = f -> (x -> f(x x))(x -> f(v -> x x v));
-
+                Y = f -> (x -> f(x x))(x -> f(v -> x x v));
                 Y (f -> n -> if (n == 0) 1 else n * f(n - 1)) 10
             ";
 
@@ -111,7 +110,7 @@ namespace XUnitTester.Glug {
                 fn beide -> [1, 2];
                 fn sum[x, y] x + y;
 
-                return [beide[], beide[] - 1, sum@beide[]]
+                return [beide[], beide[] - 1, sum$beide[]]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -129,10 +128,10 @@ namespace XUnitTester.Glug {
                         body[from];
                         loop[from + step, to, step, body];
                     )
-                )
-                $sum = 0;
+                );
+                !sum = 0;
                 loop[1, 512 + 1, 1, i -> sum = sum + i];
-                $mul = 1;
+                !mul = 1;
                 loop[1, 10, 1, i -> mul = mul * i];
                 return [sum, mul];
             ";

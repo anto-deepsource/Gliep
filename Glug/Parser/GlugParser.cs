@@ -20,13 +20,13 @@ namespace GeminiLab.Glug.Parser {
             return IsLiteral(type)
                    || type == GlugTokenType.Identifier
                    || type == GlugTokenType.OpSub
-                   || type == GlugTokenType.OpNeg
                    || type == GlugTokenType.SymbolLParen
                    || type == GlugTokenType.KeywordIf
                    || type == GlugTokenType.KeywordWhile
                    || type == GlugTokenType.KeywordReturn
                    || type == GlugTokenType.KeywordFn
                    || type == GlugTokenType.SymbolLBracket
+                   || type == GlugTokenType.SymbolBang
                 ;
         }
 
@@ -48,7 +48,7 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.OpMul => GlugBiOpType.Mul,
             GlugTokenType.OpDiv => GlugBiOpType.Div,
             GlugTokenType.OpMod => GlugBiOpType.Mod,
-            GlugTokenType.OpAt => GlugBiOpType.Call,
+            GlugTokenType.OpDollar => GlugBiOpType.Call,
             GlugTokenType.OpCall => GlugBiOpType.Call,
             _ => throw new ArgumentOutOfRangeException(),
         };
@@ -77,7 +77,7 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.OpMul => 0x80,
             GlugTokenType.OpDiv => 0x80,
             GlugTokenType.OpMod => 0x80,
-            GlugTokenType.OpAt => 0x90,
+            GlugTokenType.OpDollar => 0x90,
             GlugTokenType.OpCall => 0xa0,
             _ => -1,
         };
@@ -101,7 +101,7 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.OpMul => true,
             GlugTokenType.OpDiv => true,
             GlugTokenType.OpMod => true,
-            GlugTokenType.OpAt => false,
+            GlugTokenType.OpDollar => false,
             GlugTokenType.OpCall => true,
             _ => throw new ArgumentOutOfRangeException(),
         };
@@ -225,7 +225,7 @@ namespace GeminiLab.Glug.Parser {
                 return new UnOp(GlugUnOpType.Not, ReadExprItem(stream));
             }
 
-            if (tok.Type == GlugTokenType.OpDollar) {
+            if (tok.Type == GlugTokenType.SymbolBang) {
                 stream.GetToken();
                 return new VarRef(ReadIdentifier(stream)) { IsDef = true };
             }

@@ -66,12 +66,15 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitBiOp(BiOp val) {
-            base.VisitBiOp(val);
-
             if (val.Op == GlugBiOpType.Assign) {
                 if (!val.ExprL.IsVarRef) {
                     throw new ArgumentOutOfRangeException();
                 }
+
+                _beingAssigned = true;
+                Visit(val.ExprL);
+                _beingAssigned = false;
+                Visit(val.ExprR);
 
                 if (val.ExprL is VarRef vr) {
                     vr.Variable.MarkAssigned();
@@ -82,14 +85,18 @@ namespace GeminiLab.Glug.AST {
                 } else {
                     throw new ArgumentOutOfRangeException();
                 }
+            } else {
+                base.VisitBiOp(val);
             }
         }
+
+        private bool _beingAssigned = false;
 
         public override void VisitVarRef(VarRef val) {
             base.VisitVarRef(val);
 
             if (!CurrentScope.TryLookupVariable(val.Id, out var v)) {
-                v = RootTable.CreateVariable(val.Id);
+                v = (_beingAssigned ? CurrentScope : RootTable).CreateVariable(val.Id);
             }
 
             val.Variable = v;
