@@ -3,11 +3,6 @@ using System.Collections.Generic;
 
 namespace GeminiLab.Glos.ViMa {
     public partial class GlosViMa {
-        #region unit
-        // Answer: ViMa should not manage units.
-        #endregion
-
-        #region stack
         private readonly GlosStack<GlosValue> _stack = new GlosStack<GlosValue>();
         private int _sptr => _stack.Count;
 
@@ -41,43 +36,6 @@ namespace GeminiLab.Glos.ViMa {
         private void pushUntil(int newSptr) {
             while (_stack.Count < newSptr) pushStack();
         }
-        #endregion
-
-        #region delimiter stack
-        internal const int MaxStack = 0x10000;
-
-        private readonly int[] _delStack = new int[MaxStack];
-        private int _dptr = 0;
-
-        private bool hasDelimiter() {
-            return _dptr > callStackTop().DelimiterStackBase;
-        }
-
-        private int peekDelimiter() {
-            return hasDelimiter() ? _delStack[_dptr - 1] : callStackTop().PrivateStackBase;
-        }
-
-        private int popDelimiter() {
-            int rv;
-            
-            if (hasDelimiter()) {
-                rv = _delStack[_dptr - 1];
-                --_dptr;
-            } else {
-                rv = callStackTop().PrivateStackBase;
-            }
-
-            return rv;
-        }
-
-        private void pushDelimiter() {
-            _delStack[_dptr++] = _sptr;
-        }
-
-        private void pushDelimiter(int pos) {
-            _delStack[_dptr++] = pos;
-        }
-        #endregion                                                                                                                                                     
 
         public GlosValue.Comparer Comparer => new GlosValue.Comparer(this);
     }

@@ -2,6 +2,49 @@
 
 namespace GeminiLab.Glos.ViMa {
     public partial class GlosViMa {
+        public static bool ReadInstructionAndImmediate(ReadOnlySpan<byte> code, ref int ip, out GlosOp op, out long imm, out bool immOnStack) {
+            var len = code.Length;
+
+            immOnStack = false;
+            imm = 0;
+
+            if (ip == len) {
+                op = GlosOp.Ret;
+                return true;
+            }
+
+            var opb = code[ip++];
+            op = (GlosOp)opb;
+            var immt = GlosOpInfo.Immediates[opb];
+
+            unchecked {
+                switch (immt) {
+                    case GlosOpImmediate.Embedded:
+                        imm = opb & 0x07;
+                        break;
+                    case GlosOpImmediate.Byte:
+                        if (ip + 1 > len) return false;
+                        imm = (sbyte)code[ip++];
+                        break;
+                    case GlosOpImmediate.Dword:
+                        if (ip + 4 > len) return false;
+                        imm = unchecked((int)(uint)((ulong)code[ip] | ((ulong)code[ip + 1] << 8) | ((ulong)code[ip + 2] << 16) | ((ulong)code[ip + 3] << 24)));
+                        ip += 4;
+                        break;
+                    case GlosOpImmediate.Qword:
+                        if (ip + 8 > len) return false;
+                        imm = unchecked((long)((ulong)code[ip] | ((ulong)code[ip + 1] << 8) | ((ulong)code[ip + 2] << 16) | ((ulong)code[ip + 3] << 24) | ((ulong)code[ip + 4] << 32) | ((ulong)code[ip + 5] << 40) | ((ulong)code[ip + 6] << 48) | ((ulong)code[ip + 7] << 56)));
+                        ip += 8;
+                        break;
+                    case GlosOpImmediate.OnStack:
+                        immOnStack = true;
+                        break;
+                }
+            }
+
+            return true;
+        }
+
         private void executeFunctionOnStack(int bptr, GlosFunction function, int argc) {
             var proto = function.Prototype;
             var unit = function.Prototype.Unit;
@@ -31,62 +74,22 @@ namespace GeminiLab.Glos.ViMa {
 
             pushUntil(prib);
 
-            var ops = proto.Code;
-            var len = ops.Length;
+            var code = proto.Code;
+            var len = code.Length;
             ip = 0;
             while (true) {
                 if (ip < 0 || ip > len) throw new GlosInvalidProgramCounterException(this, ip);
 
-                // the implicit return at the end of function
-                var op = ip == len ? GlosOp.Ret : (GlosOp)ops[ip++];
-                var cat = GlosOpInfo.Categories[(int)op];
+                if (!ReadInstructionAndImmediate(code, ref ip, out var op, out long imms, out bool immOnStack)) throw new GlosUnexpectedEndOfCodeException(this);
 
-                // get imm
-                ulong imm;
-                long imms;
-                switch (GlosOpInfo.Immediates[(int)op]) {
-                case GlosOpImmediate.Embedded:
-                    imm = ((ulong)op) & 0x07;
-                    imms = ((long)op) & 0x07;
-                    break;
-                case GlosOpImmediate.Byte:
-                    if (ip + 1 > len) throw new GlosUnexpectedEndOfCodeException(this);
-                    imm = ops[ip++];
-                    imms = unchecked((sbyte)(byte)imm);
-                    break;
-                case GlosOpImmediate.Dword:
-                    if (ip + 4 > len) throw new GlosUnexpectedEndOfCodeException(this);
-                    imm = (ulong)ops[ip]
-                          | ((ulong)ops[ip + 1] << 8)
-                          | ((ulong)ops[ip + 2] << 16)
-                          | ((ulong)ops[ip + 3] << 24);
-                    imms = unchecked((int)(uint)imm);
-                    ip += 4;
-                    break;
-                case GlosOpImmediate.Qword:
-                    if (ip + 8 > len) throw new GlosUnexpectedEndOfCodeException(this);
-                    imm = (ulong)ops[ip]
-                          | ((ulong)ops[ip + 1] << 8)
-                          | ((ulong)ops[ip + 2] << 16)
-                          | ((ulong)ops[ip + 3] << 24)
-                          | ((ulong)ops[ip + 4] << 32)
-                          | ((ulong)ops[ip + 5] << 40)
-                          | ((ulong)ops[ip + 6] << 48)
-                          | ((ulong)ops[ip + 7] << 56);
-                    imms = unchecked((long)imm);
-                    ip += 8;
-                    break;
-                case GlosOpImmediate.OnStack:
+                if (immOnStack) {
                     imms = stackTop().AssertInteger();
-                    imm = unchecked((ulong)imms);
                     popStack();
-                    break;
-                default:
-                    imm = 0;
-                    imms = 0;
-                    break;
                 }
 
+                // the implicit return at the end of function
+                var cat = GlosOpInfo.Categories[(int)op];
+                
                 // execution
                 if (cat == GlosOpCategory.BinaryArithmeticOperator) {
                     binaryArithmeticOperator(op, ref stackTop(1), in stackTop(1), in stackTop());
@@ -163,7 +166,7 @@ namespace GeminiLab.Glos.ViMa {
                 } else if (op == GlosOp.LdNil) {
                     pushNil();
                 } else if (op == GlosOp.LdFlt) {
-                    pushStack().SetFloatByBinaryRepresentation(imm);
+                    pushStack().SetFloatByBinaryPresentation(unchecked((ulong)imms));
                 } else if (op == GlosOp.LdTrue) {
                     pushStack().SetBoolean(true);
                 } else if (op == GlosOp.LdFalse) {
@@ -262,7 +265,7 @@ namespace GeminiLab.Glos.ViMa {
 
             _stack.AsSpan(rtb, retc).CopyTo(_stack.AsSpan(bptr, retc));
             popUntil(bptr + retc);
-            _dptr = frame.DelimiterStackBase;
+            popCurrentFrameDelimiter();
             popCallStackFrame();
         }
 

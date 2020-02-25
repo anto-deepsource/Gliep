@@ -26,7 +26,7 @@ namespace GeminiLab.Glos.ViMa {
             return ref v;
         }
 
-        public static ref GlosValue SetFloatByBinaryRepresentation(this ref GlosValue v, ulong representation) {
+        public static ref GlosValue SetFloatByBinaryPresentation(this ref GlosValue v, ulong representation) {
             v.ValueNumber.Integer = unchecked((long)representation);
             v.ValueObject = null;
             v.Type = GlosValueType.Float;

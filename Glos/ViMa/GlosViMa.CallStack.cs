@@ -13,28 +13,19 @@ namespace GeminiLab.Glos.ViMa {
     }
 
     public partial class GlosViMa {
-        // TODO: make call stack flexible and remove this constant
-        internal const int MaxCallStack = 0x1000;
-        private readonly GlosStackFrame[] _callStack = new GlosStackFrame[MaxCallStack];
-        private long _cptr = 0;
+        private readonly GlosStack<GlosStackFrame> _callStack = new GlosStack<GlosStackFrame>();
+        private int _cptr => _callStack.Count;
 
-        public ReadOnlySpan<GlosStackFrame> CurrentCallStack => new ReadOnlySpan<GlosStackFrame>(_callStack, 0, (int)_cptr);
-
-        private ref GlosStackFrame callStackTop() {
-            return ref _callStack[_cptr - 1];
-        }
+        private ref GlosStackFrame callStackTop() => ref _callStack.StackTop();
 
         private ref GlosStackFrame callStackTop(int count) {
             return ref _callStack[_cptr - count - 1];
         }
 
-        private ref GlosStackFrame pushCallStackFrame() {
-            return ref _callStack[_cptr++];
-        }
+        private ref GlosStackFrame pushCallStackFrame() => ref _callStack.PushStack();
 
         private void popCallStackFrame() {
-            --_cptr;
-            _callStack[_cptr].Function = null!;
+            _callStack.PopStack().Function = null!;
         }
     }
 }
