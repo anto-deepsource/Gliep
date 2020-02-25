@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using GeminiLab.Core2;
+using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glos.ViMa;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Xunit;
 using XUnitTester.Checker;
 
 namespace XUnitTester.Glos {
     public class CodeGeneratorTest : GlosTestBase {
         [Fact]
-        public void LdTest() {
+        public void Ld() {
             var fgen = Builder.AddFunction();
             long expected = 0;
 
@@ -35,7 +39,7 @@ namespace XUnitTester.Glos {
         }
 
         [Fact]
-        public void LdStrAndLdFunTest() {
+        public void LdStrAndLdFun() {
             var fgen = Builder.AddFunction();
             string expected = "";
 
@@ -65,7 +69,7 @@ namespace XUnitTester.Glos {
         }
 
         [Fact]
-        public void LoopTest() {
+        public void Loop() {
             var fgen = Builder.AddFunction();
             var iter = fgen.AllocateLocalVariable();
             var max = fgen.AllocateLocalVariable();
@@ -105,45 +109,29 @@ namespace XUnitTester.Glos {
             it.AssertEnd();
         }
 
-        /*
         [Fact]
-        public void LoopTest() {
+        public void Loc() {
+            var size = 1024;
             var fgen = Builder.AddFunction();
-            var iter = fgen.AllocateLocalVariable();
-            var max = fgen.AllocateLocalVariable();
 
-            fgen.AppendLd(0);
-            fgen.AppendStLoc(iter);
-            fgen.AppendLdArg(0);
-            fgen.AppendStLoc(max);
+            var list = new List<LocalVariable>();
 
-            fgen.AppendLdDel();
+            for (int i = 0; i < size; ++i) {
+                var lv = fgen.AllocateLocalVariable();
+                list.Add(lv);
 
-            var loopTag = fgen.AllocateAndInsertLabel();
-
-            fgen.AppendLdLoc(iter);
-            fgen.AppendLd(1);
-            fgen.AppendAdd();
-            fgen.AppendDup();
-            fgen.AppendDup();
-            fgen.AppendStLoc(iter);
-            fgen.AppendLdLoc(max);
-            fgen.AppendLss();
-            fgen.AppendBt(loopTag);
-
-            fgen.AppendRet();
-
-            var res = ViMa.ExecuteFunction(new GlosFunction(Unit.FunctionTable[fgen.Id], new GlosTable(ViMa)), new GlosValue[] { 1024 });
-
-            var checker = GlosValueArrayChecker.Create(res);
-            var it = checker.First();
-
-            for (int i = 0; i < 1024; ++i) {
-                it.AssertInteger(i + 1).MoveNext();
+                fgen.AppendLd(i);
+                fgen.AppendStLoc(lv);
             }
 
-            it.AssertEnd();
+            list.ForEach(fgen.AppendLdLoc);
+            (size - 1).Times(fgen.AppendAdd);
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertInteger((size - 1) * size / 2)
+                .MoveNext().AssertEnd();
         }
-        */
     }
 }

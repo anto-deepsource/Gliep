@@ -131,14 +131,14 @@ namespace XUnitTester.Glug {
                     }
                 }
                 $sum = 0;
-                loop[1, 100, 1, i -> sum = sum + i];
+                loop[1, 512 + 1, 1, i -> sum = sum + i];
                 $mul = 1;
                 loop[1, 10, 1, i -> mul = mul * i];
                 return [sum, mul];
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(4950)
+                .First().AssertInteger((1 + 512) * 512 / 2)
                 .MoveNext().AssertInteger(362880)
                 .MoveNext().AssertEnd();
         }

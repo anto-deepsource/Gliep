@@ -1,4 +1,5 @@
 ﻿using System;
+using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
 using Xunit;
 
@@ -50,8 +51,8 @@ namespace XUnitTester.Glos {
                             Assert.False(_cmp.LessThan(x, y));
                             Assert.False(_cmp.GreaterThan(x, y));
                         } else {
-                            Assert.ThrowsAny<Exception>(() => _cmp.LessThan(vals[i], vals[j]));
-                            Assert.ThrowsAny<Exception>(() => _cmp.GreaterThan(vals[i], vals[j]));
+                            Assert.Throws<GlosInvalidBinaryOperandTypeException>(() => _cmp.LessThan(vals[i], vals[j]));
+                            Assert.Throws<GlosInvalidBinaryOperandTypeException>(() => _cmp.GreaterThan(vals[i], vals[j]));
                         }
                     } else {
                         Assert.False(_cmp.EqualTo(vals[i], vals[j]));
@@ -68,8 +69,8 @@ namespace XUnitTester.Glos {
                             Assert.False(_cmp.LessThan(x, y));
                             Assert.False(_cmp.GreaterThan(x, y));
                         } else {
-                            Assert.ThrowsAny<Exception>(() => _cmp.LessThan(vals[i], vals[j]));
-                            Assert.ThrowsAny<Exception>(() => _cmp.GreaterThan(vals[i], vals[j]));
+                            Assert.Throws<GlosInvalidBinaryOperandTypeException>(() => _cmp.LessThan(vals[i], vals[j]));
+                            Assert.Throws<GlosInvalidBinaryOperandTypeException>(() => _cmp.GreaterThan(vals[i], vals[j]));
                         }
                     }
 
