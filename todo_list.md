@@ -17,6 +17,5 @@ REFACTOR!!!!
 
 - add while support.
   - add break support.
-- add string support.
 - add table support.
 - add global variable write support.

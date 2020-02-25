@@ -1,13 +1,4 @@
-fn counter[ctr] {
-    return fn {
-        $rv = ctr;
-        ctr = ctr + 1;
-        return rv;
-    }
-};
-
-
-fn counter[ctr] { ctr = ctr - 1; fn -> ctr = ctr + 1 };
+fn counter[ctr] ( ctr = ctr - 1; fn -> ctr = ctr + 1 );
 $a = counter[0];
 $b = counter[7];
 
@@ -16,7 +7,7 @@ print@a[];
 print@b[];
 print@a[];
 
-print @ (fn fibo[x] if (x == 0 | x == 1) x else fibo[x - 1] + fibo[x - 2]) 20
+print @ (fn fibo[x] if (x == 0 | x == 1) x else fibo[x - 1] + fibo[x - 2]) 20;
 
 ############################################
 
@@ -30,7 +21,9 @@ print@sum@beide[];  # expected: 3
 
 ############################################
 $Y = f -> (x -> f(x x))(x -> f(v -> x x v));
-print @ Y (f -> n -> if (n == 0) 1 else n * f[n - 1]) 10
+print @ Y (f -> n -> if (n == 0) 1 else n * f[n - 1]) 10;
 
 $Y = f -> (x -> f(x x))(x -> f(v -> x x v));
-print(Y (f -> n -> if (n == 0) 1 else n * f(n - 1)) 10)
+print(Y (f -> n -> if (n == 0) 1 else n * f(n - 1)) 10);
+
+print "ユニコードイグザンプル\u677e"

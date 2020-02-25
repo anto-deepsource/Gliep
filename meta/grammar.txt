@@ -28,8 +28,7 @@ ExprItem    : literal
             | "$" identifier
             | "-" ExprItem
             | "~" ExprItem
-            | ExprInParen
-            | BlockInBra
+            | BlockInParen
             | If
             | While
             | Return
@@ -38,16 +37,13 @@ ExprItem    : literal
             | OnStackList
             ;
 
-ExprInParen : "(" Expr ")"
+BlockInParen    : "(" Block ")"
+                ;
+
+If          : "if" BlockInParen Expr ( "elif" BlockInParen Expr )* ( "else" Expr )?
             ;
 
-BlockInBra  : "{" Block "}"
-            ;
-
-If          : "if" ExprInParen Expr ( "elif" ExprInParen Expr )* ( "else" Expr )?
-            ;
-
-While       : "while" ExprInParen Expr
+While       : "while" BlockInParen Expr
             ;
 
 Return      : "return" Expr

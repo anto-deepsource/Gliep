@@ -10,7 +10,7 @@ namespace XUnitTester.Glug {
         [Fact]
         public void Evaluation() {
             var code = @"
-                [1, 2, false, {}, nil, 1 + 2, if (true) 1, if (false) 2]
+                [1, 2, false, (), nil, 1 + 2, if (true) 1, if (false) 2]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -42,7 +42,7 @@ namespace XUnitTester.Glug {
         [Fact]
         public void Counter() {
             var code = @"
-                fn counter [begin] { begin = begin - 1; fn -> begin = begin + 1 };
+                fn counter [begin] ( begin = begin - 1; fn -> begin = begin + 1 );
                 [$ca, $cb, $cc, $cd] = [counter 0, counter(0), counter[7], counter@-1];
 
                 return [ca[], ca[], ca[], cb[], ca[], cc[], ca[], cd[], ca[]];
@@ -124,12 +124,12 @@ namespace XUnitTester.Glug {
         [Fact]
         public void RecursiveLoop() {
             var code = @" 
-                fn loop[from, to, step, body] {
-                    if (from < to) {
+                fn loop[from, to, step, body] (
+                    if (from < to) (
                         body[from];
                         loop[from + step, to, step, body];
-                    }
-                }
+                    )
+                )
                 $sum = 0;
                 loop[1, 512 + 1, 1, i -> sum = sum + i];
                 $mul = 1;
