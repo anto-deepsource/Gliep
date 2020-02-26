@@ -11,8 +11,6 @@ REFACTOR!!!!
 - add hash instruction.
   - find a good way to evaluate and update glosvalue's hash.
 
-- rewrite main execution function, replace resursion with loop when calling functions.
-
 ## Glug
 
 - add while support.

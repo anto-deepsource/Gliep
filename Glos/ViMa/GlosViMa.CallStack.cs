@@ -10,6 +10,7 @@ namespace GeminiLab.Glos.ViMa {
         public int InstructionPointer;
         public int DelimiterStackBase;
         public GlosFunction Function;
+        public GlosContext Context;
     }
 
     public partial class GlosViMa {

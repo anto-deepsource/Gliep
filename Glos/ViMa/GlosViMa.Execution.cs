@@ -45,39 +45,26 @@ namespace GeminiLab.Glos.ViMa {
             return true;
         }
 
-        private void executeFunctionOnStack(int bptr, GlosFunction function, int argc) {
-            var proto = function.Prototype;
-            var unit = function.Prototype.Unit;
-            var parent = function.ParentContext;
-            var ctx = new GlosContext(parent);
-            var global = ctx.Root;
+        public GlosValue[] ExecuteFunction(GlosFunction function, GlosValue[] args) {
+            var callStackBase = _cptr;
+            var bptr = _sptr;
 
-            foreach (var s in proto.VariableInContext) ctx.CreateVariable(s);
+            var ip = 0;
+            GlosFunctionPrototype proto = null!;
+            ReadOnlySpan<byte> code = default;
+            var len = 0;
+            GlosUnit unit = null!;
+            GlosContext ctx = null!;
+            GlosContext global = null!;
 
-            var locc = proto.LocalVariableSize;
+            var firstArgc = args.Length;
+            args.AsSpan().CopyTo(_stack.AsSpan(bptr, firstArgc));
 
-            ref var frame = ref pushCallStackFrame();
+            NewCallFrame(bptr, function, firstArgc);
+            RestoreStatus(ref code);
+            pushUntil(callStackTop().PrivateStackBase);
 
-            ref var argb = ref frame.ArgumentsBase;
-            ref var locb = ref frame.LocalVariablesBase;
-            ref var prib = ref frame.PrivateStackBase;
-            ref var ip = ref frame.InstructionPointer;
-
-            argb = bptr;
-            locb = argb + argc;
-            prib = locb + locc;
-
-            frame.StackBase = bptr;
-            frame.Function = function;
-            frame.ArgumentsCount = argc;
-            frame.DelimiterStackBase = _dptr;
-
-            pushUntil(prib);
-
-            var code = proto.Code;
-            var len = code.Length;
-            ip = 0;
-            while (true) {
+            while (_cptr > callStackBase) {
                 if (ip < 0 || ip > len) throw new GlosInvalidProgramCounterException(this, ip);
 
                 if (!ReadInstructionAndImmediate(code, ref ip, out var op, out long imms, out bool immOnStack)) throw new GlosUnexpectedEndOfCodeException(this);
@@ -89,7 +76,7 @@ namespace GeminiLab.Glos.ViMa {
 
                 // the implicit return at the end of function
                 var cat = GlosOpInfo.Categories[(int)op];
-                
+
                 // execution
                 if (cat == GlosOpCategory.BinaryArithmeticOperator) {
                     binaryArithmeticOperator(op, ref stackTop(1), in stackTop(1), in stackTop());
@@ -172,17 +159,17 @@ namespace GeminiLab.Glos.ViMa {
                 } else if (op == GlosOp.LdFalse) {
                     pushStack().SetBoolean(false);
                 } else if (cat == GlosOpCategory.LoadLocalVariable) {
-                    if (imms >= locc || imms < 0) throw new GlosLocalVariableIndexOutOfRangeException(this, (int)imms);
-                    pushStack() = _stack[locb + (int)imms];
+                    if (imms >= proto.LocalVariableSize || imms < 0) throw new GlosLocalVariableIndexOutOfRangeException(this, (int)imms);
+                    pushStack() = _stack[callStackTop().LocalVariablesBase + (int)imms]; // !!!!!
                 } else if (cat == GlosOpCategory.StoreLocalVariable) {
-                    if (imms >= locc || imms < 0) throw new GlosLocalVariableIndexOutOfRangeException(this, (int)imms);
-                    _stack[locb + (int)imms] = stackTop();
+                    if (imms >= proto.LocalVariableSize || imms < 0) throw new GlosLocalVariableIndexOutOfRangeException(this, (int)imms);
+                    _stack[callStackTop().LocalVariablesBase + (int)imms] = stackTop();
                     popStack();
                 } else if (cat == GlosOpCategory.LoadArgument) {
                     pushNil();
-                    if (imms < argc && imms >= 0) stackTop() = _stack[argb + (int)imms];
+                    if (imms < callStackTop().ArgumentsCount && imms >= 0) stackTop() = _stack[callStackTop().ArgumentsBase + (int)imms];
                 } else if (op == GlosOp.LdArgc) {
-                    pushStack().SetInteger(argc);
+                    pushStack().SetInteger(callStackTop().ArgumentsCount);
                 } else if (cat == GlosOpCategory.Branch) {
                     var dest = ip + (int)imms;
                     var jump = op switch {
@@ -203,7 +190,8 @@ namespace GeminiLab.Glos.ViMa {
 
                     if (op != GlosOp.B && op != GlosOp.BS) popStack();
                 } else if (op == GlosOp.Dup) {
-                    pushStack(in stackTop());
+                    pushStack();
+                    stackTop() = stackTop(1);
                 } else if (op == GlosOp.Pop) {
                     popStack();
                 } else if (op == GlosOp.LdDel) {
@@ -212,13 +200,10 @@ namespace GeminiLab.Glos.ViMa {
                     var funv = stackTop();
                     popStack();
 
-                    var ptr = popDelimiter();
+                    var ptr = peekDelimiter();
                     var nextArgc = _sptr - ptr;
 
-                    if (funv.Type == GlosValueType.Function) {
-                        var fun = funv.AssertFunction();
-                        executeFunctionOnStack(ptr, fun, nextArgc);
-                    } else if (funv.Type == GlosValueType.ExternalFunction) {
+                    if (funv.Type == GlosValueType.ExternalFunction) {
                         var fun = funv.AssertExternalFunction();
 
                         var nextArgs = new GlosValue[nextArgc];
@@ -227,13 +212,25 @@ namespace GeminiLab.Glos.ViMa {
                         var nextRetc = nextRets.Length;
                         nextRets.AsSpan().CopyTo(_stack.AsSpan(ptr, nextRetc));
                         popUntil(ptr + nextRetc);
+                    } else if (funv.Type == GlosValueType.Function) {
+                        var fun = funv.AssertFunction();
+                        StoreStatus();
+                        NewCallFrame(ptr, fun, nextArgc);
+                        RestoreStatus(ref code);
+                        pushUntil(callStackTop().PrivateStackBase);
                     } else {
                         throw new InvalidOperationException();
                     }
-
-                    pushDelimiter(ptr);
                 } else if (op == GlosOp.Ret) {
-                    break;
+                    // clean up
+                    var rtb = popDelimiter();
+                    var retc = _sptr - rtb;
+
+                    _stack.AsSpan(rtb, retc).CopyTo(_stack.AsSpan(callStackTop().StackBase, retc));
+                    popUntil(callStackTop().StackBase + retc);
+                    popCurrentFrameDelimiter();
+                    popCallStackFrame();
+                    RestoreStatus(ref code);
                 } else if (op == GlosOp.Bind) {
                     stackTop().AssertFunction().ParentContext = ctx;
                 } else if (cat == GlosOpCategory.ShpRv) {
@@ -259,33 +256,48 @@ namespace GeminiLab.Glos.ViMa {
                 }
             }
 
-            // clean up
-            var rtb = popDelimiter();
-            var retc = _sptr - rtb;
+            var rc = _sptr - bptr;
+            var rv = new GlosValue[rc];
 
-            _stack.AsSpan(rtb, retc).CopyTo(_stack.AsSpan(bptr, retc));
-            popUntil(bptr + retc);
-            popCurrentFrameDelimiter();
-            popCallStackFrame();
-        }
-
-        public GlosValue[] ExecuteFunction(GlosFunction function, GlosValue[]? args) {
-            var oldSptr = _sptr;
-
-            args ??= Array.Empty<GlosValue>();
-            var argc = args.Length;
-            args.AsSpan().CopyTo(_stack.AsSpan(_sptr, argc));
-
-            function.ParentContext ??= new GlosContext(null);
-
-            executeFunctionOnStack(oldSptr, function, argc);
-
-            var retc = _sptr - oldSptr;
-            var rv = new GlosValue[retc];
-            _stack.AsSpan(oldSptr, retc).CopyTo(rv.AsSpan());
-
-            popUntil(oldSptr);
+            _stack.AsSpan(bptr, rc).CopyTo(rv);
+            popUntil(bptr);
             return rv;
+
+            void NewCallFrame(int bptr, GlosFunction function, int argc) {
+                ref var frame = ref pushCallStackFrame();
+
+                frame.Function = function;
+                frame.Context = new GlosContext(function.ParentContext);
+
+                frame.StackBase = bptr;
+                frame.ArgumentsBase = bptr;
+                frame.ArgumentsCount = argc;
+                frame.LocalVariablesBase = frame.ArgumentsBase + frame.ArgumentsCount;
+                frame.PrivateStackBase = frame.LocalVariablesBase + function.Prototype.LocalVariableSize;
+                frame.InstructionPointer = 0;
+                frame.DelimiterStackBase = _dptr;
+
+                foreach (var s in function.Prototype.VariableInContext) frame.Context.CreateVariable(s);
+            }
+
+            void RestoreStatus(ref ReadOnlySpan<byte> code) {
+                if (_cptr <= callStackBase) return;
+                ref var frame = ref callStackTop();
+
+                ip = frame.InstructionPointer;
+                proto = frame.Function.Prototype;
+                code = proto.Code;
+                len = code.Length;
+                unit = proto.Unit;
+                ctx = frame.Context;
+                global = ctx.Root;
+            }
+
+            void StoreStatus() {
+                ref var frame = ref callStackTop();
+
+                frame.InstructionPointer = ip;
+            }
         }
 
         // though ViMa shouldn't manage units, this function is necessary
