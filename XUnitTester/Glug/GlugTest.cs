@@ -2,11 +2,19 @@
 using System.Collections.Generic;
 using System.Text;
 using GeminiLab.Core2.Text;
+using GeminiLab.Glos.ViMa;
 using Xunit;
 using XUnitTester.Checker;
 
 namespace XUnitTester.Glug {
     public class GlugTest : GlugExecutionTestBase {
+        [Fact]
+        public void Return0() {
+            GlosValueArrayChecker.Create(Execute("0"))
+                .First().AssertInteger(0)
+                .MoveNext().AssertEnd();
+        }
+
         [Fact]
         public void Evaluation() {
             var code = @"
@@ -139,6 +147,30 @@ namespace XUnitTester.Glug {
             GlosValueArrayChecker.Create(Execute(code))
                 .First().AssertInteger((1 + 512) * 512 / 2)
                 .MoveNext().AssertInteger(362880)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void GlobalAndLocal() {
+            var code = @"
+                fn a -> x = 1;
+                fn b -> !!x = 2;
+                fn c -> !!x;
+
+                return [c[], a[], b[], a[], c[], !!ext[], c[]]
+            ";
+
+            var context = new GlosContext(null);
+            context.CreateVariable("ext", (GlosExternalFunction)((param) => { context.GetVariableReference("x") = 3; return new GlosValue[] { 3 }; }));
+
+            GlosValueArrayChecker.Create(Execute(code, context))
+                .First().AssertNil()
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(2)
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(2)
+                .MoveNext().AssertInteger(3)
+                .MoveNext().AssertInteger(3)
                 .MoveNext().AssertEnd();
         }
     }

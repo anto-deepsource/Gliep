@@ -45,6 +45,7 @@ namespace GeminiLab.Glug.Tokenizer {
             return value.Substring(b, ptr - b);
         }
 
+        // this method is getting more and more nasty, TODO: refactor
         private static IEnumerable<GlugToken> GetTokensFromLine(string line) {
             int len = line.Length;
             int ptr = 0;
@@ -176,8 +177,13 @@ namespace GeminiLab.Glug.Tokenizer {
                     yield return new GlugToken { Type = GlugTokenType.LiteralString, ValueString = EscapeSequenceConverter.Decode(line.AsSpan(begin + 1, ptr - begin - 1)) };
                     ++ptr;
                 } else if (c == '!') {
-                    yield return new GlugToken { Type = GlugTokenType.SymbolBang };
                     ++ptr;
+                    if (next == '!') {
+                        ++ptr;
+                        yield return new GlugToken { Type = GlugTokenType.SymbolBangBang };
+                    } else {
+                        yield return new GlugToken { Type = GlugTokenType.SymbolBang };
+                    }
                 } else {
                     ++ptr;
                 }

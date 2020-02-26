@@ -30,6 +30,7 @@ namespace GeminiLab.Glug.Tokenizer {
         SymbolComma     = 0x001_009_00,
         SymbolRArrow    = 0x001_00a_00,
         SymbolBang      = 0x001_00b_00,
+        SymbolBangBang  = 0x001_00c_00,
         OpAdd           = 0x002_000_00,
         OpSub           = 0x002_001_00,
         OpMul           = 0x002_002_00,

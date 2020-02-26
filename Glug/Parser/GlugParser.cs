@@ -27,6 +27,7 @@ namespace GeminiLab.Glug.Parser {
                    || type == GlugTokenType.KeywordFn
                    || type == GlugTokenType.SymbolLBracket
                    || type == GlugTokenType.SymbolBang
+                   || type == GlugTokenType.SymbolBangBang
                 ;
         }
 
@@ -228,6 +229,11 @@ namespace GeminiLab.Glug.Parser {
             if (tok.Type == GlugTokenType.SymbolBang) {
                 stream.GetToken();
                 return new VarRef(ReadIdentifier(stream)) { IsDef = true };
+            }
+
+            if (tok.Type == GlugTokenType.SymbolBangBang) {
+                stream.GetToken();
+                return new VarRef(ReadIdentifier(stream)) { IsGlobal = true };
             }
 
             if (tok.Type == GlugTokenType.Identifier) {

@@ -45,6 +45,7 @@ namespace GeminiLab.Glug.AST {
     public class VarRef : Expr {
         public Variable Variable { get; set; }
         public bool IsDef { get; set; }
+        public bool IsGlobal { get; set; }
 
         public override bool IsVarRef { get; } = true;
 

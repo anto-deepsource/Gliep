@@ -30,7 +30,12 @@ namespace GeminiLab.Glos.ViMa {
 
             if (_location.TryGetValue(name, out location)) return location.getWrapper(name);
 
-            var rv = (Parent ?? throw new ArgumentOutOfRangeException(nameof(name))).getWrapper(name, out location);
+            if (Parent == null) {
+                location = this;
+                return _variables[name] = new GlosValueReferenceWrapper();
+            }
+
+            var rv = Parent.getWrapper(name, out location);
             _location[name] = location;
             return rv;
         }

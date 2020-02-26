@@ -33,7 +33,8 @@ namespace GeminiLab.Glug.AST {
         public override void VisitVarRef(VarRef val) {
             base.VisitVarRef(val);
 
-            if (val.IsDef) CurrentScope.CreateVariable(val.Id);
+            if (val.IsDef) val.Variable = CurrentScope.CreateVariable(val.Id);
+            else if (val.IsGlobal) val.Variable = RootTable.CreateVariable(val.Id);
         }
 
         // place this function here temporarily, TODO: find a better place for it
@@ -95,12 +96,15 @@ namespace GeminiLab.Glug.AST {
         public override void VisitVarRef(VarRef val) {
             base.VisitVarRef(val);
 
-            if (!CurrentScope.TryLookupVariable(val.Id, out var v)) {
-                v = (_beingAssigned ? CurrentScope : RootTable).CreateVariable(val.Id);
+            if (val.Variable == null) {
+                if (!CurrentScope.TryLookupVariable(val.Id, out var v)) {
+                    v = (_beingAssigned ? CurrentScope : RootTable).CreateVariable(val.Id);
+                }
+
+                val.Variable = v;
             }
 
-            val.Variable = v;
-            v.HintUsedIn(CurrentScope);
+            val.Variable.HintUsedIn(CurrentScope);
         }
     }
 }
