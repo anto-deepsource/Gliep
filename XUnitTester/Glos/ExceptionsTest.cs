@@ -7,6 +7,7 @@ using Xunit;
 
 namespace XUnitTester.Glos {
     public class ExceptionsTest : GlosTestBase {
+        // TODO: a custom exception assert mechanic
         [Fact]
         public void BadBranch() {
             var fun = Builder.AddFunctionRaw(new[] {
@@ -19,11 +20,11 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fun;
 
-            var exception = Assert.Throws<GlosInvalidProgramCounterException>(() => {
+            var exception = Assert.Throws<GlosRuntimeException>(() => {
                 ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
             });
 
-            Assert.Equal(44, exception.ProgramCounter);
+            // Assert.Equal(44, exception.InstructionPointer);
         }
 
         [Fact]
@@ -37,7 +38,7 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fun;
 
-            Assert.Throws<GlosUnexpectedEndOfCodeException>(() => {
+            Assert.Throws<GlosRuntimeException>(() => {
                 ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
             });
         }
@@ -50,11 +51,11 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fun;
 
-            var exception = Assert.Throws<GlosLocalVariableIndexOutOfRangeException>(() => {
+            var exception = Assert.Throws<GlosRuntimeException>(() => {
                 ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
             });
 
-            Assert.Equal(0, exception.Index);
+            // Assert.Equal(0, exception.Index);
 
             fun = Builder.AddFunctionRaw(new[] {
                 (byte)GlosOp.StLoc1,
@@ -62,26 +63,26 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fun;
 
-            exception = Assert.Throws<GlosLocalVariableIndexOutOfRangeException>(() => {
+            exception = Assert.Throws<GlosRuntimeException>(() => {
                 ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
             });
 
-            Assert.Equal(1, exception.Index);
+            // Assert.Equal(1, exception.Index);
         }
 
         [Fact]
         public void UnknownOpException() {
             var fun = Builder.AddFunctionRaw(new[] {
-                (byte)0xff, // TODO: mark op 0xff reserved for invalid
+                (byte)GlosOp.Invalid,
             }, 0);
 
             Builder.Entry = fun;
 
-            var exception = Assert.Throws<GlosUnknownOpException>(() => {
+            var exception = Assert.Throws<GlosRuntimeException>(() => {
                 ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
             });
 
-            Assert.Equal((byte)0xff, exception.Op);
+            // Assert.Equal((byte)0xff, exception.Op);
         }
     }
 }

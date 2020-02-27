@@ -28,7 +28,7 @@ namespace XUnitTester.Glug {
 
             var unit = gen.Builder.GetResult();
 
-            return ViMa.ExecuteUnit(unit, Array.Empty<GlosValue>(), context ?? new GlosContext(null!));
+            return ViMa.ExecuteUnit(unit, null, context ?? new GlosContext(null!));
         }
     }
 }

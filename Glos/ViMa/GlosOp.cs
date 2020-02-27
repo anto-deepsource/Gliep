@@ -131,5 +131,7 @@
         SysC5   = 0xe5,
         SysC6   = 0xe6,
         SysC7   = 0xe7,
+
+        Invalid = 0xff,
     }
 }

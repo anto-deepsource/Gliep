@@ -16,3 +16,4 @@ REFACTOR!!!!
 - add while support.
   - add break support.
 - add table support.
+- add list concat operator.

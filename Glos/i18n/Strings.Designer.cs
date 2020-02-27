@@ -70,11 +70,11 @@ namespace GeminiLab.Glos.i18n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid program counter {0}..
+        ///   Looks up a localized string similar to Invalid program counter..
         /// </summary>
-        internal static string DefaultMessageGlosInvalidProgramCounterException {
+        internal static string DefaultMessageGlosInvalidInstructionPointerException {
             get {
-                return ResourceManager.GetString("DefaultMessageGlosInvalidProgramCounterException", resourceCulture);
+                return ResourceManager.GetString("DefaultMessageGlosInvalidInstructionPointerException", resourceCulture);
             }
         }
         
@@ -106,6 +106,15 @@ namespace GeminiLab.Glos.i18n {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} occurred during execution. Inner exception message: {1}..
+        /// </summary>
+        internal static string DefaultMessageGlosRuntimeExceptionWithInner {
+            get {
+                return ResourceManager.GetString("DefaultMessageGlosRuntimeExceptionWithInner", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unexpected end of code..
         /// </summary>
         internal static string DefaultMessageGlosUnexpectedEndOfCodeException {
@@ -120,6 +129,24 @@ namespace GeminiLab.Glos.i18n {
         internal static string DefaultMessageGlosUnknownOpException {
             get {
                 return ResourceManager.GetString("DefaultMessageGlosUnknownOpException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &quot;{0}&quot; is not callable..
+        /// </summary>
+        internal static string DefaultMessageGlosValueNotCallableException {
+            get {
+                return ResourceManager.GetString("DefaultMessageGlosValueNotCallableException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type assertion failed: {0} expected, {1} get..
+        /// </summary>
+        internal static string DefaultMessageGlosValueTypeAssertionFailedException {
+            get {
+                return ResourceManager.GetString("DefaultMessageGlosValueTypeAssertionFailedException", resourceCulture);
             }
         }
     }

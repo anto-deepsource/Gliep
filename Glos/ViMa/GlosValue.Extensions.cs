@@ -41,13 +41,6 @@ namespace GeminiLab.Glos.ViMa {
 
             return ref v;
         }
-        public static ref GlosValue SetExternalFunction(this ref GlosValue v, GlosExternalFunction value) {
-            v.ValueNumber.Integer = 0;
-            v.ValueObject = value;
-            v.Type = GlosValueType.ExternalFunction;
-
-            return ref v;
-        }
         
         public static ref GlosValue SetTable(this ref GlosValue v, GlosTable value) {
             v.ValueNumber.Integer = 0;
@@ -73,45 +66,63 @@ namespace GeminiLab.Glos.ViMa {
             return ref v;
         }
 
+        public static ref GlosValue SetExternalFunction(this ref GlosValue v, GlosExternalFunction value) {
+            v.ValueNumber.Integer = 0;
+            v.ValueObject = value;
+            v.Type = GlosValueType.ExternalFunction;
+
+            return ref v;
+        }
+
 
         public static void AssertNil(this in GlosValue v) {
-            if (v.Type != GlosValueType.Nil) throw new InvalidOperationException(); // TODO: create a new `AssertFailedException`
+            if (v.Type != GlosValueType.Nil) throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Nil);
         }
 
         public static long AssertInteger(this in GlosValue v) {
             if (v.Type == GlosValueType.Integer) return v.ValueNumber.Integer;
-            throw new InvalidOperationException();
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Integer);
         }
 
         public static double AssertFloat(this in GlosValue v) {
             if (v.Type == GlosValueType.Float) return v.ValueNumber.Float;
-            throw new InvalidOperationException();
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Float);
         }
 
         public static bool AssertBoolean(this in GlosValue v) {
             if (v.Type == GlosValueType.Boolean) return v.ValueNumber.Integer != 0;
-            throw new InvalidOperationException();
-        }
-
-        public static GlosExternalFunction AssertExternalFunction(this in GlosValue v) {
-            if (v.Type == GlosValueType.ExternalFunction && v.ValueObject is GlosExternalFunction fun) return fun;
-            throw new InvalidOperationException();
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Boolean);
         }
 
         public static GlosTable AssertTable(this in GlosValue v) {
             if (v.Type == GlosValueType.Table && v.ValueObject is GlosTable table) return table;
-            throw new InvalidOperationException();
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Table);
         }
 
         public static string AssertString(this in GlosValue v) {
             if (v.Type == GlosValueType.String && v.ValueObject is string s) return s;
-            throw new InvalidOperationException();
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.String);
         }
 
         public static GlosFunction AssertFunction(this in GlosValue v) {
             if (v.Type == GlosValueType.Function && v.ValueObject is GlosFunction fun) return fun;
-            throw new InvalidOperationException();
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Function);
         }
+
+        public static GlosExternalFunction AssertExternalFunction(this in GlosValue v) {
+            if (v.Type == GlosValueType.ExternalFunction && v.ValueObject is GlosExternalFunction fun) return fun;
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.ExternalFunction);
+        }
+
+
+        public static long AssumeInteger(this in GlosValue v) => v.ValueNumber.Integer;
+        public static double AssumeFloat(this in GlosValue v) => v.ValueNumber.Float;
+        public static bool AssumeBoolean(this in GlosValue v) => v.ValueNumber.Integer != 0;
+        public static GlosTable AssumeTable(this in GlosValue v) => (GlosTable)v.ValueObject!;
+        public static string AssumeString(this in GlosValue v) => (string)v.ValueObject!;
+        public static GlosFunction AssumeFunction(this in GlosValue v) => (GlosFunction)v.ValueObject!;
+        public static GlosExternalFunction AssumeExternalFunction(this in GlosValue v) => (GlosExternalFunction)v.ValueObject!;
+
 
         public static bool Truthy(this in GlosValue v) {
             if (v.Type == GlosValueType.Nil) return false;
@@ -138,7 +149,7 @@ namespace GeminiLab.Glos.ViMa {
         }
 
         public static void AssertInvokable(this in GlosValue v) {
-            if (!v.IsInvokable()) throw new InvalidOperationException();
+            if (!v.IsInvokable()) throw new GlosValueNotCallableException(v);
         }
 
         public static GlosValue[] Invoke(this in GlosValue v, GlosViMa vm, GlosValue[] args) {

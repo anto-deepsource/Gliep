@@ -45,7 +45,7 @@ namespace GeminiLab.Glos {
         }
 
         public Span<T> AsSpan(int start, int length) => AsSpan(new Range(start, start + length));
-
+        
         public void EnsureCapacity(int cap) {
             if (Capacity > cap) return;
 

@@ -119,15 +119,15 @@
   </resheader>
   <data name="DefaultMessageGlosInvalidBinaryOperandTypeException" xml:space="preserve">
     <value>Invalid operand type "{1}" and "{2}" for operator "{0}".</value>
-    <comment>0: op, 1: typel, 2: typer</comment>
+    <comment>0: op, 1: typel, 2: typer.</comment>
   </data>
-  <data name="DefaultMessageGlosInvalidProgramCounterException" xml:space="preserve">
-    <value>Invalid program counter {0}.</value>
+  <data name="DefaultMessageGlosInvalidInstructionPointerException" xml:space="preserve">
+    <value>Invalid program counter.</value>
     <comment>0: pc.</comment>
   </data>
   <data name="DefaultMessageGlosInvalidUnaryOperandTypeException" xml:space="preserve">
     <value>Invalid operand type "{1}" for operator "{0}".</value>
-    <comment>0: op, 1: type</comment>
+    <comment>0: op, 1: type.</comment>
   </data>
   <data name="DefaultMessageGlosLocalVariableIndexOutOfRangeException" xml:space="preserve">
     <value>Index of requested local variable ({0}) out of range.</value>
@@ -136,11 +136,23 @@
   <data name="DefaultMessageGlosRuntimeException" xml:space="preserve">
     <value>A runtime exception occurred during execution.</value>
   </data>
+  <data name="DefaultMessageGlosRuntimeExceptionWithInner" xml:space="preserve">
+    <value>{0} occurred during execution. Inner exception message: {1}.</value>
+    <comment>0: innex.type, 1: innex.msg.</comment>
+  </data>
   <data name="DefaultMessageGlosUnexpectedEndOfCodeException" xml:space="preserve">
     <value>Unexpected end of code.</value>
   </data>
   <data name="DefaultMessageGlosUnknownOpException" xml:space="preserve">
     <value>Unknown op 0x{0:x2}.</value>
     <comment>0: op.</comment>
+  </data>
+  <data name="DefaultMessageGlosValueNotCallableException" xml:space="preserve">
+    <value>"{0}" is not callable.</value>
+    <comment>0: value.</comment>
+  </data>
+  <data name="DefaultMessageGlosValueTypeAssertionFailedException" xml:space="preserve">
+    <value>Type assertion failed: {0} expected, {1} get.</value>
+    <comment>0: expected, 1: actual.</comment>
   </data>
 </root>

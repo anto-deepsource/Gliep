@@ -70,7 +70,7 @@ namespace GeminiLab.Glos.ViMa {
 
                 if (tryInvokeMetaLessThan(x, y, false, out var metaResult)) return metaResult; 
                 
-                throw new GlosInvalidBinaryOperandTypeException(_vm, GlosOp.Lss, x, y);
+                throw new GlosInvalidBinaryOperandTypeException(GlosOp.Lss, x, y);
             }
 
             public bool GreaterThan(in GlosValue x, in GlosValue y) {
@@ -80,7 +80,7 @@ namespace GeminiLab.Glos.ViMa {
 
                 if (tryInvokeMetaLessThan(y, x, true, out var metaResult)) return metaResult;
 
-                throw new GlosInvalidBinaryOperandTypeException(_vm, GlosOp.Gtr, x, y);
+                throw new GlosInvalidBinaryOperandTypeException(GlosOp.Gtr, x, y);
             }
 
             public bool EqualTo(in GlosValue x, in GlosValue y) {
