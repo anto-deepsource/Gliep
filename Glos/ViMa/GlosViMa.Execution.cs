@@ -80,14 +80,8 @@ namespace GeminiLab.Glos.ViMa {
                     var cat = GlosOpInfo.Categories[(int)op];
 
                     // execution
-                    if (cat == GlosOpCategory.BinaryArithmeticOperator) {
-                        binaryArithmeticOperator(op, ref stackTop(1), in stackTop(1), in stackTop());
-                        popStack();
-                    } else if (cat == GlosOpCategory.BinaryBitwiseOperator) {
-                        binaryBitwiseOperator(op, ref stackTop(1), in stackTop(1), in stackTop());
-                        popStack();
-                    } else if (cat == GlosOpCategory.BinaryComparisonOperator) {
-                        binaryComparisonOperator(op, ref stackTop(1), in stackTop(1), in stackTop());
+                    if (cat == GlosOpCategory.BinaryOperator) {
+                        Calculator.ExecuteBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
                         popStack();
                     } else if (op == GlosOp.Smt) {
                         stackTop(1).AssertTable().Metatable = stackTop().AssertTable();

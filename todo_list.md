@@ -10,6 +10,7 @@ REFACTOR!!!!
 - add tostring instruction.
 - add hash instruction.
   - find a good way to evaluate and update glosvalue's hash.
+- add truthy and falsey instruction.
 
 ## Glug
 

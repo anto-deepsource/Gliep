@@ -4,14 +4,18 @@ namespace GeminiLab.Glos.ViMa {
     public partial struct GlosValue {
         public class EqualityComparer : IEqualityComparer<GlosValue> {
             private readonly GlosViMa _vm;
-            private readonly Comparer _cmp;
+            private readonly Calculator _cal;
 
             public EqualityComparer(GlosViMa vm) {
                 _vm = vm;
-                _cmp = new Comparer(vm);
+                _cal = new Calculator(vm);
             }
 
-            public bool Equals(GlosValue x, GlosValue y) => _cmp.EqualTo(x, y);
+            public bool Equals(GlosValue x, GlosValue y) {
+                GlosValue cache = default;
+                _cal.Equ(ref cache, x, y);
+                return cache.Truthy();
+            }
 
             public int GetHashCode(GlosValue obj) {
                 if (obj._hashCodeCalculated) {

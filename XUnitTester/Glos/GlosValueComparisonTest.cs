@@ -4,6 +4,7 @@ using GeminiLab.Glos.ViMa;
 using Xunit;
 
 namespace XUnitTester.Glos {
+    /* TODO: other way to test operators
     public class GlosValueComparisonTest : GlosTestBase {
         private readonly GlosValue.Comparer _cmp;
 
@@ -79,4 +80,5 @@ namespace XUnitTester.Glos {
             }
         }
     }
+    */
 }

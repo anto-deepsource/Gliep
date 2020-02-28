@@ -45,5 +45,32 @@ namespace GeminiLab.Glos.ViMa {
                 _ => ""
             };
         }
+
+        // TODO: find a better place for following method(s)
+        public static bool TryGetMetamethodOfOperand(in GlosValue x, in GlosValue y, string name, bool lookupMetatableOfLatterFirst, out GlosValue fun) {
+            fun = default;
+            ref var rf = ref fun;
+            rf.SetNil();
+
+            if (!lookupMetatableOfLatterFirst) {
+                if (x.Type == GlosValueType.Table && x.AssertTable().TryGetMetamethod(name, out fun)) return true;
+                if (y.Type == GlosValueType.Table && y.AssertTable().TryGetMetamethod(name, out fun)) return true;
+                return false;
+            } else {
+                if (y.Type == GlosValueType.Table && y.AssertTable().TryGetMetamethod(name, out fun)) return true;
+                if (x.Type == GlosValueType.Table && x.AssertTable().TryGetMetamethod(name, out fun)) return true;
+                return false;
+            }
+        }
+
+        public static bool TryInvokeMetamethod(ref GlosValue dest, in GlosValue x, in GlosValue y, GlosViMa viMa, string name, bool lookupMetatableOfLatterFirst) {
+            if (!TryGetMetamethodOfOperand(x, y, name, lookupMetatableOfLatterFirst, out var fun)) return false;
+
+            var res = fun.Invoke(viMa, new[] { x, y });
+            if (res.Length > 0) dest = res[0];
+            else dest.SetNil();
+
+            return true;
+        }
     }
 }

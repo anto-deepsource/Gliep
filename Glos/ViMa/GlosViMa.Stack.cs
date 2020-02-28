@@ -37,6 +37,6 @@ namespace GeminiLab.Glos.ViMa {
             while (_stack.Count < newSptr) pushStack();
         }
 
-        public GlosValue.Comparer Comparer => new GlosValue.Comparer(this);
+        public GlosValue.Calculator Calculator => new GlosValue.Calculator(this);
     }
 }
