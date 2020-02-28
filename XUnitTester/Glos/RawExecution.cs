@@ -4,7 +4,7 @@ using Xunit;
 using XUnitTester.Checker;
 
 namespace XUnitTester.Glos {
-    public class BasicExecutionTest : GlosTestBase {
+    public class RawExecution : GlosTestBase {
         [Fact]
         public void Return0() {
             var fid = Builder.AddFunctionRaw(new[] {
@@ -226,37 +226,5 @@ namespace XUnitTester.Glos {
                 .MoveNext().AssertInteger(2)
                 .MoveNext().AssertEnd();
         }
-
-        /*
-        [Fact]
-        public void Syscall() {
-            var fid = Builder.AddFunctionRaw(new[] {
-                (byte)GlosOp.Ld0,
-                (byte)GlosOp.StLoc0,
-
-                (byte)GlosOp.SysC0,
-                (byte)GlosOp.SysC1, // calling to an invalid syscall should be equivalent to nop
-
-                (byte)GlosOp.LdLoc0,
-                (byte)GlosOp.LdLoc1,
-
-                (byte)GlosOp.Ret,
-            }, 2);
-
-            ViMa.SetSyscall(0, (GlosValue[] stack, ref long sptr, GlosStackFrame[] callStack, ref long cptr) => {
-                stack[callStack[cptr - 1].LocalVariablesBase].SetBoolean(true);
-                stack[callStack[cptr - 1].LocalVariablesBase + 1].SetBoolean(false);
-            });
-
-            Builder.Entry = fid;
-
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
-
-            GlosValueArrayChecker.Create(res)
-                .First().AssertTrue()
-                .MoveNext().AssertFalse()
-                .MoveNext().AssertEnd();
-        }
-        */
     }
 }

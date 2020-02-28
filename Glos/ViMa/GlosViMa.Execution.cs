@@ -224,7 +224,7 @@ namespace GeminiLab.Glos.ViMa {
                             RestoreStatus(ref code);
                             pushUntil(callStackTop().PrivateStackBase);
                         } else {
-                            throw new InvalidOperationException();
+                            throw new GlosValueNotCallableException(funv);
                         }
                     } else if (op == GlosOp.Ret) {
                         // clean up
@@ -255,7 +255,7 @@ namespace GeminiLab.Glos.ViMa {
                     } else if (op == GlosOp.Nop) {
                         // nop;
                     } else if (cat == GlosOpCategory.Syscall) {
-                        // _syscalls[(int)imms]?.Invoke(_stack, ref _sptr, _callStack, ref _cptr);
+                        _syscalls[(int)imms]?.Invoke(_stack, _callStack, _delStack);
                     } else {
                         throw new GlosUnknownOpException((byte)op);
                     }
@@ -267,7 +267,6 @@ namespace GeminiLab.Glos.ViMa {
                 _stack.AsSpan(bptr, rc).CopyTo(rv);
                 popUntil(bptr);
                 return rv;
-
             } catch (GlosException ex) {
                 StoreStatus();
                 throw new GlosRuntimeException(this, ex);

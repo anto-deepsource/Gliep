@@ -6,7 +6,7 @@ using GeminiLab.Glos.ViMa;
 using Xunit;
 
 namespace XUnitTester.Glos {
-    public class ExceptionsTest : GlosTestBase {
+    public class Exceptions : GlosTestBase {
         // TODO: a custom exception assert mechanic
         [Fact]
         public void BadBranch() {

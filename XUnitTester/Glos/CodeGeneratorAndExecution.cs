@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using GeminiLab.Core2;
 using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glos.ViMa;
 using Xunit;
 using XUnitTester.Checker;
 
 namespace XUnitTester.Glos {
-    public class ExecutionWithCodeGeneratorTest : GlosTestBase {
+    public class CodeGeneratorAndExecution : GlosTestBase {
         [Fact]
         public void IntegerArithmeticOp() {
             var fgen = Builder.AddFunction();
@@ -842,6 +844,194 @@ namespace XUnitTester.Glos {
                     .MoveNext().AssertInteger(val)
                     .MoveNext().AssertEnd();
             }
+        }
+
+        [Fact]
+        public void MassiveLd() {
+            var fgen = Builder.AddFunction();
+            long expected = 0;
+
+            unchecked {
+                fgen.AppendLd(0);
+
+                for (int i = 0; i < 64; ++i) {
+                    for (int j = 0; j < 64; ++j) {
+                        long v = (long)((1ul << i) | (1ul << j));
+
+                        expected += v;
+                        fgen.AppendLd(v);
+                        fgen.AppendAdd();
+                    }
+                }
+            }
+
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertInteger(expected)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void MassiveLdStrAndLdFun() {
+            var fgen = Builder.AddFunction();
+            string expected = "";
+
+            unchecked {
+                for (int i = 0; i < 1024; ++i) {
+                    var s = i.ToString(CultureInfo.InvariantCulture);
+                    expected += s;
+
+                    var f = Builder.AddFunction();
+                    f.AppendLdStr(s);
+
+                    fgen.AppendLdDel();
+                    fgen.AppendLdFun(f);
+                    fgen.AppendCall();
+                    fgen.AppendShpRv(1);
+                    if (i != 0) fgen.AppendAdd();
+                }
+            }
+
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertString(expected)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void Loop() {
+            var fgen = Builder.AddFunction();
+            var iter = fgen.AllocateLocalVariable();
+            var max = fgen.AllocateLocalVariable();
+
+            fgen.AppendLd(0);
+            fgen.AppendStLoc(iter);
+            fgen.AppendLdArg(0);
+            fgen.AppendStLoc(max);
+
+            fgen.AppendLdDel();
+
+            var loopTag = fgen.AllocateAndInsertLabel();
+
+            fgen.AppendLdLoc(iter);
+            fgen.AppendLd(1);
+            fgen.AppendAdd();
+            fgen.AppendDup();
+            fgen.AppendDup();
+            fgen.AppendStLoc(iter);
+            fgen.AppendLdLoc(max);
+            fgen.AppendLss();
+            fgen.AppendBt(loopTag);
+
+            fgen.AppendRet();
+
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, new GlosValue[] { 1024 });
+
+            var checker = GlosValueArrayChecker.Create(res);
+            var it = checker.First();
+
+            for (int i = 0; i < 1024; ++i) {
+                it.AssertInteger(i + 1).MoveNext();
+            }
+
+            it.AssertEnd();
+        }
+
+        [Fact]
+        public void MassiveLoc() {
+            var size = 1024;
+            var fgen = Builder.AddFunction();
+
+            var list = new List<LocalVariable>();
+
+            for (int i = 0; i < size; ++i) {
+                var lv = fgen.AllocateLocalVariable();
+                list.Add(lv);
+
+                fgen.AppendLd(i);
+                fgen.AppendStLoc(lv);
+            }
+
+            list.ForEach(fgen.AppendLdLoc);
+            (size - 1).Times(fgen.AppendAdd);
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertInteger((size - 1) * size / 2)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void Syscall() {
+            // syscall 0: ldlocc
+            ViMa.SetSyscall(0, (stack, callStack, delStack) => {
+                stack.PushStack() = callStack.StackTop().Function.Prototype.LocalVariableSize;
+            });
+
+            // syscall 1: erase all locs
+            ViMa.SetSyscall(1, (stack, callStack, delStack) => {
+                foreach (ref var v in stack.AsSpan(callStack.StackTop().LocalVariablesBase, callStack.StackTop().Function.Prototype.LocalVariableSize)) {
+                    v.SetNil();
+                }
+            });
+
+            // syscall 2: set all locs to 1
+            ViMa.SetSyscall(2, (stack, callStack, delStack) => {
+                foreach (ref var v in stack.AsSpan(callStack.StackTop().LocalVariablesBase, callStack.StackTop().Function.Prototype.LocalVariableSize)) {
+                    v.SetInteger(1);
+                }
+            });
+
+            var locc = 4;
+            var fgen = Builder.AddFunction();
+            var locs = new LocalVariable[locc];
+            for (int i = 0; i < locc; ++i) {
+                fgen.AppendLd(i);
+                fgen.AppendStLoc(locs[i] = fgen.AllocateLocalVariable());
+            }
+
+            fgen.AppendLdDel();
+            fgen.AppendSyscall(0);
+            for (int i = 0; i < locc; ++i) {
+                fgen.AppendLdLoc(locs[i]);
+            }
+            fgen.AppendSyscall(1);
+            for (int i = 0; i < locc; ++i) {
+                fgen.AppendLdLoc(locs[i]);
+            }
+            fgen.AppendSyscall(2);
+            for (int i = 0; i < locc; ++i) {
+                fgen.AppendLdLoc(locs[i]);
+            }
+
+            fgen.AppendRet();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var checker = GlosValueArrayChecker.Create(res).First();
+
+            checker.AssertInteger(locc).MoveNext();
+            for (int i = 0; i < locc; ++i) {
+                checker.AssertInteger(i).MoveNext();
+            }
+
+            for (int i = 0; i < locc; ++i) {
+                checker.AssertNil().MoveNext();
+            }
+
+            for (int i = 0; i < locc; ++i) {
+                checker.AssertInteger(1).MoveNext();
+            }
+
+            checker.AssertEnd();
         }
     }
 }
