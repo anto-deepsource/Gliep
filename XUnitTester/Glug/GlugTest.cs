@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using GeminiLab.Core2.Text;
+using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
 using Xunit;
 using XUnitTester.Checker;
@@ -191,6 +192,28 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertInteger(4)
                 .MoveNext().AssertInteger(5)
                 .MoveNext().AssertEnd();
+        }
+
+        [Theory]
+        [InlineData("1 + true", GlosOp.Add, GlosValueType.Integer, GlosValueType.Boolean)]
+        [InlineData("\"\" - 1", GlosOp.Sub, GlosValueType.String, GlosValueType.Integer)]
+        [InlineData("nil * {}", GlosOp.Mul, GlosValueType.Nil, GlosValueType.Table)]
+        [InlineData("2 / \"\"", GlosOp.Div, GlosValueType.Integer, GlosValueType.String)]
+        [InlineData("\"\" % 2", GlosOp.Mod, GlosValueType.String, GlosValueType.Integer)]
+        [InlineData("true << false", GlosOp.Lsh, GlosValueType.Boolean, GlosValueType.Boolean)]
+        [InlineData("\"\" >> 44353", GlosOp.Rsh, GlosValueType.String, GlosValueType.Integer)]
+        [InlineData("true & 1", GlosOp.And, GlosValueType.Boolean, GlosValueType.Integer)]
+        [InlineData("1 | \"\"", GlosOp.Orr, GlosValueType.Integer, GlosValueType.String)]
+        [InlineData("{} ^ nil", GlosOp.Xor, GlosValueType.Table, GlosValueType.Nil)]
+        [InlineData("false > 1", GlosOp.Gtr, GlosValueType.Boolean, GlosValueType.Integer)]
+        [InlineData("{} < true", GlosOp.Lss, GlosValueType.Table, GlosValueType.Boolean)]
+        [InlineData("nil >= {}", GlosOp.Geq, GlosValueType.Nil, GlosValueType.Table)]
+        [InlineData("true <= 1", GlosOp.Leq, GlosValueType.Boolean, GlosValueType.Integer)]
+        public void BadBiOp(string code, GlosOp op, GlosValueType left, GlosValueType right) {
+            var exception = Assert.IsType<GlosInvalidBinaryOperandTypeException>(Assert.Throws<GlosRuntimeException>(() => Execute(code)).InnerException);
+            Assert.Equal(op, exception.Op);
+            Assert.Equal(left, exception.Left.Type);
+            Assert.Equal(right, exception.Right.Type);
         }
     }
 }

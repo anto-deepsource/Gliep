@@ -121,6 +121,32 @@ namespace GeminiLab.Glos.ViMa {
                 else throw new GlosInvalidBinaryOperandTypeException(GlosOp.Gtr, x, y);
             }
 
+            public void Leq(ref GlosValue dest, in GlosValue x, in GlosValue y) {
+                if (BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint <= yint);
+                else if (BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat <= yfloat);
+                else if (BothString(x, y, out var xstr, out var ystr)) dest.SetBoolean(string.Compare(xstr, ystr, StringComparison.Ordinal) <= 0);
+                else if (TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Lss, false)) {
+                    if (dest.Falsey()) {
+                        if (!TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Equ, false)) {
+                            throw new GlosInvalidBinaryOperandTypeException(GlosOp.Lss, x, y);
+                        }
+                    }
+                } else throw new GlosInvalidBinaryOperandTypeException(GlosOp.Leq, x, y);
+            }
+
+            public void Geq(ref GlosValue dest, in GlosValue x, in GlosValue y) {
+                if (BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint >= yint);
+                else if (BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat >= yfloat);
+                else if (BothString(x, y, out var xstr, out var ystr)) dest.SetBoolean(string.Compare(xstr, ystr, StringComparison.Ordinal) >= 0);
+                else if (TryInvokeMetamethod(ref dest, y, x, _viMa, GlosMetamethodNames.Lss, true)) {
+                    if (dest.Falsey()) {
+                        if (!TryInvokeMetamethod(ref dest, y, x, _viMa, GlosMetamethodNames.Equ, true)) {
+                            throw new GlosInvalidBinaryOperandTypeException(GlosOp.Lss, x, y);
+                        }
+                    }
+                } else throw new GlosInvalidBinaryOperandTypeException(GlosOp.Geq, x, y);
+            }
+
             public void Equ(ref GlosValue dest, in GlosValue x, in GlosValue y) {
                 if (BothNil(x, y)) dest.SetBoolean(true);
                 else if (BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint == yint);
@@ -144,33 +170,6 @@ namespace GeminiLab.Glos.ViMa {
 
                 else dest.SetBoolean(x.Type != y.Type || !ReferenceEquals(x.ValueObject, y.ValueObject));
             }
-
-            public void Leq(ref GlosValue dest, in GlosValue x, in GlosValue y) {
-                if (BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint <= yint);
-                else if (BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat <= yfloat);
-                else if (BothString(x, y, out var xstr, out var ystr)) dest.SetBoolean(string.Compare(xstr, ystr, StringComparison.Ordinal) <= 0);
-                else if (TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Lss, false)) {
-                    if (dest.Falsey()) {
-                        if (!TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Equ, false)) {
-                            throw new GlosInvalidBinaryOperandTypeException(GlosOp.Lss, x, y);
-                        }
-                    }
-                } else throw new GlosInvalidBinaryOperandTypeException(GlosOp.Lss, x, y);
-            }
-
-            public void Geq(ref GlosValue dest, in GlosValue x, in GlosValue y) {
-                if (BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint >= yint);
-                else if (BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat >= yfloat);
-                else if (BothString(x, y, out var xstr, out var ystr)) dest.SetBoolean(string.Compare(xstr, ystr, StringComparison.Ordinal) >= 0);
-                else if (TryInvokeMetamethod(ref dest, y, x, _viMa, GlosMetamethodNames.Lss, true)) {
-                    if (dest.Falsey()) {
-                        if (!TryInvokeMetamethod(ref dest, y, x, _viMa, GlosMetamethodNames.Equ, true)) {
-                            throw new GlosInvalidBinaryOperandTypeException(GlosOp.Lss, x, y);
-                        }
-                    }
-                } else throw new GlosInvalidBinaryOperandTypeException(GlosOp.Lss, x, y);
-            }
-
 #pragma warning restore CS0642
 
             protected delegate void GlosBinaryOperationHandler(ref GlosValue dest, in GlosValue x, in GlosValue y);
