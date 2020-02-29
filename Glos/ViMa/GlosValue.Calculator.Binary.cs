@@ -64,7 +64,7 @@ namespace GeminiLab.Glos.ViMa {
 
             public void Lsh(ref GlosValue dest, in GlosValue x, in GlosValue y) {
                 unchecked {
-                    if (BothInteger(x, y, out var xint, out var yint)) dest.SetInteger((long)((ulong)xint << (int)yint));
+                    if (BothInteger(x, y, out var xint, out var yint)) dest.SetInteger((long)((ulong)xint << (int)(0x3f & (uint)yint)));
                     else if (TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Lsh, false)) ;
                     else throw new GlosInvalidBinaryOperandTypeException(GlosOp.Lsh, x, y);
                 }
@@ -72,7 +72,7 @@ namespace GeminiLab.Glos.ViMa {
 
             public void Rsh(ref GlosValue dest, in GlosValue x, in GlosValue y) {
                 unchecked {
-                    if (BothInteger(x, y, out var xint, out var yint)) dest.SetInteger((long)((ulong)xint >> (int)yint));
+                    if (BothInteger(x, y, out var xint, out var yint)) dest.SetInteger((long)((ulong)xint >> (int)(0x3f & (uint)yint)));
                     else if (TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Rsh, false)) ;
                     else throw new GlosInvalidBinaryOperandTypeException(GlosOp.Rsh, x, y);
                 }

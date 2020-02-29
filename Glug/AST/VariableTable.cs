@@ -83,11 +83,11 @@ namespace GeminiLab.Glug.AST {
                 break;
             case VariablePlace.Context:
                 fgen.AppendLdStr(Name);
-                fgen.AppendUvcR();
+                fgen.AppendUvc();
                 break;
             case VariablePlace.Global:
                 fgen.AppendLdStr(Name);
-                fgen.AppendUvgR();
+                fgen.AppendUvg();
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

@@ -17,25 +17,30 @@
         Equ     = 0x0e,
         Neq     = 0x0f,
 
+        // Uen/UenL:
+        // push value
+        // push table
+        // push key
+        // uen/uen.L
         Smt     = 0x10,
         Gmt     = 0x11,
         Ren     = 0x12,
         Uen     = 0x13,
         RenL    = 0x14,
         UenL    = 0x15,
+        Ien     = 0x16,
 
         Not     = 0x18,
         Neg     = 0x19,
 
-        Rvc     = 0x1c,
-        Uvc     = 0x1d,
-        Rvg     = 0x1e,
-        Uvg     = 0x1f,
-        UvcR    = 0x20,
-        UvgR    = 0x21,
-
-        // LdEnv   = 0x20,
-        // LdGlb   = 0x21,
+        // Uvc/Uvg:
+        // push value
+        // push key
+        // uvc/uvg
+        Rvc     = 0x20,
+        Uvc     = 0x21,
+        Rvg     = 0x22,
+        Uvg     = 0x23,
 
         LdFun   = 0x28,
         LdStr   = 0x29,

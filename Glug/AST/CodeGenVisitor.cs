@@ -33,7 +33,7 @@ namespace GeminiLab.Glug.AST {
                     fun.AppendStLoc(variable.LocalVariable);
                 } else if (variable.Place == VariablePlace.Context) {
                     fun.AppendLdStr(variable.Name);
-                    fun.AppendUvcR();
+                    fun.AppendUvc();
                 }
             }
 

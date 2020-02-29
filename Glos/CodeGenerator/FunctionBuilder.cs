@@ -89,6 +89,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendUen() => AppendInstruction(GlosOp.Uen);
         public void AppendRenL() => AppendInstruction(GlosOp.RenL);
         public void AppendUenL() => AppendInstruction(GlosOp.UenL);
+        public void AppendIen() => AppendInstruction(GlosOp.Ien);
         public void AppendNot() => AppendInstruction(GlosOp.Not);
         public void AppendNeg() => AppendInstruction(GlosOp.Neg);
 
@@ -97,8 +98,6 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendUvc() => AppendInstruction(GlosOp.Uvc);
         public void AppendRvg() => AppendInstruction(GlosOp.Rvg);
         public void AppendUvg() => AppendInstruction(GlosOp.Uvg);
-        public void AppendUvcR() => AppendInstruction(GlosOp.UvcR);
-        public void AppendUvgR() => AppendInstruction(GlosOp.UvgR);
 
         // load without immediate
         public void AppendLdNeg1() => AppendInstruction(GlosOp.LdNeg1);

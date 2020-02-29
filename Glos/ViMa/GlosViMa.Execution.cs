@@ -101,7 +101,7 @@ namespace GeminiLab.Glos.ViMa {
 
                         popStack();
                     } else if (op == GlosOp.Uen) {
-                        stackTop(2).AssertTable().UpdateEntry(stackTop(1), stackTop());
+                        stackTop(1).AssertTable().UpdateEntry(stackTop(), stackTop(2));
 
                         popStack(3);
                     } else if (op == GlosOp.RenL) {
@@ -113,25 +113,23 @@ namespace GeminiLab.Glos.ViMa {
 
                         popStack();
                     } else if (op == GlosOp.UenL) {
-                        stackTop(2).AssertTable().UpdateEntryLocally(stackTop(1), stackTop());
+                        stackTop(1).AssertTable().UpdateEntryLocally(stackTop(), stackTop(2));
 
                         popStack(3);
+                    } else if (op == GlosOp.Ien) {
+                        stackTop(2).AssertTable().UpdateEntryLocally(stackTop(1), stackTop());
+
+                        popStack(2);
                     } else if (cat == GlosOpCategory.UnaryOperator) {
                         unaryOperator(op, ref stackTop());
                     } else if (op == GlosOp.Rvc) {
                         stackTop() = ctx.GetVariableReference(stackTop().AssertString());
                     } else if (op == GlosOp.Uvc) {
-                        ctx.GetVariableReference(stackTop(1).AssertString()) = stackTop();
+                        ctx.GetVariableReference(stackTop().AssertString()) = stackTop(1);
                         popStack(2);
                     } else if (op == GlosOp.Rvg) {
                         stackTop() = global.GetVariableReference(stackTop().AssertString());
                     } else if (op == GlosOp.Uvg) {
-                        global.GetVariableReference(stackTop(1).AssertString()) = stackTop();
-                        popStack(2);
-                    } else if (op == GlosOp.UvcR) {
-                        ctx.GetVariableReference(stackTop().AssertString()) = stackTop(1);
-                        popStack(2);
-                    } else if (op == GlosOp.UvgR) {
                         global.GetVariableReference(stackTop().AssertString()) = stackTop(1);
                         popStack(2);
                     } else if (op == GlosOp.LdFun || op == GlosOp.LdFunS) {

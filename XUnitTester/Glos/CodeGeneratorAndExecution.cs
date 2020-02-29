@@ -375,24 +375,24 @@ namespace XUnitTester.Glos {
             fgen.AppendLdNTbl();
             fgen.AppendStLoc(c);
 
+            fgen.AppendLdFun(metaUen);
             fgen.AppendLdLoc(at);
             fgen.AppendLdStr(GlosMetamethodNames.Uen);
-            fgen.AppendLdFun(metaUen);
             fgen.AppendUenL();
 
+            fgen.AppendLdFun(metaRen);
             fgen.AppendLdLoc(at);
             fgen.AppendLdStr(GlosMetamethodNames.Ren);
-            fgen.AppendLdFun(metaRen);
             fgen.AppendUenL();
 
+            fgen.AppendLdFun(metaUen);
             fgen.AppendLdLoc(bt);
             fgen.AppendLdStr(GlosMetamethodNames.Uen);
-            fgen.AppendLdFun(metaUen);
             fgen.AppendUenL();
 
+            fgen.AppendLdFun(metaRen);
             fgen.AppendLdLoc(ct);
             fgen.AppendLdStr(GlosMetamethodNames.Ren);
-            fgen.AppendLdFun(metaRen);
             fgen.AppendUenL();
 
             fgen.AppendLdLoc(a);
@@ -410,30 +410,30 @@ namespace XUnitTester.Glos {
             fgen.AppendSmt();
             fgen.AppendPop();
 
-            fgen.AppendLdLoc(a);
             fgen.AppendLd(0);
+            fgen.AppendLdLoc(a);
             fgen.AppendLd(0);
             fgen.AppendUen();
-            fgen.AppendLdLoc(a);
             fgen.AppendLd(1);
+            fgen.AppendLdLoc(a);
             fgen.AppendLd(1);
             fgen.AppendUenL();
 
-            fgen.AppendLdLoc(b);
             fgen.AppendLd(0);
+            fgen.AppendLdLoc(b);
             fgen.AppendLd(0);
             fgen.AppendUen();
-            fgen.AppendLdLoc(b);
             fgen.AppendLd(1);
+            fgen.AppendLdLoc(b);
             fgen.AppendLd(1);
             fgen.AppendUenL();
 
-            fgen.AppendLdLoc(c);
             fgen.AppendLd(0);
+            fgen.AppendLdLoc(c);
             fgen.AppendLd(0);
             fgen.AppendUen();
-            fgen.AppendLdLoc(c);
             fgen.AppendLd(1);
+            fgen.AppendLdLoc(c);
             fgen.AppendLd(1);
             fgen.AppendUenL();
 
@@ -509,14 +509,14 @@ namespace XUnitTester.Glos {
             fgen.AppendLdNTbl();
             fgen.AppendStLoc(a);
 
+            fgen.AppendLdArg(0);
             fgen.AppendLdLoc(at);
             fgen.AppendLdStr(GlosMetamethodNames.Uen);
-            fgen.AppendLdArg(0);
             fgen.AppendUenL();
 
+            fgen.AppendLdArg(1);
             fgen.AppendLdLoc(at);
             fgen.AppendLdStr(GlosMetamethodNames.Ren);
-            fgen.AppendLdArg(1);
             fgen.AppendUenL();
 
             fgen.AppendLdLoc(a);
@@ -524,9 +524,9 @@ namespace XUnitTester.Glos {
             fgen.AppendSmt();
             fgen.AppendPop();
 
+            fgen.AppendLd(0);
             fgen.AppendLdLoc(a);
             fgen.AppendLd(3);
-            fgen.AppendLd(0);
             fgen.AppendUen();
 
             fgen.AppendLdDel();
@@ -582,12 +582,12 @@ namespace XUnitTester.Glos {
             var cnt = ctrLambda.AllocateLocalVariable();
 
             ctrLambda.AppendLdStr(ctr);
-            ctrLambda.AppendDup();
             ctrLambda.AppendRvc();
             ctrLambda.AppendDup();
             ctrLambda.AppendStLoc(cnt);
             ctrLambda.AppendLd(1);
             ctrLambda.AppendAdd();
+            ctrLambda.AppendLdStr(ctr);
             ctrLambda.AppendUvc();
             ctrLambda.AppendLdDel();
             ctrLambda.AppendLdLoc(cnt);
@@ -596,8 +596,8 @@ namespace XUnitTester.Glos {
             var counter = Builder.AddFunction();
             counter.VariableInContext = new[] { ctr };
 
-            counter.AppendLdStr(ctr);
             counter.AppendLdArg(0);
+            counter.AppendLdStr(ctr);
             counter.AppendUvc();
             counter.AppendLdDel();
             counter.AppendLdFun(ctrLambda);
@@ -668,10 +668,10 @@ namespace XUnitTester.Glos {
             var sub = Builder.AddFunction();
 
             sub.AppendLdStr(idx);
-            sub.AppendDup();
             sub.AppendRvg();
             sub.AppendLd(1);
             sub.AppendAdd();
+            sub.AppendLdStr(idx);
             sub.AppendUvg();
             sub.AppendRet();
             
@@ -688,10 +688,10 @@ namespace XUnitTester.Glos {
             fgen.AppendShpRv(0);
 
             fgen.AppendLdStr(idx);
-            fgen.AppendDup();
             fgen.AppendRvg();
             fgen.AppendLd(1);
             fgen.AppendAdd();
+            fgen.AppendLdStr(idx);
             fgen.AppendUvg();
 
             fgen.AppendLdDel();
@@ -700,10 +700,10 @@ namespace XUnitTester.Glos {
             fgen.AppendShpRv(0);
 
             fgen.AppendLdStr(idx);
-            fgen.AppendDup();
             fgen.AppendRvg();
             fgen.AppendLd(1);
             fgen.AppendAdd();
+            fgen.AppendLdStr(idx);
             fgen.AppendUvg();
 
             fgen.AppendLdDel();
