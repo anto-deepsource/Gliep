@@ -160,5 +160,12 @@ namespace GeminiLab.Glug.AST {
             }
             Writer.DecreaseIndent();
         }
+
+        public override void VisitMetatable(Metatable val) {
+            Writer.WriteLine("<metatable>");
+            Writer.IncreaseIndent();
+            Visit(val.Table);
+            Writer.DecreaseIndent();
+        }
     }
 }

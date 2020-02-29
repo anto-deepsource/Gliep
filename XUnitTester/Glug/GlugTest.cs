@@ -19,7 +19,7 @@ namespace XUnitTester.Glug {
         [Fact]
         public void Evaluation() {
             var code = @"
-                [1, 2, false, (), nil, 1 + 2, if (true) 1, if (false) 2]
+                [1, 2, false, (), nil, -(1 + 2), if (true) 1, if (false) 2]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -28,7 +28,7 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertFalse()
                 .MoveNext().AssertNil()
                 .MoveNext().AssertNil()
-                .MoveNext().AssertInteger(3)
+                .MoveNext().AssertInteger(-3)
                 .MoveNext().AssertInteger(1)
                 .MoveNext().AssertNil()
                 .MoveNext().AssertEnd();
@@ -179,10 +179,10 @@ namespace XUnitTester.Glug {
         public void Table() {
             var code = @"
                 d = ""d"";
-                e = ""e"";
+                e = ""ee"";
                 a = { .a: 1, .b: 2, d: 4, @e: 5 };
                 a.c = 3;
-                [a.a, a.b, a.c, a@d, a.e]
+                [a.a, a.b, a.c, a@d, a.ee]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -214,6 +214,40 @@ namespace XUnitTester.Glug {
             Assert.Equal(op, exception.Op);
             Assert.Equal(left, exception.Left.Type);
             Assert.Equal(right, exception.Right.Type);
+        }
+
+        [Fact]
+        public void Vector() {
+            var code = @"
+                vector = { 
+                    .__add: [a, b] -> vector.new[a.x + b.x, a.y + b.y],
+                    .__sub: [a, b] -> vector.new[a.x - b.x, a.y - b.y],
+                    .__mul: [a, b] -> a.x * b.x + a.y * b.y,
+                    .__lss: [a, b] -> vector.len2$a < vector.len2$b,
+                    .__equ: [a, b] -> a.x == b.x & a.y == b.y,
+
+                    .new: [x, y] -> (rv = { .x: x, .y: y }; `rv = vector; rv),
+                    .len2: v -> v * v,
+                };
+
+
+                a = vector.new[1, 2];
+                b = vector.new[3, 4];
+                c = a + b;
+                d = a - b;
+
+                [c.x, c.y, d.x, d.y, a * b, a > b, a == b];
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .First().AssertInteger(4)
+                .MoveNext().AssertInteger(6)
+                .MoveNext().AssertInteger(-2)
+                .MoveNext().AssertInteger(-2)
+                .MoveNext().AssertInteger(11)
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertEnd();
         }
     }
 }

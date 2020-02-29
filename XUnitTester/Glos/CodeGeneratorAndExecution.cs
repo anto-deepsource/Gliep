@@ -395,20 +395,17 @@ namespace XUnitTester.Glos {
             fgen.AppendLdStr(GlosMetamethodNames.Ren);
             fgen.AppendUenL();
 
-            fgen.AppendLdLoc(a);
             fgen.AppendLdLoc(at);
+            fgen.AppendLdLoc(a);
             fgen.AppendSmt();
-            fgen.AppendPop();
 
-            fgen.AppendLdLoc(b);
             fgen.AppendLdLoc(bt);
+            fgen.AppendLdLoc(b);
             fgen.AppendSmt();
-            fgen.AppendPop();
 
-            fgen.AppendLdLoc(c);
             fgen.AppendLdLoc(ct);
+            fgen.AppendLdLoc(c);
             fgen.AppendSmt();
-            fgen.AppendPop();
 
             fgen.AppendLd(0);
             fgen.AppendLdLoc(a);
@@ -519,10 +516,9 @@ namespace XUnitTester.Glos {
             fgen.AppendLdStr(GlosMetamethodNames.Ren);
             fgen.AppendUenL();
 
-            fgen.AppendLdLoc(a);
             fgen.AppendLdLoc(at);
+            fgen.AppendLdLoc(a);
             fgen.AppendSmt();
-            fgen.AppendPop();
 
             fgen.AppendLd(0);
             fgen.AppendLdLoc(a);

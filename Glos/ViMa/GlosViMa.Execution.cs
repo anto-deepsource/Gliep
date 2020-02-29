@@ -84,8 +84,8 @@ namespace GeminiLab.Glos.ViMa {
                         Calculator.ExecuteBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
                         popStack();
                     } else if (op == GlosOp.Smt) {
-                        stackTop(1).AssertTable().Metatable = stackTop().AssertTable();
-                        popStack();
+                        stackTop().AssertTable().Metatable = stackTop(1).AssertTable();
+                        popStack(2);
                     } else if (op == GlosOp.Gmt) {
                         if (stackTop().AssertTable().Metatable is { } mt) {
                             stackTop().SetTable(mt);

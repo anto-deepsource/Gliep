@@ -173,6 +173,11 @@ namespace GeminiLab.Glug.AST {
                     visitAndConvertResultToValue(ind.ExprL);
                     visitAndConvertResultToValue(ind.ExprR);
                     CurrentFunction!.AppendUen();
+                } else if (val.ExprL is Metatable mt) {
+                    visitAndConvertResultToValue(val.ExprR);
+                    CurrentFunction!.AppendDup();
+                    visitAndConvertResultToValue(mt.Table);
+                    CurrentFunction!.AppendSmt();
                 } else {
                     throw new ArgumentOutOfRangeException();
                 }
@@ -232,6 +237,11 @@ namespace GeminiLab.Glug.AST {
                 visitAndConvertResultToValue(value);
                 CurrentFunction.AppendIen();
             }
+        }
+
+        public override void VisitMetatable(Metatable val) {
+            visitAndConvertResultToValue(val.Table);
+            CurrentFunction!.AppendGmt();
         }
     }
 }

@@ -24,6 +24,8 @@ namespace GeminiLab.Glug.AST {
 
         public abstract void VisitTableDef(TableDef val);
 
+        public abstract void VisitMetatable(Metatable val);
+
         public void Visit(Node node) {
             switch (node) {
             case LiteralInteger li:
@@ -68,6 +70,9 @@ namespace GeminiLab.Glug.AST {
             case TableDef tdef:
                 VisitTableDef(tdef);
                 break;
+            case Metatable mt:
+                VisitMetatable(mt);
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
             }
@@ -95,6 +100,8 @@ namespace GeminiLab.Glug.AST {
         public override void VisitBiOp(BiOp val) {}
 
         public override void VisitTableDef(TableDef val) {}
+
+        public override void VisitMetatable(Metatable val) {}
     }
 
     public class RecursiveVisitor : Visitor {
@@ -142,6 +149,10 @@ namespace GeminiLab.Glug.AST {
                 Visit(key);
                 Visit(value);
             }
+        }
+
+        public override void VisitMetatable(Metatable val) {
+            Visit(val.Table);
         }
     }
 }

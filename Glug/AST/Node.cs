@@ -215,4 +215,14 @@ namespace GeminiLab.Glug.AST {
 
         public IList<TableDefPair> Pairs { get; }
     }
+
+    public class Metatable : Expr {
+        public override bool IsVarRef { get; } = true;
+
+        public Metatable(Expr table) {
+            Table = table;
+        }
+
+        public Expr Table;
+    }
 }

@@ -24,4 +24,25 @@ print$sum$beide[];  # expected: 3
 Y = f -> (x -> f(x x))(x -> f(v -> x x v));
 print $ Y (f -> n -> if (n == 0) 1 else n * f(n - 1)) 10;
 
-print "ユニコードイグザンプル\u677e"
+print "ユニコードイグザンプル\u677e";
+
+############################################
+
+vector = { 
+    .__add: [a, b] -> vector.new[a.x + b.x, a.y + b.y],
+    .__sub: [a, b] -> vector.new[a.x - b.x, a.y - b.y],
+    .__mul: [a, b] -> a.x * b.x + a.y * b.y,
+    .__lss: [a, b] -> vector.len2$a < vector.len2$b,
+    .__equ: [a, b] -> a.x == b.x & a.y == b.y,
+
+    .new: [x, y] -> (rv = { .x: x, .y: y }; `rv = vector; rv),
+    .len2: v -> v * v,
+};
+
+
+a = vector.new[1, 2];
+b = vector.new[3, 4];
+c = a + b;
+d = a - b;
+
+print[c.x, c.y, d.x, d.y, a * b, a > b, a == b];

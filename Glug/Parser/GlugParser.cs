@@ -241,6 +241,11 @@ namespace GeminiLab.Glug.Parser {
                 return new UnOp(GlugUnOpType.Not, ReadExprItem(stream));
             }
 
+            if (tok.Type == GlugTokenType.SymbolBackquote) {
+                stream.GetToken();
+                return new Metatable(ReadExprItem(stream));
+            }
+
             if (tok.Type == GlugTokenType.SymbolBang) {
                 stream.GetToken();
                 return new VarRef(ReadIdentifier(stream)) { IsDef = true };
