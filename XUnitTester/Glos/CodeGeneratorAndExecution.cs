@@ -1,14 +1,89 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+
 using GeminiLab.Core2;
+using GeminiLab.Core2.Random;
+using GeminiLab.Core2.Random.RNG;
 using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glos.ViMa;
+
 using Xunit;
 using XUnitTester.Checker;
 
 namespace XUnitTester.Glos {
     public class CodeGeneratorAndExecution : GlosTestBase {
+        public static GlosOp[] BinaryOperations { get; } = new[] {
+            GlosOp.Add, GlosOp.Sub, GlosOp.Mul, GlosOp.Div,
+            GlosOp.Mod, GlosOp.Lsh, GlosOp.Rsh, GlosOp.And,
+            GlosOp.Orr, GlosOp.Xor, GlosOp.Gtr, GlosOp.Lss,
+            GlosOp.Geq, GlosOp.Leq, GlosOp.Equ, GlosOp.Neq,
+        };
+
+        public static IEnumerable<object[]> GetIntegerBinaryOperatorTestcases(int count) {
+            GlosOp op;
+            long opl, opr, result;
+            var opc = BinaryOperations.MakeChooser();
+            var ran = new U64ToI64RNG(DefaultRNG.U64);
+            for (int i = 0; i < count; ++i) {
+                op = opc.Next();
+                opl = ran.Next();
+                opr = ran.Next();
+                
+                unchecked {
+                    result = op switch {
+                        GlosOp.Add => opl + opr,
+                        GlosOp.Sub => opl - opr,
+                        GlosOp.Mul => opl * opr,
+                        GlosOp.Div => opl / opr,
+                        GlosOp.Mod => opl % opr,
+                        GlosOp.Lsh => opl << (int)opr,
+                        GlosOp.Rsh => (long)((ulong)opl >> (int)opr),
+                        GlosOp.And => opl & opr,
+                        GlosOp.Orr => opl | opr,
+                        GlosOp.Xor => opl ^ opr,
+                        GlosOp.Gtr => opl > opr ? -1L : 0,
+                        GlosOp.Lss => opl < opr ? -1L : 0,
+                        GlosOp.Geq => opl >= opr ? -1L : 0,
+                        GlosOp.Leq => opl <= opr ? -1L : 0,
+                        GlosOp.Equ => opl == opr ? -1L : 0,
+                        GlosOp.Neq => opl != opr ? -1L : 0,
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                }
+
+                yield return new object[] { op, opl, opr, result };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetIntegerBinaryOperatorTestcases), 1024)]
+        public void BinaryOperatorTest(GlosOp op, long opl, long opr, long result) {
+            var fgen = Builder.AddFunction();
+
+            fgen.AppendLd(opl);
+            fgen.AppendLd(opr);
+            fgen.AppendInstruction(op);
+
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+
+            var checker = GlosValueArrayChecker.Create(res).First();
+
+            if (op == GlosOp.Gtr || op == GlosOp.Lss || op == GlosOp.Geq || op == GlosOp.Leq || op == GlosOp.Equ || op == GlosOp.Neq) {
+                if (result != 0) {
+                    checker.AssertTrue();
+                } else {
+                    checker.AssertFalse();
+                }
+            } else {
+                checker.AssertInteger(result);
+            }
+
+            checker.MoveNext().AssertEnd();
+        }
+        
         [Fact]
         public void IntegerArithmeticOp() {
             var fgen = Builder.AddFunction();
@@ -113,137 +188,7 @@ namespace XUnitTester.Glos {
                     .MoveNext().AssertEnd();
             }
         }
-
-        [Fact]
-        public void IntegerBitwiseOp() {
-            var fgen = Builder.AddFunction();
-            var locs = new LocalVariable[5] {
-                fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable(),
-                fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable()
-            };
-
-            fgen.AppendLd(0xefcdab8967452301);
-            fgen.AppendStLoc(locs[0]);
-            fgen.AppendLd(0x0123456789abcdef);
-            fgen.AppendStLoc(locs[1]);
-            fgen.AppendLd(-1);
-            fgen.AppendStLoc(locs[2]);
-            fgen.AppendLd(0x11111111);
-            fgen.AppendStLoc(locs[3]);
-            fgen.AppendLd(2);
-            fgen.AppendStLoc(locs[4]);
-
-            fgen.AppendLdDel();
-
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendLdLoc(locs[4]);
-            fgen.AppendLsh(); // expected: 0x0000000044444444
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendLdLoc(locs[4]);
-            fgen.AppendRsh(); // expected: 0x0000000004444444
-            fgen.AppendLdLoc(locs[0]);
-            fgen.AppendLdLoc(locs[1]);
-            fgen.AppendAnd(); // expected: 0x0101010101010101
-            fgen.AppendLdLoc(locs[0]);
-            fgen.AppendLdLoc(locs[1]);
-            fgen.AppendOrr(); // expected: 0xefefefefefefefef
-            fgen.AppendLdLoc(locs[0]);
-            fgen.AppendLdLoc(locs[1]);
-            fgen.AppendXor(); // expected: 0xeeeeeeeeeeeeeeee
-            fgen.AppendLdLoc(locs[2]);
-            fgen.AppendNot(); // expected: 0x0000000000000000
-
-            fgen.AppendRet();
-
-            fgen.SetEntry();
-
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
-
-            unchecked {
-                GlosValueArrayChecker.Create(res)
-                    .First().AssertInteger((long)0x0000000044444444ul)
-                    .MoveNext().AssertInteger((long)0x0000000004444444ul)
-                    .MoveNext().AssertInteger((long)0x0101010101010101ul)
-                    .MoveNext().AssertInteger((long)0xefefefefefefefeful)
-                    .MoveNext().AssertInteger((long)0xeeeeeeeeeeeeeeeeul)
-                    .MoveNext().AssertInteger((long)0x0000000000000000ul)
-                    .MoveNext().AssertEnd();
-            }
-        }
-
-        [Fact]
-        public void IntegerComparisonOp() {
-            var fgen = Builder.AddFunction();
-            var a = fgen.AllocateLocalVariable();
-            var b = fgen.AllocateLocalVariable();
-
-            fgen.AppendLd(0xefcdab8967452301);
-            fgen.AppendStLoc(a);
-            fgen.AppendLd(0x123456789abcdef);
-            fgen.AppendStLoc(b);
-
-            fgen.AppendLdDel();
-
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(a);
-            fgen.AppendGtr(); // F
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(a);
-            fgen.AppendLss(); // F
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(a);
-            fgen.AppendGeq(); // T
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(a);
-            fgen.AppendLeq(); // T
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(a);
-            fgen.AppendEqu(); // T
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(a);
-            fgen.AppendNeq(); // F
-
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(b);
-            fgen.AppendGtr(); // F
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(b);
-            fgen.AppendLss(); // T
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(b);
-            fgen.AppendGeq(); // F
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(b);
-            fgen.AppendLeq(); // T
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(b);
-            fgen.AppendEqu(); // F
-            fgen.AppendLdLoc(a);
-            fgen.AppendLdLoc(b);
-            fgen.AppendNeq(); // T
-
-            fgen.AppendRet();
-
-            fgen.SetEntry();
-
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
-
-            GlosValueArrayChecker.Create(res)
-                .First().AssertFalse()
-                .MoveNext().AssertFalse()
-                .MoveNext().AssertTrue()
-                .MoveNext().AssertTrue()
-                .MoveNext().AssertTrue()
-                .MoveNext().AssertFalse()
-                .MoveNext().AssertFalse()
-                .MoveNext().AssertTrue()
-                .MoveNext().AssertFalse()
-                .MoveNext().AssertTrue()
-                .MoveNext().AssertFalse()
-                .MoveNext().AssertTrue()
-                .MoveNext().AssertEnd();
-        }
-
+        
         [Fact]
         public void NumericArithmeticOp() {
             var fgen = Builder.AddFunction();
@@ -396,11 +341,11 @@ namespace XUnitTester.Glos {
         public void TableWithUenAndRenMetamethods() {
             var metaUen = Builder.AddFunction();
 
-            metaUen.AppendLdArg(0);
-            metaUen.AppendLdArg(1);
             metaUen.AppendLdArg(2);
             metaUen.AppendLd(1);
             metaUen.AppendAdd();
+            metaUen.AppendLdArg(0);
+            metaUen.AppendLdArg(1);
             metaUen.AppendUenL();
             metaUen.AppendRet();
 
