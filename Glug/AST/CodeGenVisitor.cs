@@ -163,10 +163,18 @@ namespace GeminiLab.Glug.AST {
                     for (int i = count - 1; i >= 0; --i) ((VarRef)(list[i])).Variable.CreateStoreInstr(CurrentFunction!);
 
                     CurrentFunction.AppendLdNil();
-                } else {
+                } else if (val.ExprL is VarRef vr) {
                     visitAndConvertResultToValue(val.ExprR);
                     CurrentFunction!.AppendDup();
-                    ((VarRef)(val.ExprL)).Variable.CreateStoreInstr(CurrentFunction!);
+                    vr.Variable.CreateStoreInstr(CurrentFunction!);
+                } else if (val.ExprL is BiOp { Op: GlugBiOpType.Index } ind) {
+                    visitAndConvertResultToValue(val.ExprR);
+                    CurrentFunction!.AppendDup();
+                    visitAndConvertResultToValue(ind.ExprL);
+                    visitAndConvertResultToValue(ind.ExprR);
+                    CurrentFunction!.AppendUen();
+                } else {
+                    throw new ArgumentOutOfRangeException();
                 }
             } else {
                 visitAndConvertResultToValue(val.ExprL);
@@ -189,6 +197,7 @@ namespace GeminiLab.Glug.AST {
                     GlugBiOpType.Leq => GlosOp.Leq,
                     GlugBiOpType.Equ => GlosOp.Equ,
                     GlugBiOpType.Neq => GlosOp.Neq,
+                    GlugBiOpType.Index => GlosOp.Ren,
                     _ => GlosOp.Nop, // Add a exception here
                 });
             }
@@ -213,6 +222,16 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitVarRef(VarRef val) {
             val.Variable.CreateLoadInstr(CurrentFunction!);
+        }
+
+        public override void VisitTableDef(TableDef val) {
+            CurrentFunction!.AppendLdNTbl();
+
+            foreach (var (key, value) in val.Pairs) {
+                visitAndConvertResultToValue(key);
+                visitAndConvertResultToValue(value);
+                CurrentFunction.AppendIen();
+            }
         }
     }
 }

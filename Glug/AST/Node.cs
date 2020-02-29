@@ -174,11 +174,13 @@ namespace GeminiLab.Glug.AST {
         Equ,
         Neq,
         Call,
-        Assign
+        Assign,
+        Index,
     }
 
     public class BiOp : Expr {
         public override bool IsOnStackList { get; }
+        public override bool IsVarRef { get; }
 
         public BiOp(GlugBiOpType op, Expr exprL, Expr exprR) {
             Op = op;
@@ -186,10 +188,31 @@ namespace GeminiLab.Glug.AST {
             ExprR = exprR;
 
             IsOnStackList = op == GlugBiOpType.Call;
+            IsVarRef = op == GlugBiOpType.Index;
         }
 
         public GlugBiOpType Op { get; }
         public Expr ExprL { get; }
         public Expr ExprR { get; }
+    }
+
+    public struct TableDefPair {
+        public TableDefPair(Expr key, Expr value) {
+            Key = key;
+            Value = value;
+        }
+
+        public Expr Key;
+        public Expr Value;
+
+        public void Deconstruct(out Expr key, out Expr value) => (key, value) = (Key, Value);
+    } 
+
+    public class TableDef : Expr {
+        public TableDef(IList<TableDefPair> pairs) {
+            Pairs = pairs;
+        }
+
+        public IList<TableDefPair> Pairs { get; }
     }
 }

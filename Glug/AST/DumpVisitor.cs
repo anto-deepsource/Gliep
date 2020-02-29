@@ -35,7 +35,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitVarRef(VarRef val) {
-            Writer.WriteLine($"<val-{(val.IsDef ? "def" : "ref")}> {val.Id}");
+            Writer.WriteLine($"<var-{(val.IsDef ? "def" : "ref")}> {val.Id}");
         }
 
         public override void VisitIf(If val) {
@@ -139,11 +139,25 @@ namespace GeminiLab.Glug.AST {
                 GlugBiOpType.Neq => "neq",
                 GlugBiOpType.Call => "call",
                 GlugBiOpType.Assign => "assign",
+                GlugBiOpType.Index => "index",
                 _ => throw new ArgumentOutOfRangeException(),
             });
             Writer.IncreaseIndent();
             Visit(val.ExprL);
             Visit(val.ExprR);
+            Writer.DecreaseIndent();
+        }
+
+        public override void VisitTableDef(TableDef val) {
+            Writer.WriteLine("<table-def>");
+            Writer.IncreaseIndent();
+            foreach (var (key, value) in val.Pairs) {
+                Writer.WriteLine("<pair>");
+                Writer.IncreaseIndent();
+                Visit(key);
+                Visit(value);
+                Writer.DecreaseIndent();
+            }
             Writer.DecreaseIndent();
         }
     }

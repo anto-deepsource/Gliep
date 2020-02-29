@@ -22,6 +22,8 @@ namespace GeminiLab.Glug.AST {
         public abstract void VisitUnOp(UnOp val);
         public abstract void VisitBiOp(BiOp val);
 
+        public abstract void VisitTableDef(TableDef val);
+
         public void Visit(Node node) {
             switch (node) {
             case LiteralInteger li:
@@ -63,6 +65,9 @@ namespace GeminiLab.Glug.AST {
             case BiOp bop:
                 VisitBiOp(bop);
                 break;
+            case TableDef tdef:
+                VisitTableDef(tdef);
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
             }
@@ -88,6 +93,8 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitUnOp(UnOp val) {}
         public override void VisitBiOp(BiOp val) {}
+
+        public override void VisitTableDef(TableDef val) {}
     }
 
     public class RecursiveVisitor : Visitor {
@@ -128,6 +135,13 @@ namespace GeminiLab.Glug.AST {
         public override void VisitBiOp(BiOp val) {
             Visit(val.ExprL);
             Visit(val.ExprR);
+        }
+
+        public override void VisitTableDef(TableDef val) {
+            foreach (var (key, value) in val.Pairs) {
+                Visit(key);
+                Visit(value);
+            }
         }
     }
 }

@@ -184,6 +184,15 @@ namespace GeminiLab.Glug.Tokenizer {
                     } else {
                         yield return new GlugToken { Type = GlugTokenType.SymbolBang };
                     }
+                } else if (c == '`') {
+                    ++ptr;
+                    yield return new GlugToken { Type = GlugTokenType.SymbolBackquote };
+                } else if (c == '.') {
+                    ++ptr;
+                    yield return new GlugToken { Type = GlugTokenType.SymbolDot };
+                } else if (c == ':') {
+                    ++ptr;
+                    yield return new GlugToken { Type = GlugTokenType.SymbolColon };
                 } else {
                     ++ptr;
                 }

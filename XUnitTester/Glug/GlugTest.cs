@@ -173,5 +173,24 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertInteger(3)
                 .MoveNext().AssertEnd();
         }
+
+        [Fact]
+        public void Table() {
+            var code = @"
+                d = ""d"";
+                e = ""e"";
+                a = { .a: 1, .b: 2, d: 4, @e: 5 };
+                a.c = 3;
+                [a.a, a.b, a.c, a@d, a.e]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .First().AssertInteger(1)
+                .MoveNext().AssertInteger(2)
+                .MoveNext().AssertInteger(3)
+                .MoveNext().AssertInteger(4)
+                .MoveNext().AssertInteger(5)
+                .MoveNext().AssertEnd();
+        }
     }
 }

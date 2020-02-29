@@ -11,6 +11,8 @@ Block       : ( Expr ';'?)*
 # earlier appearence, higher precedence
 Expr        : ExprItem
             | Expr Expr
+            | Expr "$" Expr
+            | Expr "." identifier
             | Expr "@" Expr
             | Expr ( "*" | "/" | "%" ) Expr
             | Expr ( "+" | "-" ) Expr
@@ -23,11 +25,15 @@ Expr        : ExprItem
             | Expr "=" Expr
             ;
 
+# ExprItem also eats tokens greedily
 ExprItem    : literal
             | identifier
-            | "$" identifier
+            | "!" identifier
+            | "!!" identifier
+            | TableDef
             | "-" ExprItem
             | "~" ExprItem
+            | "`" ExprItem
             | BlockInParen
             | If
             | While
@@ -36,6 +42,12 @@ ExprItem    : literal
             | Lambda
             | OnStackList
             ;
+
+TableDef    : "{" (TableDef ("," TableDef)*)? "}"
+                ;
+
+TableDef    : (("@"? Expr ) | ("." identifier)) ":" Expr
+                    ;
 
 BlockInParen    : "(" Block ")"
                 ;

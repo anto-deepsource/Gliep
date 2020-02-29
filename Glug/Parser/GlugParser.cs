@@ -26,8 +26,10 @@ namespace GeminiLab.Glug.Parser {
                    || type == GlugTokenType.KeywordReturn
                    || type == GlugTokenType.KeywordFn
                    || type == GlugTokenType.SymbolLBracket
+                   || type == GlugTokenType.SymbolLBrace
                    || type == GlugTokenType.SymbolBang
                    || type == GlugTokenType.SymbolBangBang
+                   || type == GlugTokenType.SymbolBackquote
                 ;
         }
 
@@ -51,6 +53,8 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.OpMod => GlugBiOpType.Mod,
             GlugTokenType.OpDollar => GlugBiOpType.Call,
             GlugTokenType.OpCall => GlugBiOpType.Call,
+            GlugTokenType.OpAt => GlugBiOpType.Index,
+            GlugTokenType.SymbolDot => GlugBiOpType.Index,
             _ => throw new ArgumentOutOfRangeException(),
         };
 
@@ -80,6 +84,8 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.OpMod => 0x80,
             GlugTokenType.OpDollar => 0x90,
             GlugTokenType.OpCall => 0xa0,
+            GlugTokenType.OpAt => 0xb0,
+            GlugTokenType.SymbolDot => 0xc0,
             _ => -1,
         };
 
@@ -104,6 +110,8 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.OpMod => true,
             GlugTokenType.OpDollar => false,
             GlugTokenType.OpCall => true,
+            GlugTokenType.OpAt => true,
+            GlugTokenType.SymbolDot => true,
             _ => throw new ArgumentOutOfRangeException(),
         };
 
@@ -135,9 +143,15 @@ namespace GeminiLab.Glug.Parser {
             var s = new List<(Expr expr, GlugTokenType op)>();
             Expr expr;
             int lastP = 0;
+            bool lastDot = false;
 
             while (true) {
-                expr = ReadExprItem(stream);
+                if (lastDot) {
+                    expr = new LiteralString(ReadIdentifier(stream));
+                } else {
+                    expr = ReadExprItem(stream);
+                }
+                
                 var tok = stream.PeekToken();
                 var op = tok?.Type ?? GlugTokenType.NotAToken;
 
@@ -170,6 +184,7 @@ namespace GeminiLab.Glug.Parser {
                 }
 
                 lastP = p;
+                lastDot = op == GlugTokenType.SymbolDot;
                 s.Add((expr, op));
             }
 
@@ -247,6 +262,7 @@ namespace GeminiLab.Glug.Parser {
                 GlugTokenType.KeywordReturn => ReadReturn(stream),
                 GlugTokenType.KeywordFn => ReadFunction(stream),
                 GlugTokenType.SymbolLBracket => ReadOnStackList(stream),
+                GlugTokenType.SymbolLBrace => ReadTableDef(stream),
                 _ => throw new ArgumentOutOfRangeException(),
             };
         }
@@ -348,10 +364,10 @@ namespace GeminiLab.Glug.Parser {
             return rv;
         }
 
-        private static OnStackList ReadOnStackList(LookAheadTokenStream stream, bool skipLBracket = false) {
+        private static OnStackList ReadOnStackList(LookAheadTokenStream stream) {
             var rv = new List<Expr>();
 
-            if (!skipLBracket) Consume(stream, GlugTokenType.SymbolLBracket);
+            Consume(stream, GlugTokenType.SymbolLBracket);
             GlugToken tok;
             while (((tok = stream.PeekToken()) != null)) {
                 if (tok.Type == GlugTokenType.SymbolRBracket) break;
@@ -369,6 +385,37 @@ namespace GeminiLab.Glug.Parser {
             Consume(stream, GlugTokenType.SymbolRBracket);
 
             return new OnStackList(rv);
+        }
+
+        private static TableDef ReadTableDef(LookAheadTokenStream stream) {
+            var rv = new List<TableDefPair>();
+
+            Consume(stream, GlugTokenType.SymbolLBrace);
+
+            while (true) {
+                var tok = stream.PeekTokenNonNull();
+                if (tok.Type == GlugTokenType.SymbolRBrace) break;
+
+                Expr key;
+                if (tok.Type == GlugTokenType.SymbolDot) {
+                    stream.GetToken();
+                    key = new LiteralString(ReadIdentifier(stream));
+                } else {
+                    if (tok.Type == GlugTokenType.OpAt) stream.GetToken();
+                    key = ReadExprGreedily(stream);
+                }
+
+                Consume(stream, GlugTokenType.SymbolColon);
+
+                rv.Add(new TableDefPair(key, ReadExprGreedily(stream)));
+
+                tok = stream.PeekTokenNonNull();
+                if (tok.Type == GlugTokenType.SymbolComma) Consume(stream, GlugTokenType.SymbolComma);
+            }
+
+            Consume(stream, GlugTokenType.SymbolRBrace);
+
+            return new TableDef(rv);
         }
     }
 }
