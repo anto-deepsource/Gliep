@@ -10,7 +10,7 @@ namespace GeminiLab.Glos.ViMa {
             VariableInContext = new HashSet<string>(variableInContext);
         }
 
-        public GlosUnit Unit { get; internal set; }
+        public GlosUnit Unit { get; internal set; } = null!;
 
         private readonly byte[] _code;
         public ReadOnlySpan<byte> Code => new ReadOnlySpan<byte>(_code);

@@ -43,7 +43,7 @@ namespace GeminiLab.Glug.AST {
     public class LiteralNil : Literal { }
 
     public class VarRef : Expr {
-        public Variable Variable { get; set; }
+        public Variable Variable { get; set; } = null!;
         public bool IsDef { get; set; }
         public bool IsGlobal { get; set; }
 
@@ -101,9 +101,9 @@ namespace GeminiLab.Glug.AST {
     }
     
     public class Function : Expr {
-        public VariableTable VariableTable { get; set; }
+        public VariableTable VariableTable { get; set; } = null!;
 
-        public Variable Self { get; set; }
+        public Variable Self { get; set; } = null!;
 
         public Function(string? name, List<string> parameters, Expr body) {
             Name = name;

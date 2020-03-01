@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+
 using GeminiLab.Glos.ViMa;
+
 using Xunit;
 
 namespace XUnitTester.Checker {

@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Xml.Schema;
+
 using GeminiLab.Glug.AST;
 using GeminiLab.Glug.Tokenizer;
 
@@ -355,12 +350,11 @@ namespace GeminiLab.Glug.Parser {
                     else throw new ArgumentOutOfRangeException();
                     stream.GetToken();
                     tok = stream.PeekToken();
-                    if (tok?.Type == GlugTokenType.SymbolComma) {
-                        Consume(stream, GlugTokenType.SymbolComma);
-                        continue;
-                    } else {
+                    if (tok?.Type != GlugTokenType.SymbolComma) {
                         break;
                     }
+
+                    Consume(stream, GlugTokenType.SymbolComma);
                 }
 
                 Consume(stream, GlugTokenType.SymbolRBracket);
@@ -373,18 +367,17 @@ namespace GeminiLab.Glug.Parser {
             var rv = new List<Expr>();
 
             Consume(stream, GlugTokenType.SymbolLBracket);
-            GlugToken tok;
+            GlugToken? tok;
             while (((tok = stream.PeekToken()) != null)) {
                 if (tok.Type == GlugTokenType.SymbolRBracket) break;
                 rv.Add(ReadExprGreedily(stream));
 
                 tok = stream.PeekTokenNonNull();
-                if (tok.Type == GlugTokenType.SymbolComma) {
-                    Consume(stream, GlugTokenType.SymbolComma);
-                    continue;
-                } else {
+                if (tok.Type != GlugTokenType.SymbolComma) {
                     break;
                 }
+
+                Consume(stream, GlugTokenType.SymbolComma);
             }
 
             Consume(stream, GlugTokenType.SymbolRBracket);

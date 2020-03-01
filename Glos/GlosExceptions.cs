@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Security;
-using System.Text;
+
 using GeminiLab.Glos.ViMa;
 
 namespace GeminiLab.Glos {

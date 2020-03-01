@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace GeminiLab.Glos.ViMa {
     public class GlosTable {
@@ -61,6 +60,6 @@ namespace GeminiLab.Glos.ViMa {
             return false;
         }
 
-        public GlosTable Metatable { get; set; }
+        public GlosTable? Metatable { get; set; }
     }
 }

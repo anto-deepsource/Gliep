@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+
 using GeminiLab.Glos.CodeGenerator;
 
 namespace GeminiLab.Glug.AST {
@@ -37,7 +37,7 @@ namespace GeminiLab.Glug.AST {
 
         public int ArgumentId { get; }
 
-        public LocalVariable LocalVariable { get; set; }
+        public LocalVariable? LocalVariable { get; set; }
 
         public VariablePlace Place { get; private set; }
 
@@ -55,13 +55,13 @@ namespace GeminiLab.Glug.AST {
             }
         }
 
-        public void CreateLoadInstr(FunctionBuilder fgen) {
+        public void CreateLoadInstr(GlosFunctionBuilder fgen) {
             switch (Place) {
             case VariablePlace.Argument:
                 fgen.AppendLdArg(ArgumentId);
                 break;
             case VariablePlace.LocalVariable:
-                fgen.AppendLdLoc(LocalVariable);
+                fgen.AppendLdLoc(LocalVariable!);
                 break;
             case VariablePlace.Context:
                 fgen.AppendLdStr(Name);
@@ -76,10 +76,10 @@ namespace GeminiLab.Glug.AST {
             }
         }
 
-        public void CreateStoreInstr(FunctionBuilder fgen) {
+        public void CreateStoreInstr(GlosFunctionBuilder fgen) {
             switch (Place) {
             case VariablePlace.LocalVariable:
-                fgen.AppendStLoc(LocalVariable);
+                fgen.AppendStLoc(LocalVariable!);
                 break;
             case VariablePlace.Context:
                 fgen.AppendLdStr(Name);

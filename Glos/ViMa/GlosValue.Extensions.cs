@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GeminiLab.Glos.ViMa {
+﻿namespace GeminiLab.Glos.ViMa {
     public static class GlosValueExtensions {
         public static ref GlosValue SetNil(this ref GlosValue v) {
             v.ValueNumber.Integer = 0;

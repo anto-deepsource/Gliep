@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+
 using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
+
 using Xunit;
 
 namespace XUnitTester.Glos {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace GeminiLab.Glug.AST {
     public class FunctionAndVarDefVisitor : RecursiveVisitor {
@@ -67,7 +66,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitBiOp(BiOp val) {
-            var oldBA = _beingAssigned;
+            var oldBeingAssigned = _beingAssigned;
             _beingAssigned = false;
 
             if (val.Op == GlugBiOpType.Assign) {
@@ -93,7 +92,7 @@ namespace GeminiLab.Glug.AST {
                 base.VisitBiOp(val);
             }
 
-            _beingAssigned = oldBA;
+            _beingAssigned = oldBeingAssigned;
         }
 
         private bool _beingAssigned = false;

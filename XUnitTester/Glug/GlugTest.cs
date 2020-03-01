@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using GeminiLab.Core2.Text;
+﻿using GeminiLab.Core2.Text;
 using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
+
 using Xunit;
 using XUnitTester.Checker;
 

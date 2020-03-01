@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+
 using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glos.ViMa;
-using GeminiLab.Glug.Tokenizer;
 
 namespace GeminiLab.Glug.AST {
     public class CodeGenVisitor : RecursiveVisitor {
         public GlosUnitBuilder Builder { get; } = new GlosUnitBuilder();
 
-        public FunctionBuilder? CurrentFunction { get; private set; }
+        public GlosFunctionBuilder? CurrentFunction { get; private set; }
 
         public override void VisitFunction(Function val) {
             var fun = Builder.AddFunction();
@@ -30,7 +27,7 @@ namespace GeminiLab.Glug.AST {
             foreach (var variable in variables.Where(x => x.IsArgument && x.Place != VariablePlace.Argument)) {
                 fun.AppendLdArg(variable.ArgumentId);
                 if (variable.Place == VariablePlace.LocalVariable) {
-                    fun.AppendStLoc(variable.LocalVariable);
+                    fun.AppendStLoc(variable.LocalVariable!);
                 } else if (variable.Place == VariablePlace.Context) {
                     fun.AppendLdStr(variable.Name);
                     fun.AppendUvc();

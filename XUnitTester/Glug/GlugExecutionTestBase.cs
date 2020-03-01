@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
+
 using GeminiLab.Glos.ViMa;
 using GeminiLab.Glug.AST;
 using GeminiLab.Glug.Parser;

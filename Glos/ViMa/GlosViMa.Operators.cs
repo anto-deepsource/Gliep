@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GeminiLab.Glos.ViMa {
+﻿namespace GeminiLab.Glos.ViMa {
     public partial class GlosViMa {
         private void unaryOperator(GlosOp op, ref GlosValue o) {
             if (op == GlosOp.Not && o.Type == GlosValueType.Integer) {

@@ -87,7 +87,7 @@ namespace GeminiLab.Glos.ViMa {
                         stackTop().AssertTable().Metatable = stackTop(1).AssertTable();
                         popStack(2);
                     } else if (op == GlosOp.Gmt) {
-                        if (stackTop().AssertTable().Metatable is { } mt) {
+                        if (stackTop().AssertTable().Metatable is {} mt) {
                             stackTop().SetTable(mt);
                         } else {
                             stackTop().SetNil();

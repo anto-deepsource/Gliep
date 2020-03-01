@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-
-namespace GeminiLab.Glos.CodeGenerator {
+﻿namespace GeminiLab.Glos.CodeGenerator {
     public class Label {
-        internal readonly FunctionBuilder Builder;
+        internal readonly GlosFunctionBuilder Builder;
         internal int TargetCounter;
 
-        internal Label(FunctionBuilder builder) {
+        internal Label(GlosFunctionBuilder builder) {
             Builder = builder;
         }
     }

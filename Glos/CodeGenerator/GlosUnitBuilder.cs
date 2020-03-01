@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+
 using GeminiLab.Glos.ViMa;
 
 namespace GeminiLab.Glos.CodeGenerator {
@@ -20,11 +20,11 @@ namespace GeminiLab.Glos.CodeGenerator {
 
         #region function table
         private int _func = 0;
-        private readonly List<FunctionBuilder> _builders = new List<FunctionBuilder>();
+        private readonly List<GlosFunctionBuilder> _builders = new List<GlosFunctionBuilder>();
         private readonly List<GlosFunctionPrototype> _functions = new List<GlosFunctionPrototype>();
         
-        public FunctionBuilder AddFunction() {
-            var fun = new FunctionBuilder(this, _func++);
+        public GlosFunctionBuilder AddFunction() {
+            var fun = new GlosFunctionBuilder(this, _func++);
             _builders.Add(fun);
             _functions.Add(null!);
             return fun;

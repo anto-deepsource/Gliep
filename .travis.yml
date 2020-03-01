@@ -7,7 +7,7 @@ script:
   - dotnet tool install coveralls.net --version 1.0.0 --tool-path tools
   - sudo apt-get install -y apt-transport-https aspnetcore-runtime-2.1
   - dotnet build -nologo -c Debug Gliep.Full.sln
-  - dotnet test -nologo -p:CollectCoverage=true -p:CoverletOutputFormat=opencover -p:Exclude=[xunit.*]* -p:ExcludeByAttribute="CompilerGeneratedAttribute" -v=normal XUnitTester/XUnitTester.csproj
+  - dotnet test -nologo -p:CollectCoverage=true -p:CoverletOutputFormat=opencover -p:Exclude="\"[xunit.*]*,[GeminiLab.Core2*]*\"" -p:ExcludeByAttribute="CompilerGeneratedAttribute" -v=normal XUnitTester/XUnitTester.csproj
   - REPO_COMMIT_AUTHOR=$(git show -s --pretty=format:"%cn")
   - REPO_COMMIT_AUTHOR_EMAIL=$(git show -s --pretty=format:"%ce")
   - REPO_COMMIT_MESSAGE=$(git show -s --pretty=format:"%s")

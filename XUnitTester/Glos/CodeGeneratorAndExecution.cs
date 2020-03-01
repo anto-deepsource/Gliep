@@ -87,7 +87,7 @@ namespace XUnitTester.Glos {
         [Fact]
         public void IntegerArithmeticOp() {
             var fgen = Builder.AddFunction();
-            var locs = new LocalVariable[5] {
+            var locs = new[] {
                 fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable(),
                 fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable()
             };

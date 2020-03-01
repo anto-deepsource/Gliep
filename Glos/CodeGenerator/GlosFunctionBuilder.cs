@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+
 using GeminiLab.Glos.ViMa;
 
 namespace GeminiLab.Glos.CodeGenerator {
-    public class FunctionBuilder {
-        internal FunctionBuilder(GlosUnitBuilder parent, int id) {
+    public class GlosFunctionBuilder {
+        internal GlosFunctionBuilder(GlosUnitBuilder parent, int id) {
             Parent = parent;
             Id = id;
         }
@@ -15,27 +15,27 @@ namespace GeminiLab.Glos.CodeGenerator {
         public int Id { get; }
 
         // TODO: replace temporary workaround
-        public IReadOnlyCollection<string> VariableInContext { get; set; }
+        public IReadOnlyCollection<string> VariableInContext { get; set; } = Array.Empty<string>();
 
         #region instruction buffer
         private class Instruction {
             public GlosOp OpCode;
             public long Immediate;
-            public Label Target;
+            public Label? Target;
             public int Offset;
 
-            public void Deconstruct(out GlosOp opCode, out long immediate, out Label target, out int offset) {
+            public void Deconstruct(out GlosOp opCode, out long immediate, out Label? target, out int offset) {
                 opCode = OpCode;
                 immediate = Immediate;
                 target = Target;
                 offset = Offset;
             }
         }
-        private List<Instruction> _instructions = new List<Instruction>(); 
+        private readonly List<Instruction> _instructions = new List<Instruction>(); 
         #endregion
 
         #region label
-        private Dictionary<Label, List<int>> _labels = new Dictionary<Label, List<int>>();
+        private readonly Dictionary<Label, List<int>> _labels = new Dictionary<Label, List<int>>();
 
         public Label AllocateLabel() {
             var label = new Label(this);
@@ -119,7 +119,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendLdStr(string str) => AppendLdStr(Parent.AddOrGetString(str));
 
         public void AppendLdFun(int id) => AppendInstruction(GlosOp.LdFun, immediate: id);
-        public void AppendLdFun(FunctionBuilder fun) => AppendLdFun(fun.Id);
+        public void AppendLdFun(GlosFunctionBuilder fun) => AppendLdFun(fun.Id);
 
         private long getIdFromLoc(LocalVariable loc) {
             if (loc.Builder != this) throw new ArgumentOutOfRangeException(nameof(loc));
@@ -252,7 +252,7 @@ namespace GeminiLab.Glos.CodeGenerator {
                         buff.AddOp(GlosOp.SysC0 + (byte)(0x07 & imm));
                     } else if (GlosOpInfo.Categories[(byte)op] == GlosOpCategory.Branch) {
                         buff.AddOp(op);
-                        _labels[target].Add(buff.Count);
+                        _labels[target!].Add(buff.Count);
                         buff.AddInteger32(int.MaxValue);
                     } else {
                         // throw new UnknownOpcodeException();

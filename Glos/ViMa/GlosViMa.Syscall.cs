@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace GeminiLab.Glos.ViMa {
     // todo: add delimiter to its params
-    public delegate void GlosSyscall(GlosStack<GlosValue> _stack, GlosStack<GlosStackFrame> _callStack, GlosStack<int> _delStack);
+    public delegate void GlosSyscall(GlosStack<GlosValue> stack, GlosStack<GlosStackFrame> callStack, GlosStack<int> delStack);
 
     public partial class GlosViMa {
         private const int MaxSyscallCount = 8;
