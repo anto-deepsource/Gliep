@@ -5,10 +5,16 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>8</LangVersion>
     <RootNamespace>GeminiLab.Gliep</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="GeminiLab.Core2.CommandLineParser" Version="1.0.0-preview-20191013-238" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Glug\Glug.csproj" />
+    <ProjectReference Include="..\Glos\Glos.csproj" />
   </ItemGroup>
 
 </Project>

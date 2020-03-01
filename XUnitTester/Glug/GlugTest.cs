@@ -17,7 +17,7 @@ namespace XUnitTester.Glug {
         [Fact]
         public void Evaluation() {
             var code = @"
-                [1, 2, false, (), nil, -(1 + 2), if (true) 1, if (false) 2]
+                [1, 2, false, (), nil, -(1 + 2), if (true) 1, if (false) 2, `{}]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -28,6 +28,7 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertNil()
                 .MoveNext().AssertInteger(-3)
                 .MoveNext().AssertInteger(1)
+                .MoveNext().AssertNil()
                 .MoveNext().AssertNil()
                 .MoveNext().AssertEnd();
         }
@@ -98,7 +99,7 @@ namespace XUnitTester.Glug {
 
         [Fact]
         public void String() {
-            string strA = "strA", strB = "ユニコードイグザンプル";
+            string strA = "strA", strB = "ユニコードイグザンプル\u4396";
             string strEscape = "\\n";
             var code = $@"
                 [""{strA}"", ""{strA}"" + ""{strB}"", ""{strEscape}""]

@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+
 using GeminiLab.Core2;
+using GeminiLab.Core2.CommandLineParser;
 using GeminiLab.Core2.IO;
 using GeminiLab.Core2.Text;
+
 using GeminiLab.Glos.ViMa;
+using GeminiLab.Glug;
 using GeminiLab.Glug.AST;
 using GeminiLab.Glug.Parser;
 using GeminiLab.Glug.Tokenizer;
@@ -109,16 +113,16 @@ namespace GeminiLab.Gliep {
         }
 
         public static void DumpUnit(GlosUnit unit) {
-            Console.WriteLine("= Glos Unit");
-            Console.WriteLine("== overview");
-            Console.WriteLine($"{unit.FunctionTable.Count} function(s), {unit.StringTable.Count} string constant(s), entry #{unit.Entry}");
-            Console.WriteLine("== string constant table");
-            for (int i = 0; i < unit.StringTable.Count; ++i) Console.WriteLine($"#{i}: \"{EscapeSequenceConverter.Encode(unit.StringTable[i])}\"");
-            Console.WriteLine("== function table");
+            Console.WriteLine(@"= Glos Unit");
+            Console.WriteLine(@"== overview");
+            Console.WriteLine($@"{unit.FunctionTable.Count} function(s), {unit.StringTable.Count} string constant(s), entry #{unit.Entry}");
+            Console.WriteLine(@"== string constant table");
+            for (int i = 0; i < unit.StringTable.Count; ++i) Console.WriteLine($@"#{i}: ""{EscapeSequenceConverter.Encode(unit.StringTable[i])}""");
+            Console.WriteLine(@"== function table");
             for (int i = 0; i < unit.FunctionTable.Count; ++i) {
                 var fun = unit.FunctionTable[i];
 
-                Console.WriteLine($"#{i}: loc size {fun.LocalVariableSize}{(fun.VariableInContext.Count > 0 ? $", ctx var: {fun.VariableInContext.JoinBy(", ")}" : "")}{(unit.Entry == i ? ", entry" : "")}");
+                Console.WriteLine($@"#{i}: loc size {fun.LocalVariableSize}{(fun.VariableInContext.Count > 0 ? $", ctx var: {fun.VariableInContext.JoinBy(", ")}" : "")}{(unit.Entry == i ? ", entry" : "")}");
 
                 var ops = fun.Code;
                 var ip = 0;
@@ -129,41 +133,58 @@ namespace GeminiLab.Gliep {
             }
         }
 
+        public static void DumpTokenStream(IGlugTokenStream stream) {
+            GlugToken? tok;
+            while ((tok = stream.GetToken()) != null) {
+                var output = tok.Type.ToString();
+                if (((int)tok.Type & 0x2) != 0) output += $", {tok.ValueInt}(0x{tok.ValueInt:x16})";
+                if (((int)tok.Type & 0x1) != 0) output += $", \"{tok.ValueString}\"";
+                Console.WriteLine(output);
+            }
+        }
+
         public static void Main(string[] args) {
-            var sb = new StringBuilder();
+            var options = CommandLineParser<CommandLineOptions>.Parse(args);
 
-            string s;
-            while ((s = Console.ReadLine()) != null) sb.AppendLine(s);
+            string code = "";
+            if (options.Code != null) {
+                code = options.Code;
+            } else {
+                if (options.Input == "-") {
+                    var sb = new StringBuilder();
+                    string s;
+                    while ((s = Console.ReadLine()) != null) sb.AppendLine(s);
+                    code = sb.ToString();
+                } else {
+                    using var fs = new FileStream(options.Input, FileMode.Open, FileAccess.Read);
+                    using var sr = new StreamReader(fs);
+                    code = sr.ReadToEnd();
+                }
+            }
 
-            var tok = new GlugTokenizer(new StringReader(sb.ToString()));
-            /*
-            while (true) {
-                var token = tok.GetToken();
-                if (token == null) break;
+            using var tok = TypicalCompiler.Tokenize(code);
 
-                Console.WriteLine(token.Type);
-            } 
-            return;
-            */
-            var root = GlugParser.Parse(tok);
-            new DumpVisitor(new IndentedWriter(Console.Out)).Visit(root);
+            if (options.DumpTokenStreamAndExit) {
+                DumpTokenStream(tok);
+                return;
+            }
 
-            var rootFun = new Function("<root>", new List<string>(), root);
+            var root = TypicalCompiler.Parse(tok);
 
-            var vdv = new FunctionAndVarDefVisitor();
-            vdv.Visit(rootFun);
+            if (options.DumpAST || options.DumpASTAndExit) {
+                new DumpVisitor(new IndentedWriter(Console.Out)).Visit(root);
 
-            var vcv = new VarRefVisitor(vdv.RootTable);
-            vcv.Visit(rootFun);
+                if (options.DumpASTAndExit) return;
+            }
 
-            vdv.DetermineVariablePlace();
-            
-            var gen = new CodeGenVisitor();
-            gen.Visit(rootFun);
+            TypicalCompiler.ProcessTree(ref root);
+            var unit = TypicalCompiler.CodeGen(root);
 
-            var unit = gen.Builder.GetResult();
+            if (options.DumpUnit || options.DumpUnitAndExit) {
+                DumpUnit(unit);
 
-            DumpUnit(unit);
+                if (options.DumpUnitAndExit) return;
+            }
 
             var global = new GlosContext(null!);
             global.CreateVariable("print", GlosValue.NewExternalFunction(param => {
@@ -189,7 +210,5 @@ namespace GeminiLab.Gliep {
             var vm = new GlosViMa();
             vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);
         }
-
-        public static T Default<T>() => default;
     }
 }
