@@ -32,6 +32,7 @@
 
         Not     = 0x18,
         Neg     = 0x19,
+        Typeof  = 0x1a,
 
         // Uvc/Uvg:
         // push value

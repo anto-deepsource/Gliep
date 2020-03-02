@@ -974,5 +974,24 @@ namespace XUnitTester.Glos {
 
             checker.AssertEnd();
         }
+
+        [Fact]
+        public void Typeof() {
+            var fgen = Builder.AddFunction();
+
+            fgen.AppendLdNil();
+            fgen.AppendTypeof();
+            fgen.AppendLd(1);
+            fgen.AppendTypeof();
+
+            fgen.SetEntry();
+
+            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+
+            GlosValueArrayChecker.Create(res)
+                .First().AssertString(nameof(GlosValueType.Nil).ToLowerInvariant())
+                .MoveNext().AssertString(nameof(GlosValueType.Integer).ToLowerInvariant())
+                .MoveNext().AssertEnd();
+        }
     }
 }

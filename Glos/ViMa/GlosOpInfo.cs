@@ -56,11 +56,11 @@
             // 0x18
             GlosOpCategory.UnaryOperator,
             GlosOpCategory.UnaryOperator,
-            GlosOpCategory.NotUsed, 
+            GlosOpCategory.UnaryOperator, 
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,
-            GlosOpCategory.NotUsed, 
-            GlosOpCategory.NotUsed, 
+            GlosOpCategory.NotUsed,
+            GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,
             // 0x20
             GlosOpCategory.Others,

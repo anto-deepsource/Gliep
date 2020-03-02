@@ -6,7 +6,6 @@ REFACTOR!!!!
 
 ## Glos
 
-- add typeof instruction.
 - add tostring instruction.
 - add hash instruction.
   - find a good way to evaluate and update glosvalue's hash.
@@ -19,3 +18,4 @@ REFACTOR!!!!
 - make index in osl ref. i.e. allow `[a.a, a.b] = [1, 2]`.
 - add list concat operator.
 - add locally ren and uen operators.
+- add typeof operator.

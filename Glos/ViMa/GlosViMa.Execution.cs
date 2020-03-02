@@ -121,7 +121,7 @@ namespace GeminiLab.Glos.ViMa {
 
                         popStack(2);
                     } else if (cat == GlosOpCategory.UnaryOperator) {
-                        unaryOperator(op, ref stackTop());
+                        Calculator.ExecuteUnaryOperation(ref stackTop(), in stackTop(), op);
                     } else if (op == GlosOp.Rvc) {
                         stackTop() = ctx.GetVariableReference(stackTop().AssertString());
                     } else if (op == GlosOp.Uvc) {
@@ -260,6 +260,7 @@ namespace GeminiLab.Glos.ViMa {
                 popUntil(bptr);
                 return rv;
             } catch (GlosException ex) {
+                // bug here: if this method invokes a external function, which call this method, which throws, this statement will write to wrong stackframe
                 StoreStatus();
                 throw new GlosRuntimeException(this, ex);
             }
