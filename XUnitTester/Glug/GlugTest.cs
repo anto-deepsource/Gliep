@@ -235,7 +235,7 @@ namespace XUnitTester.Glug {
                 c = a + b;
                 d = a - b;
 
-                [c.x, c.y, d.x, d.y, a * b, a > b, a == b];
+                [c.x, c.y, d.x, d.y, a * b, a > b, a < b, a >= b, a <= b, a == b, a ~= b];
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -245,7 +245,11 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertInteger(-2)
                 .MoveNext().AssertInteger(11)
                 .MoveNext().AssertFalse()
+                .MoveNext().AssertTrue()
                 .MoveNext().AssertFalse()
+                .MoveNext().AssertTrue()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertTrue()
                 .MoveNext().AssertEnd();
         }
     }

@@ -107,7 +107,7 @@ namespace GeminiLab.Glos.ViMa {
                 if (BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint < yint);
                 else if (BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat < yfloat);
                 else if (BothString(x, y, out var xstr, out var ystr)) dest.SetBoolean(string.Compare(xstr, ystr, StringComparison.Ordinal) < 0);
-                else if (TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Lss, false)) ;
+                else if (TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Lss, false)) dest.SetBoolean(dest.Truthy());
                 else throw new GlosInvalidBinaryOperandTypeException(GlosOp.Lss, x, y);
             }
 
@@ -115,32 +115,40 @@ namespace GeminiLab.Glos.ViMa {
                 if (BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint > yint);
                 else if (BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat > yfloat);
                 else if (BothString(x, y, out var xstr, out var ystr)) dest.SetBoolean(string.Compare(xstr, ystr, StringComparison.Ordinal) > 0);
-                else if (TryInvokeMetamethod(ref dest, y, x, _viMa, GlosMetamethodNames.Lss, true)) ;
+                else if (TryInvokeMetamethod(ref dest, y, x, _viMa, GlosMetamethodNames.Lss, true)) dest.SetBoolean(dest.Truthy());
                 else throw new GlosInvalidBinaryOperandTypeException(GlosOp.Gtr, x, y);
             }
 
             public void Leq(ref GlosValue dest, in GlosValue x, in GlosValue y) {
+                GlosValue temp = default;
+
                 if (BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint <= yint);
                 else if (BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat <= yfloat);
                 else if (BothString(x, y, out var xstr, out var ystr)) dest.SetBoolean(string.Compare(xstr, ystr, StringComparison.Ordinal) <= 0);
-                else if (TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Lss, false)) {
-                    if (dest.Falsey()) {
+                else if (TryInvokeMetamethod(ref temp, x, y, _viMa, GlosMetamethodNames.Lss, false)) {
+                    if (temp.Falsey()) {
                         if (!TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Equ, false)) {
                             throw new GlosInvalidBinaryOperandTypeException(GlosOp.Lss, x, y);
                         }
+                    } else {
+                        dest.SetBoolean(true);
                     }
                 } else throw new GlosInvalidBinaryOperandTypeException(GlosOp.Leq, x, y);
             }
 
             public void Geq(ref GlosValue dest, in GlosValue x, in GlosValue y) {
+                GlosValue temp = default;
+
                 if (BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint >= yint);
                 else if (BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat >= yfloat);
                 else if (BothString(x, y, out var xstr, out var ystr)) dest.SetBoolean(string.Compare(xstr, ystr, StringComparison.Ordinal) >= 0);
-                else if (TryInvokeMetamethod(ref dest, y, x, _viMa, GlosMetamethodNames.Lss, true)) {
-                    if (dest.Falsey()) {
+                else if (TryInvokeMetamethod(ref temp, y, x, _viMa, GlosMetamethodNames.Lss, true)) {
+                    if (temp.Falsey()) {
                         if (!TryInvokeMetamethod(ref dest, y, x, _viMa, GlosMetamethodNames.Equ, true)) {
                             throw new GlosInvalidBinaryOperandTypeException(GlosOp.Lss, x, y);
                         }
+                    } else {
+                        dest.SetBoolean(true);
                     }
                 } else throw new GlosInvalidBinaryOperandTypeException(GlosOp.Geq, x, y);
             }
@@ -152,7 +160,7 @@ namespace GeminiLab.Glos.ViMa {
                 else if (BothString(x, y, out var xstring, out var ystring)) dest.SetBoolean(xstring == ystring);
                 else if (BothBoolean(x, y, out var xbool, out var ybool)) dest.SetBoolean(xbool == ybool);
                 else if (BothFunction(x, y, out var xfun, out var yfun)) dest.SetBoolean(xfun.Prototype == yfun.Prototype && xfun.ParentContext == yfun.ParentContext);
-                else if (TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Equ, false)) ;
+                else if (TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Equ, false)) dest.Truthy();
 
                 else dest.SetBoolean(x.Type == y.Type && ReferenceEquals(x.ValueObject, y.ValueObject));
             }
