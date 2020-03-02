@@ -29,7 +29,7 @@ namespace XUnitTester.Glos {
                 op = opc.Next();
                 opl = ran.Next();
                 opr = ran.Next();
-                
+
                 unchecked {
                     result = op switch {
                         GlosOp.Add => opl + opr,
@@ -72,123 +72,64 @@ namespace XUnitTester.Glos {
             var checker = GlosValueArrayChecker.Create(res).First();
 
             if (op == GlosOp.Gtr || op == GlosOp.Lss || op == GlosOp.Geq || op == GlosOp.Leq || op == GlosOp.Equ || op == GlosOp.Neq) {
-                if (result != 0) {
-                    checker.AssertTrue();
-                } else {
-                    checker.AssertFalse();
-                }
+                checker.AssertBoolean(result != 0);
             } else {
                 checker.AssertInteger(result);
             }
 
             checker.MoveNext().AssertEnd();
         }
-        
-        [Fact]
-        public void IntegerArithmeticOp() {
+
+
+
+        public static GlosOp[] BooleanBinaryOperations { get; } = new[] {
+            GlosOp.And,  GlosOp.Orr, GlosOp.Xor, GlosOp.Equ, GlosOp.Neq,
+        };
+
+        public static IEnumerable<object[]> GetBooleanBinaryOperatorTestcases() {
+            var all = new[] { true, false };
+
+            foreach (var op in BooleanBinaryOperations) {
+                foreach (var opl in all) {
+                    foreach (var opr in all) {
+                        bool result;
+                        unchecked {
+                            result = op switch {
+                                GlosOp.And => opl & opr,
+                                GlosOp.Orr => opl | opr,
+                                GlosOp.Xor => opl ^ opr,
+                                GlosOp.Equ => opl == opr,
+                                GlosOp.Neq => opl ^ opr,
+                                _ => throw new ArgumentOutOfRangeException()
+                            };
+                        }
+
+                        yield return new object[] { op, opl, opr, result };
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetBooleanBinaryOperatorTestcases))]
+        public void BooleanBinaryOperatorTest(GlosOp op, bool opl, bool opr, bool result) {
             var fgen = Builder.AddFunction();
-            var locs = new[] {
-                fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable(),
-                fgen.AllocateLocalVariable(), fgen.AllocateLocalVariable()
-            };
-            
-            fgen.AppendLd(0xefcdab8967452301);
-            fgen.AppendStLoc(locs[0]);
-            fgen.AppendLd(0x0123456789abcdef);
-            fgen.AppendStLoc(locs[1]);
-            fgen.AppendLd(-1);
-            fgen.AppendStLoc(locs[2]);
-            fgen.AppendLd(0x11111111);
-            fgen.AppendStLoc(locs[3]);
-            fgen.AppendLd(2);
-            fgen.AppendStLoc(locs[4]);
 
-            fgen.AppendLdDel();
-
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendAdd(); // expected: 0x0000000022222222
-            fgen.AppendLdLoc(locs[0]);
-            fgen.AppendLdLoc(locs[0]);
-            fgen.AppendAdd(); // expected: 0xdf9b5712ce8a4602
-            fgen.AppendLdLoc(locs[0]);
-            fgen.AppendLdLoc(locs[1]);
-            fgen.AppendAdd(); // expected: 0xf0f0f0f0f0f0f0f0
-
-            fgen.AppendLdLoc(locs[2]);
-            fgen.AppendLdLoc(locs[2]);
-            fgen.AppendSub(); // expected: 0x0000000000000000
-            fgen.AppendLdLoc(locs[1]);
-            fgen.AppendLdLoc(locs[2]);
-            fgen.AppendSub(); // expected: 0x0123456789abcdf0
-            fgen.AppendLdLoc(locs[1]);
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendSub(); // expected: 0x01234567789abcde
-
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendMul(); // expected: 0x0123456787654321
-            fgen.AppendLdLoc(locs[1]);
-            fgen.AppendLdLoc(locs[0]);
-            fgen.AppendMul(); // expected: 0xa9cf824ab13e7aef
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendLdLoc(locs[2]);
-            fgen.AppendMul(); // expected: 0xffffffffeeeeeeef
-
-            fgen.AppendLdLoc(locs[1]);
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendDiv(); // expected: 0x0000000011111111
-            fgen.AppendLdLoc(locs[2]);
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendDiv(); // expected: 0x0000000000000000
-            fgen.AppendLdLoc(locs[0]);
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendDiv(); // expected: 0xffffffff0d0d0d0d
-
-            fgen.AppendLdLoc(locs[1]);
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendMod(); // expected: 0x0000000002468ace
-            fgen.AppendLdLoc(locs[0]);
-            fgen.AppendLdLoc(locs[3]);
-            fgen.AppendMod(); // expected: 0xfffffffff0ac6824
-            fgen.AppendLdLoc(locs[0]);
-            fgen.AppendLdLoc(locs[4]);
-            fgen.AppendMod(); // expected: 0xffffffffffffffff
-
-            fgen.AppendLdLoc(locs[2]);
-            fgen.AppendNeg(); // expected: 0x0000000000000001
-            fgen.AppendLd(long.MinValue);
-            fgen.AppendNeg(); // expected: 0x8000000000000000
-
-            fgen.AppendRet();
+            fgen.AppendLdBool(opl);
+            fgen.AppendLdBool(opr);
+            fgen.AppendInstruction(op);
 
             fgen.SetEntry();
 
             var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
 
-            unchecked {
-                GlosValueArrayChecker.Create(res)
-                    .First().AssertInteger((long)0x0000000022222222ul)
-                    .MoveNext().AssertInteger((long)0xdf9b5712ce8a4602ul)
-                    .MoveNext().AssertInteger((long)0xf0f0f0f0f0f0f0f0ul)
-                    .MoveNext().AssertInteger((long)0x0000000000000000ul)
-                    .MoveNext().AssertInteger((long)0x0123456789abcdf0ul)
-                    .MoveNext().AssertInteger((long)0x01234567789abcdeul)
-                    .MoveNext().AssertInteger((long)0x0123456787654321ul)
-                    .MoveNext().AssertInteger((long)0xa9cf824ab13e7aeful)
-                    .MoveNext().AssertInteger((long)0xffffffffeeeeeeeful)
-                    .MoveNext().AssertInteger((long)0x0000000011111111ul)
-                    .MoveNext().AssertInteger((long)0x0000000000000000ul)
-                    .MoveNext().AssertInteger((long)0xffffffff0d0d0d0dul)
-                    .MoveNext().AssertInteger((long)0x0000000002468aceul)
-                    .MoveNext().AssertInteger((long)0xfffffffff0ac6824ul)
-                    .MoveNext().AssertInteger((long)0xfffffffffffffffful)
-                    .MoveNext().AssertInteger((long)0x0000000000000001ul)
-                    .MoveNext().AssertInteger((long)0x8000000000000000ul)
-                    .MoveNext().AssertEnd();
-            }
+            GlosValueArrayChecker.Create(res)
+                .First().AssertBoolean(result)
+                .MoveNext().AssertEnd();
         }
-        
+
+
+
         [Fact]
         public void NumericArithmeticOp() {
             var fgen = Builder.AddFunction();
@@ -293,6 +234,9 @@ namespace XUnitTester.Glos {
         public void FunctionCall() {
             var inc = Builder.AddFunction();
 
+            inc.AppendLdDel(); // duplicate LdDel to test whether ViMa clear del stack of callee correctly.
+            inc.AppendLdDel();
+            inc.AppendLdDel();
             inc.AppendLdArg(0);
             inc.AppendLd(1);
             inc.AppendAdd();

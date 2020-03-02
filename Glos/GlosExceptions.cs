@@ -13,19 +13,24 @@ namespace GeminiLab.Glos {
         public GlosRuntimeException(GlosViMa viMa, Exception innerException)
             : base(string.Format(i18n.Strings.DefaultMessageGlosRuntimeExceptionWithInner, innerException.GetType().Name, innerException.Message), innerException) {
             ViMa = viMa;
+            CallStack = ViMa.CallStackFrames.ToArray();
         }
 
         public GlosRuntimeException(GlosViMa viMa, string? message = null)
             : base(message ?? i18n.Strings.DefaultMessageGlosRuntimeException) {
             ViMa = viMa;
+            CallStack = ViMa.CallStackFrames.ToArray();
         }
 
         public GlosRuntimeException(GlosViMa viMa, string message, Exception innerException)
             : base(message, innerException) {
             ViMa = viMa;
+            CallStack = ViMa.CallStackFrames.ToArray();
         }
 
         public GlosViMa ViMa { get; }
+
+        public GlosStackFrame[] CallStack { get; }
     }
 
     public class GlosUnknownOpException : GlosException {

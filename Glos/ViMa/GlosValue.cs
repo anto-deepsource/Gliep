@@ -42,6 +42,7 @@ namespace GeminiLab.Glos.ViMa {
                 GlosValueType.Nil => "nil",
                 GlosValueType.Integer => ValueNumber.Integer.ToString(),
                 GlosValueType.String => (ValueObject as string)!,
+                GlosValueType.Boolean => this.AssumeBoolean() ? "true" : "false",
                 _ => ""
             };
         }

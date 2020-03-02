@@ -15,6 +15,7 @@ namespace GeminiLab.Glug.Parser {
             return IsLiteral(type)
                    || type == GlugTokenType.Identifier
                    || type == GlugTokenType.OpSub
+                   || type == GlugTokenType.OpNot
                    || type == GlugTokenType.SymbolLParen
                    || type == GlugTokenType.KeywordIf
                    || type == GlugTokenType.KeywordWhile

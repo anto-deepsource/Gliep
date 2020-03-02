@@ -71,12 +71,46 @@ namespace XUnitTester.Glos {
         }
 
         [Fact]
-        public void UnknownOpException() {
+        public void UnknownOp() {
             var fun = Builder.AddFunctionRaw(new[] {
                 (byte)GlosOp.Invalid,
             }, 0);
 
             Builder.Entry = fun;
+
+            var exception = Assert.Throws<GlosRuntimeException>(() => {
+                ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            });
+
+            // Assert.Equal((byte)0xff, exception.Op);
+        }
+
+        [Fact]
+        public void NotCallable() {
+            var fgen = Builder.AddFunction();
+
+            fgen.AppendLdDel();
+            fgen.AppendLd(1);
+            fgen.AppendCall();
+
+            fgen.SetEntry();
+
+            var exception = Assert.Throws<GlosRuntimeException>(() => {
+                ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            });
+
+            // Assert.Equal((byte)0xff, exception.Op);
+        }
+
+        [Fact]
+        public void AssertionFailed() {
+            var fgen = Builder.AddFunction();
+
+            fgen.AppendLd(1);
+            fgen.AppendGmt();
+            fgen.AppendRet();
+
+            fgen.SetEntry();
 
             var exception = Assert.Throws<GlosRuntimeException>(() => {
                 ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());

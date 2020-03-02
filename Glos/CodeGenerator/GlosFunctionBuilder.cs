@@ -107,6 +107,8 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendLdTrue() => AppendInstruction(GlosOp.LdTrue);
         public void AppendLdFalse() => AppendInstruction(GlosOp.LdFalse);
 
+        public void AppendLdBool(bool value) => AppendInstruction(value ? GlosOp.LdTrue : GlosOp.LdFalse);
+
         // load (integer)
         public void AppendLd(long imm) => AppendInstruction(GlosOp.Ld, immediate: imm);
         public void AppendLd(ulong imm) => AppendInstruction(GlosOp.Ld, immediate: unchecked((long)imm));

@@ -8,8 +8,8 @@ namespace GeminiLab.Glos.ViMa {
 
         public static bool BothInteger(in GlosValue x, in GlosValue y, out long xv, out long yv) {
             if (x.Type == GlosValueType.Integer && y.Type == GlosValueType.Integer) {
-                xv = x.ValueNumber.Integer;
-                yv = y.ValueNumber.Integer;
+                xv = x.AssumeInteger();
+                yv = y.AssumeInteger();
 
                 return true;
             }
@@ -24,22 +24,22 @@ namespace GeminiLab.Glos.ViMa {
 
             if (x.Type == GlosValueType.Integer) {
                 xflag = true;
-                xv = x.ValueNumber.Integer;
+                xv = x.AssumeInteger();
             }
 
             if (x.Type == GlosValueType.Float) {
                 xflag = true;
-                xv = x.ValueNumber.Float;
+                xv = x.AssumeFloat();
             }
 
             if (y.Type == GlosValueType.Integer) {
                 yflag = true;
-                yv = y.ValueNumber.Integer;
+                yv = y.AssumeInteger();
             }
 
             if (y.Type == GlosValueType.Float) {
                 yflag = true;
-                yv = y.ValueNumber.Float;
+                yv = y.AssumeFloat();
             }
 
             if (xflag && yflag) return true;
@@ -50,8 +50,8 @@ namespace GeminiLab.Glos.ViMa {
 
         public static bool BothBoolean(in GlosValue x, in GlosValue y, out bool xv, out bool yv) {
             if (x.Type == GlosValueType.Boolean && y.Type == GlosValueType.Boolean) {
-                xv = x.Truthy();
-                yv = y.Truthy();
+                xv = x.AssumeBoolean();
+                yv = y.AssumeBoolean();
 
                 return true;
             }
@@ -63,8 +63,8 @@ namespace GeminiLab.Glos.ViMa {
         public static bool BothString(in GlosValue x, in GlosValue y, [NotNullWhen(true)] out string? xv,
             [NotNullWhen(true)] out string? yv) {
             if (x.Type == GlosValueType.String && y.Type == GlosValueType.String) {
-                xv = x.AssertString();
-                yv = y.AssertString();
+                xv = x.AssumeString();
+                yv = y.AssumeString();
 
                 return true;
             }
@@ -76,8 +76,8 @@ namespace GeminiLab.Glos.ViMa {
         public static bool BothFunction(in GlosValue x, in GlosValue y, [NotNullWhen(true)] out GlosFunction? xv,
             [NotNullWhen(true)] out GlosFunction? yv) {
             if (x.Type == GlosValueType.Function && y.Type == GlosValueType.Function) {
-                xv = x.AssertFunction();
-                yv = y.AssertFunction();
+                xv = x.AssumeFunction();
+                yv = y.AssumeFunction();
 
                 return true;
             }
@@ -89,8 +89,8 @@ namespace GeminiLab.Glos.ViMa {
         public static bool BothExternalFunction(in GlosValue x, in GlosValue y,
             [NotNullWhen(true)] out GlosExternalFunction? xv, [NotNullWhen(true)] out GlosExternalFunction? yv) {
             if (x.Type == GlosValueType.Function && y.Type == GlosValueType.Function) {
-                xv = x.AssertExternalFunction();
-                yv = y.AssertExternalFunction();
+                xv = x.AssumeExternalFunction();
+                yv = y.AssumeExternalFunction();
 
                 return true;
             }

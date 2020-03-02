@@ -1,4 +1,6 @@
-﻿namespace GeminiLab.Glos.ViMa {
+﻿using System.Runtime.CompilerServices;
+
+namespace GeminiLab.Glos.ViMa {
     public static class GlosValueExtensions {
         public static ref GlosValue SetNil(this ref GlosValue v) {
             v.ValueNumber.Integer = 0;
@@ -78,47 +80,54 @@
         }
 
         public static long AssertInteger(this in GlosValue v) {
-            if (v.Type == GlosValueType.Integer) return v.ValueNumber.Integer;
+            if (v.Type == GlosValueType.Integer) return v.AssumeInteger();
             throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Integer);
         }
 
         public static double AssertFloat(this in GlosValue v) {
-            if (v.Type == GlosValueType.Float) return v.ValueNumber.Float;
+            if (v.Type == GlosValueType.Float) return v.AssumeFloat();
             throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Float);
         }
 
         public static bool AssertBoolean(this in GlosValue v) {
-            if (v.Type == GlosValueType.Boolean) return v.ValueNumber.Integer != 0;
+            if (v.Type == GlosValueType.Boolean) return v.AssumeBoolean();
             throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Boolean);
         }
 
         public static GlosTable AssertTable(this in GlosValue v) {
-            if (v.Type == GlosValueType.Table && v.ValueObject is GlosTable table) return table;
+            if (v.Type == GlosValueType.Table) return v.AssumeTable(); // this method no longer checks ill-formed GlosValue, so do following methods
             throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Table);
         }
 
         public static string AssertString(this in GlosValue v) {
-            if (v.Type == GlosValueType.String && v.ValueObject is string s) return s;
+            if (v.Type == GlosValueType.String) return v.AssumeString();
             throw new GlosValueTypeAssertionFailedException(v, GlosValueType.String);
         }
 
         public static GlosFunction AssertFunction(this in GlosValue v) {
-            if (v.Type == GlosValueType.Function && v.ValueObject is GlosFunction fun) return fun;
+            if (v.Type == GlosValueType.Function) return v.AssumeFunction();
             throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Function);
         }
 
         public static GlosExternalFunction AssertExternalFunction(this in GlosValue v) {
-            if (v.Type == GlosValueType.ExternalFunction && v.ValueObject is GlosExternalFunction fun) return fun;
+            if (v.Type == GlosValueType.ExternalFunction) return v.AssumeExternalFunction();
             throw new GlosValueTypeAssertionFailedException(v, GlosValueType.ExternalFunction);
         }
 
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long AssumeInteger(this in GlosValue v) => v.ValueNumber.Integer;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double AssumeFloat(this in GlosValue v) => v.ValueNumber.Float;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool AssumeBoolean(this in GlosValue v) => v.ValueNumber.Integer != 0;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GlosTable AssumeTable(this in GlosValue v) => (GlosTable)v.ValueObject!;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string AssumeString(this in GlosValue v) => (string)v.ValueObject!;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GlosFunction AssumeFunction(this in GlosValue v) => (GlosFunction)v.ValueObject!;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GlosExternalFunction AssumeExternalFunction(this in GlosValue v) => (GlosExternalFunction)v.ValueObject!;
 
 
