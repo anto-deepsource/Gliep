@@ -70,51 +70,51 @@ namespace GeminiLab.Glug.Tokenizer {
 
                     ++ptr;
                     if (!last && next == '>') { ++ptr; yield return new GlugToken {Type = GlugTokenType.SymbolRArrow}; }
-                    else yield return new GlugToken { Type = GlugTokenType.OpSub };
+                    else yield return new GlugToken { Type = GlugTokenType.SymbolSub };
                 } else if (c == '+') {
                     ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.OpAdd };
+                    yield return new GlugToken { Type = GlugTokenType.SymbolAdd };
                 } else if (c == '*') {
                     ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.OpMul };
+                    yield return new GlugToken { Type = GlugTokenType.SymbolMul };
                 } else if (c == '/') {
                     ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.OpDiv };
+                    yield return new GlugToken { Type = GlugTokenType.SymbolDiv };
                 } else if (c == '%') {
                     ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.OpMod };
+                    yield return new GlugToken { Type = GlugTokenType.SymbolMod };
                 } else if (c == '<') {
                     ++ptr;
 
-                    if (last) yield return new GlugToken { Type = GlugTokenType.OpLss };
-                    else if (next == '<') { ++ptr; yield return new GlugToken { Type = GlugTokenType.OpLsh }; }
-                    else if (next == '=') { ++ptr; yield return new GlugToken { Type = GlugTokenType.OpLeq }; }
-                    else yield return new GlugToken { Type = GlugTokenType.OpLss };
+                    if (last) yield return new GlugToken { Type = GlugTokenType.SymbolLss };
+                    else if (next == '<') { ++ptr; yield return new GlugToken { Type = GlugTokenType.SymbolLsh }; }
+                    else if (next == '=') { ++ptr; yield return new GlugToken { Type = GlugTokenType.SymbolLeq }; }
+                    else yield return new GlugToken { Type = GlugTokenType.SymbolLss };
                 } else if (c == '>') {
                     ++ptr;
 
-                    if (last) yield return new GlugToken { Type = GlugTokenType.OpGtr };
-                    else if (next == '>') { ++ptr; yield return new GlugToken { Type = GlugTokenType.OpRsh }; } 
-                    else if (next == '=') { ++ptr; yield return new GlugToken { Type = GlugTokenType.OpGeq }; } 
-                    else yield return new GlugToken { Type = GlugTokenType.OpGtr };
+                    if (last) yield return new GlugToken { Type = GlugTokenType.SymbolGtr };
+                    else if (next == '>') { ++ptr; yield return new GlugToken { Type = GlugTokenType.SymbolRsh }; } 
+                    else if (next == '=') { ++ptr; yield return new GlugToken { Type = GlugTokenType.SymbolGeq }; } 
+                    else yield return new GlugToken { Type = GlugTokenType.SymbolGtr };
                 } else if (c == '&') {
                     ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.OpAnd };
+                    yield return new GlugToken { Type = GlugTokenType.SymbolAnd };
                 } else if (c == '|') {
                     ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.OpOrr };
+                    yield return new GlugToken { Type = GlugTokenType.SymbolOrr };
                 } else if (c == '^') {
                     ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.OpXor };
+                    yield return new GlugToken { Type = GlugTokenType.SymbolXor };
                 } else if (c == '~') {
                     ++ptr;
 
-                    if (!last && next == '=') { ++ptr; yield return new GlugToken { Type = GlugTokenType.OpNeq }; }
-                    else yield return new GlugToken { Type = GlugTokenType.OpNot };
+                    if (!last && next == '=') { ++ptr; yield return new GlugToken { Type = GlugTokenType.SymbolNeq }; }
+                    else yield return new GlugToken { Type = GlugTokenType.SymbolNot };
                 } else if (c == '=') {
                     ++ptr;
 
-                    if (!last && next == '=') { ++ptr; yield return new GlugToken {Type = GlugTokenType.OpEqu}; }
+                    if (!last && next == '=') { ++ptr; yield return new GlugToken {Type = GlugTokenType.SymbolEqu}; }
                     else yield return new GlugToken { Type = GlugTokenType.SymbolAssign };
                 } else if (IsIdentifierLeadingChar(c)) {
                     var id = ReadIdentifier(line, len, ref ptr);
@@ -154,7 +154,7 @@ namespace GeminiLab.Glug.Tokenizer {
                     yield return new GlugToken { Type = GlugTokenType.SymbolSemicolon };
                 } else if (c == '$') {
                     ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.OpDollar };
+                    yield return new GlugToken { Type = GlugTokenType.SymbolDollar };
                 } else if (c == ',') {
                     ++ptr;
                     yield return new GlugToken { Type = GlugTokenType.SymbolComma };
@@ -163,7 +163,7 @@ namespace GeminiLab.Glug.Tokenizer {
                     yield return new GlugToken { Type = GlugTokenType.SymbolBackslash };
                 } else if (c == '@') {
                     ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.OpAt };
+                    yield return new GlugToken { Type = GlugTokenType.SymbolAt };
                 } else if (c == '#') {
                     yield break;
                 } else if (c == '\"') {

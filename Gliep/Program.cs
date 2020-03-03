@@ -137,8 +137,8 @@ namespace GeminiLab.Gliep {
             GlugToken? tok;
             while ((tok = stream.GetToken()) != null) {
                 var output = tok.Type.ToString();
-                if (((int)tok.Type & 0x2) != 0) output += $", {tok.ValueInt}(0x{tok.ValueInt:x16})";
-                if (((int)tok.Type & 0x1) != 0) output += $", \"{tok.ValueString}\"";
+                if (tok.Type.HasInteger()) output += $", {tok.ValueInt}(0x{tok.ValueInt:x16})";
+                if (tok.Type.HasString()) output += $", \"{tok.ValueString}\"";
                 Console.WriteLine(output);
             }
         }

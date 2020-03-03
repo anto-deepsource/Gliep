@@ -7,15 +7,11 @@ using GeminiLab.Glug.Tokenizer;
 
 namespace GeminiLab.Glug.Parser {
     public static class GlugParser {
-        private static bool IsLiteral(GlugTokenType type) {
-            return ((uint)type >> 20) == 0x000;
-        }
-
         private static bool LikelyExpr(GlugTokenType type) {
-            return IsLiteral(type)
+            return type.GetCategory() == GlugTokenTypeCategory.Literal
                    || type == GlugTokenType.Identifier
-                   || type == GlugTokenType.OpSub
-                   || type == GlugTokenType.OpNot
+                   || type == GlugTokenType.SymbolSub
+                   || type == GlugTokenType.SymbolNot
                    || type == GlugTokenType.SymbolLParen
                    || type == GlugTokenType.KeywordIf
                    || type == GlugTokenType.KeywordWhile
@@ -31,56 +27,56 @@ namespace GeminiLab.Glug.Parser {
 
         private static GlugBiOpType TokenToBiOp(GlugTokenType op) => op switch {
             GlugTokenType.SymbolAssign => GlugBiOpType.Assign,
-            GlugTokenType.OpOrr => GlugBiOpType.Orr,
-            GlugTokenType.OpXor => GlugBiOpType.Xor,
-            GlugTokenType.OpAnd => GlugBiOpType.And,
-            GlugTokenType.OpEqu => GlugBiOpType.Equ,
-            GlugTokenType.OpNeq => GlugBiOpType.Neq,
-            GlugTokenType.OpGtr => GlugBiOpType.Gtr,
-            GlugTokenType.OpLss => GlugBiOpType.Lss,
-            GlugTokenType.OpGeq => GlugBiOpType.Geq,
-            GlugTokenType.OpLeq => GlugBiOpType.Leq,
-            GlugTokenType.OpLsh => GlugBiOpType.Lsh,
-            GlugTokenType.OpRsh => GlugBiOpType.Rsh,
-            GlugTokenType.OpAdd => GlugBiOpType.Add,
-            GlugTokenType.OpSub => GlugBiOpType.Sub,
-            GlugTokenType.OpMul => GlugBiOpType.Mul,
-            GlugTokenType.OpDiv => GlugBiOpType.Div,
-            GlugTokenType.OpMod => GlugBiOpType.Mod,
-            GlugTokenType.OpDollar => GlugBiOpType.Call,
+            GlugTokenType.SymbolOrr => GlugBiOpType.Orr,
+            GlugTokenType.SymbolXor => GlugBiOpType.Xor,
+            GlugTokenType.SymbolAnd => GlugBiOpType.And,
+            GlugTokenType.SymbolEqu => GlugBiOpType.Equ,
+            GlugTokenType.SymbolNeq => GlugBiOpType.Neq,
+            GlugTokenType.SymbolGtr => GlugBiOpType.Gtr,
+            GlugTokenType.SymbolLss => GlugBiOpType.Lss,
+            GlugTokenType.SymbolGeq => GlugBiOpType.Geq,
+            GlugTokenType.SymbolLeq => GlugBiOpType.Leq,
+            GlugTokenType.SymbolLsh => GlugBiOpType.Lsh,
+            GlugTokenType.SymbolRsh => GlugBiOpType.Rsh,
+            GlugTokenType.SymbolAdd => GlugBiOpType.Add,
+            GlugTokenType.SymbolSub => GlugBiOpType.Sub,
+            GlugTokenType.SymbolMul => GlugBiOpType.Mul,
+            GlugTokenType.SymbolDiv => GlugBiOpType.Div,
+            GlugTokenType.SymbolMod => GlugBiOpType.Mod,
+            GlugTokenType.SymbolDollar => GlugBiOpType.Call,
             GlugTokenType.OpCall => GlugBiOpType.Call,
-            GlugTokenType.OpAt => GlugBiOpType.Index,
+            GlugTokenType.SymbolAt => GlugBiOpType.Index,
             GlugTokenType.SymbolDot => GlugBiOpType.Index,
             _ => throw new ArgumentOutOfRangeException(),
         };
 
         private static GlugUnOpType TokenToUnOp(GlugTokenType op) => op switch {
-            GlugTokenType.OpSub => GlugUnOpType.Neg,
-            GlugTokenType.OpNot => GlugUnOpType.Not,
+            GlugTokenType.SymbolSub => GlugUnOpType.Neg,
+            GlugTokenType.SymbolNot => GlugUnOpType.Not,
             _ => throw new ArgumentOutOfRangeException(),
         };
 
         private static int Precedence(GlugTokenType op) => op switch {
             GlugTokenType.SymbolAssign => 0x05,
-            GlugTokenType.OpOrr => 0x10,
-            GlugTokenType.OpXor => 0x20,
-            GlugTokenType.OpAnd => 0x30,
-            GlugTokenType.OpEqu => 0x40,
-            GlugTokenType.OpNeq => 0x40,
-            GlugTokenType.OpGtr => 0x50,
-            GlugTokenType.OpLss => 0x50,
-            GlugTokenType.OpGeq => 0x50,
-            GlugTokenType.OpLeq => 0x50,
-            GlugTokenType.OpLsh => 0x60,
-            GlugTokenType.OpRsh => 0x60,
-            GlugTokenType.OpAdd => 0x70,
-            GlugTokenType.OpSub => 0x70,
-            GlugTokenType.OpMul => 0x80,
-            GlugTokenType.OpDiv => 0x80,
-            GlugTokenType.OpMod => 0x80,
-            GlugTokenType.OpDollar => 0x90,
+            GlugTokenType.SymbolOrr => 0x10,
+            GlugTokenType.SymbolXor => 0x20,
+            GlugTokenType.SymbolAnd => 0x30,
+            GlugTokenType.SymbolEqu => 0x40,
+            GlugTokenType.SymbolNeq => 0x40,
+            GlugTokenType.SymbolGtr => 0x50,
+            GlugTokenType.SymbolLss => 0x50,
+            GlugTokenType.SymbolGeq => 0x50,
+            GlugTokenType.SymbolLeq => 0x50,
+            GlugTokenType.SymbolLsh => 0x60,
+            GlugTokenType.SymbolRsh => 0x60,
+            GlugTokenType.SymbolAdd => 0x70,
+            GlugTokenType.SymbolSub => 0x70,
+            GlugTokenType.SymbolMul => 0x80,
+            GlugTokenType.SymbolDiv => 0x80,
+            GlugTokenType.SymbolMod => 0x80,
+            GlugTokenType.SymbolDollar => 0x90,
             GlugTokenType.OpCall => 0xa0,
-            GlugTokenType.OpAt => 0xb0,
+            GlugTokenType.SymbolAt => 0xb0,
             GlugTokenType.SymbolDot => 0xc0,
             _ => -1,
         };
@@ -88,25 +84,25 @@ namespace GeminiLab.Glug.Parser {
         // contract: all operators with same precedence have same associativity
         private static bool LeftAssociate(GlugTokenType op) => op switch {
             GlugTokenType.SymbolAssign => false,
-            GlugTokenType.OpOrr => true,
-            GlugTokenType.OpXor => true,
-            GlugTokenType.OpAnd => true,
-            GlugTokenType.OpEqu => true,
-            GlugTokenType.OpNeq => true,
-            GlugTokenType.OpGtr => true,
-            GlugTokenType.OpLss => true,
-            GlugTokenType.OpGeq => true,
-            GlugTokenType.OpLeq => true,
-            GlugTokenType.OpLsh => true,
-            GlugTokenType.OpRsh => true,
-            GlugTokenType.OpAdd => true,
-            GlugTokenType.OpSub => true,
-            GlugTokenType.OpMul => true,
-            GlugTokenType.OpDiv => true,
-            GlugTokenType.OpMod => true,
-            GlugTokenType.OpDollar => false,
+            GlugTokenType.SymbolOrr => true,
+            GlugTokenType.SymbolXor => true,
+            GlugTokenType.SymbolAnd => true,
+            GlugTokenType.SymbolEqu => true,
+            GlugTokenType.SymbolNeq => true,
+            GlugTokenType.SymbolGtr => true,
+            GlugTokenType.SymbolLss => true,
+            GlugTokenType.SymbolGeq => true,
+            GlugTokenType.SymbolLeq => true,
+            GlugTokenType.SymbolLsh => true,
+            GlugTokenType.SymbolRsh => true,
+            GlugTokenType.SymbolAdd => true,
+            GlugTokenType.SymbolSub => true,
+            GlugTokenType.SymbolMul => true,
+            GlugTokenType.SymbolDiv => true,
+            GlugTokenType.SymbolMod => true,
+            GlugTokenType.SymbolDollar => false,
             GlugTokenType.OpCall => true,
-            GlugTokenType.OpAt => true,
+            GlugTokenType.SymbolAt => true,
             GlugTokenType.SymbolDot => true,
             _ => throw new ArgumentOutOfRangeException(),
         };
@@ -227,12 +223,12 @@ namespace GeminiLab.Glug.Parser {
                 };
             }
 
-            if (tok.Type == GlugTokenType.OpSub) {
+            if (tok.Type == GlugTokenType.SymbolSub) {
                 stream.GetToken();
                 return new UnOp(GlugUnOpType.Neg, ReadExprItem(stream));
             }
 
-            if (tok.Type == GlugTokenType.OpNot) {
+            if (tok.Type == GlugTokenType.SymbolNot) {
                 stream.GetToken();
                 return new UnOp(GlugUnOpType.Not, ReadExprItem(stream));
             }
@@ -400,7 +396,7 @@ namespace GeminiLab.Glug.Parser {
                     stream.GetToken();
                     key = new LiteralString(ReadIdentifier(stream));
                 } else {
-                    if (tok.Type == GlugTokenType.OpAt) stream.GetToken();
+                    if (tok.Type == GlugTokenType.SymbolAt) stream.GetToken();
                     key = ReadExprGreedily(stream);
                 }
 

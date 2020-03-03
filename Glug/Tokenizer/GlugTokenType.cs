@@ -2,7 +2,7 @@ namespace GeminiLab.Glug.Tokenizer {
     public enum GlugTokenTypeCategory {
         Literal     = 0x000,
         Symbol      = 0x001,
-        Op          = 0x002,
+        Pseudo      = 0x002,
         Keyword     = 0x003,
         Identifier  = 0x004,
     }
@@ -12,7 +12,7 @@ namespace GeminiLab.Glug.Tokenizer {
     // bit 7 ... bit 0
     // | not used * 5 | a pseudo-token | with a integer | with a string |
     // pseudo token: won't be used by tokenizer, used in other place
-    public enum GlugTokenType {
+    public enum GlugTokenType : uint {
         LiteralNil      = 0x000_000_00,
         LiteralTrue     = 0x000_001_00,
         LiteralFalse    = 0x000_002_00,
@@ -34,29 +34,26 @@ namespace GeminiLab.Glug.Tokenizer {
         SymbolDot       = 0x001_00d_00,
         SymbolBackquote = 0x001_00e_00,
         SymbolColon     = 0x001_00f_00,
-        OpAdd           = 0x002_000_00,
-        OpSub           = 0x002_001_00,
-        OpMul           = 0x002_002_00,
-        OpDiv           = 0x002_003_00,
-        OpMod           = 0x002_004_00,
-        OpLsh           = 0x002_005_00,
-        OpRsh           = 0x002_006_00,
-        OpAnd           = 0x002_007_00,
-        OpOrr           = 0x002_008_00,
-        OpXor           = 0x002_009_00,
-        OpNot           = 0x002_00a_00,
-        OpNeg           = 0x002_00b_04, // used in UnOp only
-        OpGtr           = 0x002_00c_00,
-        OpLss           = 0x002_00d_00,
-        OpGeq           = 0x002_00e_00,
-        OpLeq           = 0x002_00f_00,
-        OpEqu           = 0x002_010_00,
-        OpNeq           = 0x002_011_00,
-        OpHash          = 0x002_012_00,
-        OpCall          = 0x002_013_04,
-        OpDollar        = 0x002_014_00,
-        OpAt            = 0x002_015_00,
-        // KeywordAt       = 0x003_000_00,
+        SymbolAdd       = 0x001_010_00,
+        SymbolSub       = 0x001_011_00,
+        SymbolMul       = 0x001_012_00,
+        SymbolDiv       = 0x001_013_00,
+        SymbolMod       = 0x001_014_00,
+        SymbolLsh       = 0x001_015_00,
+        SymbolRsh       = 0x001_016_00,
+        SymbolAnd       = 0x001_017_00,
+        SymbolOrr       = 0x001_018_00,
+        SymbolXor       = 0x001_019_00,
+        SymbolNot       = 0x001_01a_00,
+        SymbolGtr       = 0x001_01b_00,
+        SymbolLss       = 0x001_01c_00,
+        SymbolGeq       = 0x001_01d_00,
+        SymbolLeq       = 0x001_01e_00,
+        SymbolEqu       = 0x001_01f_00,
+        SymbolNeq       = 0x001_020_00,
+        SymbolDollar    = 0x001_021_00,
+        SymbolAt        = 0x001_022_00,
+        OpCall          = 0x002_000_04,
         KeywordIf       = 0x003_001_00,
         KeywordElif     = 0x003_002_00,
         KeywordElse     = 0x003_003_00,
@@ -65,5 +62,23 @@ namespace GeminiLab.Glug.Tokenizer {
         KeywordWhile    = 0x003_006_00,
         Identifier      = 0x004_000_01,
         NotAToken       = 0x7ff_000_04,
+    }
+
+    public static class GlugTokenTypeExtensions {
+        public static GlugTokenTypeCategory GetCategory(this GlugTokenType type) {
+            return (GlugTokenTypeCategory)((uint)type >> 20);
+        }
+
+        public static bool IsPseudo(this GlugTokenType type) {
+            return ((uint)type & 0x4) != 0;
+        }
+
+        public static bool HasInteger(this GlugTokenType type) {
+            return ((uint)type & 0x2) != 0;
+        }
+
+        public static bool HasString(this GlugTokenType type) {
+            return ((uint)type & 0x1) != 0;
+        }
     }
 }
