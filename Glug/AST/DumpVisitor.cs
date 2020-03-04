@@ -111,6 +111,7 @@ namespace GeminiLab.Glug.AST {
             Writer.WriteLine(val.Op switch {
                 GlugUnOpType.Not => "not",
                 GlugUnOpType.Neg => "neg",
+                GlugUnOpType.Typeof => "typeof",
                 _ => throw new ArgumentOutOfRangeException(),
             });
             Writer.IncreaseIndent();

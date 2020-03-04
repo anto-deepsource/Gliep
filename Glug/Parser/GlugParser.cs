@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 using GeminiLab.Glug.AST;
@@ -9,9 +10,8 @@ namespace GeminiLab.Glug.Parser {
     public static class GlugParser {
         private static bool LikelyExpr(GlugTokenType type) {
             return type.GetCategory() == GlugTokenTypeCategory.Literal
+                   || IsUnOp(type)
                    || type == GlugTokenType.Identifier
-                   || type == GlugTokenType.SymbolSub
-                   || type == GlugTokenType.SymbolNot
                    || type == GlugTokenType.SymbolLParen
                    || type == GlugTokenType.KeywordIf
                    || type == GlugTokenType.KeywordWhile
@@ -47,12 +47,6 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.OpCall => GlugBiOpType.Call,
             GlugTokenType.SymbolAt => GlugBiOpType.Index,
             GlugTokenType.SymbolDot => GlugBiOpType.Index,
-            _ => throw new ArgumentOutOfRangeException(),
-        };
-
-        private static GlugUnOpType TokenToUnOp(GlugTokenType op) => op switch {
-            GlugTokenType.SymbolSub => GlugUnOpType.Neg,
-            GlugTokenType.SymbolNot => GlugUnOpType.Not,
             _ => throw new ArgumentOutOfRangeException(),
         };
 
@@ -104,6 +98,18 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.OpCall => true,
             GlugTokenType.SymbolAt => true,
             GlugTokenType.SymbolDot => true,
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+
+        private static bool IsUnOp(GlugTokenType op) => 
+            op == GlugTokenType.SymbolSub ||
+            op == GlugTokenType.SymbolNot ||
+            op == GlugTokenType.SymbolQuote;
+
+        private static GlugUnOpType TokenToUnOp(GlugTokenType op) => op switch {
+            GlugTokenType.SymbolSub => GlugUnOpType.Neg,
+            GlugTokenType.SymbolNot => GlugUnOpType.Not,
+            GlugTokenType.SymbolQuote => GlugUnOpType.Typeof,
             _ => throw new ArgumentOutOfRangeException(),
         };
 
@@ -210,7 +216,7 @@ namespace GeminiLab.Glug.Parser {
         private static Expr ReadExprItem(LookAheadTokenStream stream) {
             var tok = stream.PeekTokenNonNull();
 
-            if (IsLiteral(tok.Type)) {
+            if (tok.Type.GetCategory() == GlugTokenTypeCategory.Literal) {
                 tok = stream.GetTokenNonNull();
 
                 return tok.Type switch {
@@ -223,16 +229,11 @@ namespace GeminiLab.Glug.Parser {
                 };
             }
 
-            if (tok.Type == GlugTokenType.SymbolSub) {
+            if (IsUnOp(tok.Type)) {
                 stream.GetToken();
-                return new UnOp(GlugUnOpType.Neg, ReadExprItem(stream));
+                return new UnOp(TokenToUnOp(tok.Type), ReadExprItem(stream));
             }
-
-            if (tok.Type == GlugTokenType.SymbolNot) {
-                stream.GetToken();
-                return new UnOp(GlugUnOpType.Not, ReadExprItem(stream));
-            }
-
+            
             if (tok.Type == GlugTokenType.SymbolBackquote) {
                 stream.GetToken();
                 return new Metatable(ReadExprItem(stream));

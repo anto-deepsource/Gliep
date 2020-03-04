@@ -53,6 +53,7 @@ namespace GeminiLab.Glug.Tokenizer {
         SymbolNeq       = 0x001_020_00,
         SymbolDollar    = 0x001_021_00,
         SymbolAt        = 0x001_022_00,
+        SymbolQuote     = 0x001_023_00,
         OpCall          = 0x002_000_04,
         KeywordIf       = 0x003_001_00,
         KeywordElif     = 0x003_002_00,

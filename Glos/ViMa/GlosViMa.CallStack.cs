@@ -29,6 +29,6 @@ namespace GeminiLab.Glos.ViMa {
             _callStack.PopStack().Function = null!;
         }
 
-        public ReadOnlySpan<GlosStackFrame> CallStackFrames => _callStack.AsSpan();
+        public ReadOnlySpan<GlosStackFrame> CallStackFrames => _callStack.AsSpan(0, _cptr);
     }
 }

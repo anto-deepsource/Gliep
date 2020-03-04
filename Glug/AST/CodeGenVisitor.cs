@@ -141,6 +141,9 @@ namespace GeminiLab.Glug.AST {
             case GlugUnOpType.Not:
                 CurrentFunction!.AppendNot();
                 break;
+            case GlugUnOpType.Typeof:
+                CurrentFunction!.AppendTypeof();
+                break;
             }
         }
 

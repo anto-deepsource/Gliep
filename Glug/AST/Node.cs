@@ -144,6 +144,7 @@ namespace GeminiLab.Glug.AST {
     public enum GlugUnOpType {
         Not,
         Neg,
+        Typeof,
     }
 
     public class UnOp : Expr {

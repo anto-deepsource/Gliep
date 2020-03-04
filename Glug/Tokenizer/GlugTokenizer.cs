@@ -193,6 +193,9 @@ namespace GeminiLab.Glug.Tokenizer {
                 } else if (c == ':') {
                     ++ptr;
                     yield return new GlugToken { Type = GlugTokenType.SymbolColon };
+                } else if (c == '\'') {
+                    ++ptr;
+                    yield return new GlugToken { Type = GlugTokenType.SymbolQuote };
                 } else {
                     ++ptr;
                 }

@@ -53,11 +53,13 @@ namespace XUnitTester.Glug {
                 fn counter [begin] ( begin = begin - 1; fn -> begin = begin + 1 );
                 [!ca, cb, !cc, cd] = [counter 0, counter(0), counter[7], counter$-1];
 
-                return [ca[], ca[], ca[], cb[], ca[], cc[], ca[], cd[], ca[]];
+                return [ca == cb, ca ~= cb, ca[], ca[], ca[], cb[], ca[], cc[], ca[], cd[], ca[]];
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(0)
+                .First().AssertFalse()
+                .MoveNext().AssertTrue()
+                .MoveNext().AssertInteger(0)
                 .MoveNext().AssertInteger(1)
                 .MoveNext().AssertInteger(2)
                 .MoveNext().AssertInteger(0)
@@ -216,12 +218,16 @@ namespace XUnitTester.Glug {
         }
 
         [Fact]
-        public void Vector() {
+        public void Vector() { 
             var code = @"
+                fn is_numeric[x] 'x == ""integer"" | 'x == ""float"";
+
                 vector = { 
                     .__add: [a, b] -> vector.new[a.x + b.x, a.y + b.y],
                     .__sub: [a, b] -> vector.new[a.x - b.x, a.y - b.y],
-                    .__mul: [a, b] -> a.x * b.x + a.y * b.y,
+                    .__mul: [a, b] -> if (is_numeric a) vector.new[a * b.x, a * b.y] 
+                                      elif (is_numeric b) vector.new[b * a.x, b * a.y] 
+                                      else a.x * b.x + a.y * b.y,
                     .__lss: [a, b] -> vector.len2$a < vector.len2$b,
                     .__equ: [a, b] -> a.x == b.x & a.y == b.y,
 
@@ -230,24 +236,44 @@ namespace XUnitTester.Glug {
                 };
 
 
-                a = vector.new[1, 2];
-                b = vector.new[3, 4];
-                c = a + b;
-                d = a - b;
+                x = vector.new[1, 0];
+                y = vector.new[0, 1];
+                c = x * 1 + 2 * y;
+                d = x * 3 - (-4) * y;
+                e = x * 5;
 
-                [c.x, c.y, d.x, d.y, a * b, a > b, a < b, a >= b, a <= b, a == b, a ~= b];
+                [
+                    c.x, c.y, d.x, d.y,
+                    c * d, c > d, c < d, c >= d, c <= d, c == d, c ~= d,
+                    e * d, e > d, e < d, e >= d, e <= d, e == d, e ~= d,
+                    d * e, d > e, d < e, d >= e, d <= e, d == e, d ~= e,
+                ];
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(4)
-                .MoveNext().AssertInteger(6)
-                .MoveNext().AssertInteger(-2)
-                .MoveNext().AssertInteger(-2)
+                .First().AssertInteger(1)
+                .MoveNext().AssertInteger(2)
+                .MoveNext().AssertInteger(3)
+                .MoveNext().AssertInteger(4)
                 .MoveNext().AssertInteger(11)
                 .MoveNext().AssertFalse()
                 .MoveNext().AssertTrue()
                 .MoveNext().AssertFalse()
                 .MoveNext().AssertTrue()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertTrue()
+                .MoveNext().AssertInteger(15)
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertTrue()
+                .MoveNext().AssertInteger(15)
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertFalse()
+                .MoveNext().AssertFalse()
                 .MoveNext().AssertFalse()
                 .MoveNext().AssertTrue()
                 .MoveNext().AssertEnd();

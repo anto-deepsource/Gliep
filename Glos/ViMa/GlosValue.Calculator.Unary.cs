@@ -16,7 +16,7 @@ namespace GeminiLab.Glos.ViMa {
             }
 
             public void Typeof(ref GlosValue dest, in GlosValue v) {
-                dest.SetString(v.Type.ToString().ToLowerInvariant());
+                dest.SetString(v.Type.GetName());
             }
 
             protected delegate void GlosUnaryOperationHandler(ref GlosValue dest, in GlosValue v);

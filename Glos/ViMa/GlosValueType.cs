@@ -1,4 +1,6 @@
-﻿namespace GeminiLab.Glos.ViMa {
+﻿using System;
+
+namespace GeminiLab.Glos.ViMa {
     public enum GlosValueType : byte {
         Nil = 0x00,
         Integer = 0x01,
@@ -11,5 +13,19 @@
         Function = 0x82,
         // Userdata = 0x83,
         ExternalFunction = 0x84,
+    }
+
+    public static class GlosValueTypeExtensions {
+        public static string GetName(this GlosValueType type) => type switch {
+            GlosValueType.Nil => "nil",
+            GlosValueType.Integer => "integer",
+            GlosValueType.Float => "float",
+            GlosValueType.Boolean => "boolean",
+            GlosValueType.Table => "table",
+            GlosValueType.String => "string",
+            GlosValueType.Function => "function",
+            GlosValueType.ExternalFunction => "function",
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
     }
 }
