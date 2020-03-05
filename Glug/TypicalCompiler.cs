@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using GeminiLab.Core2.IO;
 
 using GeminiLab.Glos.ViMa;
 using GeminiLab.Glug.AST;
@@ -9,6 +8,7 @@ using GeminiLab.Glug.Parser;
 using GeminiLab.Glug.Tokenizer;
 
 namespace GeminiLab.Glug {
+    [ExcludeFromCodeCoverage]
     public static class TypicalCompiler {
         public static IGlugTokenStream Tokenize(string value) => new GlugTokenizer(new StringReader(value));
 
