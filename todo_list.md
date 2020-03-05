@@ -16,5 +16,4 @@ REFACTOR!!!!
 - add while support.
   - add break support.
 - make index in osl ref. i.e. allow `[a.a, a.b] = [1, 2]`.
-- add list concat operator.
 - add locally ren and uen operators.

@@ -43,6 +43,7 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.SymbolMul => GlugBiOpType.Mul,
             GlugTokenType.SymbolDiv => GlugBiOpType.Div,
             GlugTokenType.SymbolMod => GlugBiOpType.Mod,
+            GlugTokenType.SymbolDotDot => GlugBiOpType.Concat,
             GlugTokenType.SymbolDollar => GlugBiOpType.Call,
             GlugTokenType.OpCall => GlugBiOpType.Call,
             GlugTokenType.SymbolAt => GlugBiOpType.Index,
@@ -68,6 +69,7 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.SymbolMul => 0x80,
             GlugTokenType.SymbolDiv => 0x80,
             GlugTokenType.SymbolMod => 0x80,
+            GlugTokenType.SymbolDotDot => 0x85,
             GlugTokenType.SymbolDollar => 0x90,
             GlugTokenType.OpCall => 0xa0,
             GlugTokenType.SymbolAt => 0xb0,
@@ -94,6 +96,7 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.SymbolMul => true,
             GlugTokenType.SymbolDiv => true,
             GlugTokenType.SymbolMod => true,
+            GlugTokenType.SymbolDotDot => false, // actually it doesn't really matter, but i prefer right-associated operators, so ...
             GlugTokenType.SymbolDollar => false,
             GlugTokenType.OpCall => true,
             GlugTokenType.SymbolAt => true,

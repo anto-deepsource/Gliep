@@ -181,6 +181,10 @@ namespace GeminiLab.Glug.AST {
                 } else {
                     throw new ArgumentOutOfRangeException();
                 }
+            } else if (val.Op == GlugBiOpType.Concat) {
+                visitAndConvertResultToOsl(val.ExprL);
+                visitAndConvertResultToOsl(val.ExprR);
+                CurrentFunction!.AppendPopDel();
             } else {
                 visitAndConvertResultToValue(val.ExprL);
                 visitAndConvertResultToValue(val.ExprR);

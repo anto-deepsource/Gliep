@@ -189,7 +189,12 @@ namespace GeminiLab.Glug.Tokenizer {
                     yield return new GlugToken { Type = GlugTokenType.SymbolBackquote };
                 } else if (c == '.') {
                     ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolDot };
+                    if (next == '.') {
+                        ++ptr;
+                        yield return new GlugToken { Type = GlugTokenType.SymbolDotDot };
+                    } else {
+                        yield return new GlugToken { Type = GlugTokenType.SymbolDot };
+                    }
                 } else if (c == ':') {
                     ++ptr;
                     yield return new GlugToken { Type = GlugTokenType.SymbolColon };

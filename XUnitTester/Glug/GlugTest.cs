@@ -118,15 +118,19 @@ namespace XUnitTester.Glug {
         public void Beide() {
             var code = @"
                 fn beide -> [1, 2];
-                fn sum[x, y] x + y;
+                fn sum2[x, y] -> x + y;
+                fn sum3[x, y, z] x + y + z;
 
-                return [beide[], beide[] - 1, sum$beide[]]
+                return [beide[], beide[] - 1, sum2$beide[], sum3$(beide[]..3)] .. beide[]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
                 .First().AssertInteger(1)
                 .MoveNext().AssertInteger(0)
                 .MoveNext().AssertInteger(3)
+                .MoveNext().AssertInteger(6)
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(2)
                 .MoveNext().AssertEnd();
         }
 

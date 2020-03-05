@@ -155,6 +155,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendCall() => AppendInstruction(GlosOp.Call);
         public void AppendRet() => AppendInstruction(GlosOp.Ret);
         public void AppendBind() => AppendInstruction(GlosOp.Bind);
+        public void AppendPopDel() => AppendInstruction(GlosOp.PopDel);
 
         // shape return values
         public void AppendShpRv(int imm) => AppendInstruction(GlosOp.ShpRv, immediate: imm);

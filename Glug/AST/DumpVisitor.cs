@@ -140,6 +140,7 @@ namespace GeminiLab.Glug.AST {
                 GlugBiOpType.Call => "call",
                 GlugBiOpType.Assign => "assign",
                 GlugBiOpType.Index => "index",
+                GlugBiOpType.Concat => "concat",
                 _ => throw new ArgumentOutOfRangeException(),
             });
             Writer.IncreaseIndent();

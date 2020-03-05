@@ -177,6 +177,7 @@ namespace GeminiLab.Glug.AST {
         Call,
         Assign,
         Index,
+        Concat,
     }
 
     public class BiOp : Expr {
@@ -188,7 +189,7 @@ namespace GeminiLab.Glug.AST {
             ExprL = exprL;
             ExprR = exprR;
 
-            IsOnStackList = op == GlugBiOpType.Call;
+            IsOnStackList = op == GlugBiOpType.Call || op == GlugBiOpType.Concat;
             IsVarRef = op == GlugBiOpType.Index;
         }
 
