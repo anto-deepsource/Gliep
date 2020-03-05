@@ -7,6 +7,7 @@
 - `$`: function call
 - `%`: modulus
 - `&`: and
+- `'`: typeof
 - `(` `)`: block
 - `*`: multiplication
 - `+`: addition
@@ -36,6 +37,5 @@
 
 ## Not used yet
 
-- `'`
 - `?`
 - `\`
