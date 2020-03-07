@@ -3,11 +3,74 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+
 using GeminiLab.Core2;
 using GeminiLab.Core2.Collections;
 using GeminiLab.Core2.Text;
+using GeminiLab.Glos;
 
 namespace GeminiLab.Glug.Tokenizer {
+    // carefully make all these classes stateless so they can work lock-free. 
+    internal class AsciiTrie {
+        private const int DefaultNodeSize = 256;
+        private const int MaxAscii = 128;
+        private const int Occupied = sizeof(GlugTokenType) / sizeof(short) + 1;
+
+        private unsafe struct Node {
+            public GlugTokenType Type;
+            public short Parent;
+            public fixed short Next[MaxAscii - Occupied];
+
+            public ref short this[char c] => ref Next[c - Occupied];
+        }
+
+        private readonly GlosStack<Node> _nodes = new GlosStack<Node>(DefaultNodeSize);
+
+
+        public GlugTokenType Read(string str, int len, ref int ptr) {
+            if (ptr >= len) return GlugTokenType.NotAToken;
+
+            short nptr = 0;
+            while (ptr < len) {
+                char c = str[ptr];
+                if (c < Occupied || c >= MaxAscii || _nodes[nptr][c] == 0) break;
+                nptr = _nodes[nptr][c];
+                ++ptr;
+            }
+
+            while (nptr > 0 && _nodes[nptr].Type == GlugTokenType.NotAToken) {
+                nptr = _nodes[nptr].Parent;
+                --ptr;
+            }
+
+            return _nodes[nptr].Type;
+        }
+
+        public void Insert(string str, GlugTokenType type) {
+            if (str.Length <= 0) throw new ArgumentOutOfRangeException(nameof(str));
+
+            short ptr = 0;
+            foreach (var c in str) {
+                if (c < Occupied || c >= MaxAscii) throw new ArgumentOutOfRangeException(nameof(str));
+                if (_nodes[ptr][c] == 0) {
+                    _nodes[ptr][c] = (short)_nodes.Count;
+                    ref var nxt = ref _nodes.PushStack();
+                    nxt.Type = GlugTokenType.NotAToken;
+                    nxt.Parent = ptr;
+                }
+
+                ptr = _nodes[ptr][c];
+            }
+
+            _nodes[ptr].Type = type;
+        }
+
+        public AsciiTrie(Dictionary<string, GlugTokenType> values) {
+            _nodes.PushStack().Type = GlugTokenType.NotAToken;
+            foreach (var (str, type) in values) Insert(str, type);
+        }
+    }
+
     public class GlugTokenizer: IGlugTokenStream {
         private static long ReadDecimalInteger(string value, int len, ref int ptr) {
             long rv = 0;
@@ -34,18 +97,63 @@ namespace GeminiLab.Glug.Tokenizer {
                    cat == UnicodeCategory.OtherLetter;
         }
 
-        private static string ReadIdentifier(string value, int len, ref int ptr) {
+        private static string ReadIdentifier(string str, int len, ref int ptr) {
             int b = ptr;
 
             while (ptr < len) {
-                if (!IsIdentifierChar(value[ptr])) return value.Substring(b, ptr - b);
+                if (!IsIdentifierChar(str[ptr])) break;
                 ++ptr;
             }
 
-            return value.Substring(b, ptr - b);
+            return str.Substring(b, ptr - b);
         }
 
-        // this method is getting more and more nasty, TODO: refactor
+        private static readonly AsciiTrie Trie;
+
+        static GlugTokenizer() {
+            Trie = new AsciiTrie(new Dictionary<string, GlugTokenType> {
+                ["+"] = GlugTokenType.SymbolAdd,
+                ["-"] = GlugTokenType.SymbolSub,
+                ["*"] = GlugTokenType.SymbolMul,
+                ["/"] = GlugTokenType.SymbolDiv,
+                ["%"] = GlugTokenType.SymbolMod,
+                ["<<"] = GlugTokenType.SymbolLsh,
+                [">>"] = GlugTokenType.SymbolRsh,
+                ["&"] = GlugTokenType.SymbolAnd,
+                ["|"] = GlugTokenType.SymbolOrr,
+                ["^"] = GlugTokenType.SymbolXor,
+                ["~"] = GlugTokenType.SymbolNot,
+                [">"] = GlugTokenType.SymbolGtr,
+                ["<"] = GlugTokenType.SymbolLss,
+                [">="] = GlugTokenType.SymbolGeq,
+                ["<="] = GlugTokenType.SymbolLeq,
+                ["=="] = GlugTokenType.SymbolEqu,
+                ["~="] = GlugTokenType.SymbolNeq,
+
+                ["("] = GlugTokenType.SymbolLParen,
+                [")"] = GlugTokenType.SymbolRParen,
+                ["{"] = GlugTokenType.SymbolLBrace,
+                ["}"] = GlugTokenType.SymbolRBrace,
+                ["["] = GlugTokenType.SymbolLBracket,
+                ["]"] = GlugTokenType.SymbolRBracket,
+                ["="] = GlugTokenType.SymbolAssign,
+                ["\\"] = GlugTokenType.SymbolBackslash,
+                [";"] = GlugTokenType.SymbolSemicolon,
+                [","] = GlugTokenType.SymbolComma,
+                ["->"] = GlugTokenType.SymbolRArrow,
+                ["!"] = GlugTokenType.SymbolBang,
+                ["!!"] = GlugTokenType.SymbolBangBang,
+                ["."] = GlugTokenType.SymbolDot,
+                ["`"] = GlugTokenType.SymbolBackquote,
+                [":"] = GlugTokenType.SymbolColon,
+
+                ["$"] = GlugTokenType.SymbolDollar,
+                ["@"] = GlugTokenType.SymbolAt,
+                ["'"] = GlugTokenType.SymbolQuote,
+                [".."] = GlugTokenType.SymbolDotDot,
+            });
+        }
+
         private static IEnumerable<GlugToken> GetTokensFromLine(string line) {
             int len = line.Length;
             int ptr = 0;
@@ -54,68 +162,15 @@ namespace GeminiLab.Glug.Tokenizer {
                 while (ptr < len && line[ptr].IsWhitespace()) ++ptr;
                 if (ptr >= len) yield break;
 
+                var type = Trie.Read(line, len, ref ptr);
+                if (type != GlugTokenType.NotAToken) {
+                    yield return new GlugToken { Type = type };
+                    continue;
+                }
+
                 char c = line[ptr];
-                bool last = ptr == (len - 1);
-                char next = last ? '\0' : line[ptr + 1];
                 if (c.IsDecimalDigit()) {
                     yield return new GlugToken { Type = GlugTokenType.LiteralInteger, ValueInt = ReadDecimalInteger(line, len, ref ptr) };
-                } else if (c == '-') {
-                    if (!last) {
-                        if (next.IsDecimalDigit()) {
-                            ++ptr;
-                            yield return new GlugToken { Type = GlugTokenType.LiteralInteger, ValueInt = unchecked(-ReadDecimalInteger(line, len, ref ptr)) };
-                            continue;
-                        }
-                    }
-
-                    ++ptr;
-                    if (!last && next == '>') { ++ptr; yield return new GlugToken {Type = GlugTokenType.SymbolRArrow}; }
-                    else yield return new GlugToken { Type = GlugTokenType.SymbolSub };
-                } else if (c == '+') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolAdd };
-                } else if (c == '*') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolMul };
-                } else if (c == '/') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolDiv };
-                } else if (c == '%') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolMod };
-                } else if (c == '<') {
-                    ++ptr;
-
-                    if (last) yield return new GlugToken { Type = GlugTokenType.SymbolLss };
-                    else if (next == '<') { ++ptr; yield return new GlugToken { Type = GlugTokenType.SymbolLsh }; }
-                    else if (next == '=') { ++ptr; yield return new GlugToken { Type = GlugTokenType.SymbolLeq }; }
-                    else yield return new GlugToken { Type = GlugTokenType.SymbolLss };
-                } else if (c == '>') {
-                    ++ptr;
-
-                    if (last) yield return new GlugToken { Type = GlugTokenType.SymbolGtr };
-                    else if (next == '>') { ++ptr; yield return new GlugToken { Type = GlugTokenType.SymbolRsh }; } 
-                    else if (next == '=') { ++ptr; yield return new GlugToken { Type = GlugTokenType.SymbolGeq }; } 
-                    else yield return new GlugToken { Type = GlugTokenType.SymbolGtr };
-                } else if (c == '&') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolAnd };
-                } else if (c == '|') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolOrr };
-                } else if (c == '^') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolXor };
-                } else if (c == '~') {
-                    ++ptr;
-
-                    if (!last && next == '=') { ++ptr; yield return new GlugToken { Type = GlugTokenType.SymbolNeq }; }
-                    else yield return new GlugToken { Type = GlugTokenType.SymbolNot };
-                } else if (c == '=') {
-                    ++ptr;
-
-                    if (!last && next == '=') { ++ptr; yield return new GlugToken {Type = GlugTokenType.SymbolEqu}; }
-                    else yield return new GlugToken { Type = GlugTokenType.SymbolAssign };
                 } else if (IsIdentifierLeadingChar(c)) {
                     var id = ReadIdentifier(line, len, ref ptr);
 
@@ -131,41 +186,6 @@ namespace GeminiLab.Glug.Tokenizer {
                         "while" => new GlugToken { Type = GlugTokenType.KeywordWhile },
                         _ => new GlugToken { Type = GlugTokenType.Identifier, ValueString = id },
                     };
-                } else if (c == '{') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolLBrace };
-                } else if (c == '}') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolRBrace };
-                } else if (c == '(') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolLParen };
-                } else if (c == ')') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolRParen };
-                } else if (c == '[') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolLBracket };
-                } else if (c == ']') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolRBracket };
-                } else if (c == ';') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolSemicolon };
-                } else if (c == '$') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolDollar };
-                } else if (c == ',') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolComma };
-                } else if (c == '\\') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolBackslash };
-                } else if (c == '@') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolAt };
-                } else if (c == '#') {
-                    yield break;
                 } else if (c == '\"') {
                     var begin = ptr;
                     ++ptr;
@@ -176,37 +196,10 @@ namespace GeminiLab.Glug.Tokenizer {
 
                     yield return new GlugToken { Type = GlugTokenType.LiteralString, ValueString = EscapeSequenceConverter.Decode(line.AsSpan(begin + 1, ptr - begin - 1)) };
                     ++ptr;
-                } else if (c == '!') {
-                    ++ptr;
-                    if (next == '!') {
-                        ++ptr;
-                        yield return new GlugToken { Type = GlugTokenType.SymbolBangBang };
-                    } else {
-                        yield return new GlugToken { Type = GlugTokenType.SymbolBang };
-                    }
-                } else if (c == '`') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolBackquote };
-                } else if (c == '.') {
-                    ++ptr;
-                    if (next == '.') {
-                        ++ptr;
-                        yield return new GlugToken { Type = GlugTokenType.SymbolDotDot };
-                    } else {
-                        yield return new GlugToken { Type = GlugTokenType.SymbolDot };
-                    }
-                } else if (c == ':') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolColon };
-                } else if (c == '\'') {
-                    ++ptr;
-                    yield return new GlugToken { Type = GlugTokenType.SymbolQuote };
-                } else {
-                    ++ptr;
                 }
             }
         }
-        
+
         private static IEnumerable<string> ReadLines(TextReader reader) {
             string line;
             while ((line = reader.ReadLine()) != null) yield return line;

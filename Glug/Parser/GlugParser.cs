@@ -233,7 +233,13 @@ namespace GeminiLab.Glug.Parser {
 
             if (IsUnOp(tok.Type)) {
                 stream.GetToken();
-                return new UnOp(TokenToUnOp(tok.Type), ReadExprItem(stream));
+
+                if (tok.Type != GlugTokenType.SymbolSub) return new UnOp(TokenToUnOp(tok.Type), ReadExprItem(stream));
+
+                var item = ReadExprItem(stream);
+                if (item is LiteralInteger li) return new LiteralInteger(unchecked(-li.Value));
+                return new UnOp(GlugUnOpType.Neg, item);
+
             }
             
             if (tok.Type == GlugTokenType.SymbolBackquote) {

@@ -17,12 +17,13 @@ namespace XUnitTester.Glug {
         [Fact]
         public void Evaluation() {
             var code = @"
-                [1, 2, false, (), nil, -(1 + 2), if (true) 1, if (false) 2, `{}]
+                [1, -2, 2--2, false, (), nil, -(1 + 2), if (true) 1, if (false) 2, `{}]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
                 .First().AssertInteger(1)
-                .MoveNext().AssertInteger(2)
+                .MoveNext().AssertInteger(-2)
+                .MoveNext().AssertInteger(4)
                 .MoveNext().AssertFalse()
                 .MoveNext().AssertNil()
                 .MoveNext().AssertNil()
