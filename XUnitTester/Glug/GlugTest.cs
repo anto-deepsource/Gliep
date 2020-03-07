@@ -1,4 +1,9 @@
-﻿using GeminiLab.Core2.Text;
+﻿using System.Collections.Generic;
+using GeminiLab.Core2;
+using GeminiLab.Core2.Random;
+using GeminiLab.Core2.Random.RNG;
+using GeminiLab.Core2.Text;
+using GeminiLab.Core2.Yielder;
 using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
 
@@ -17,7 +22,7 @@ namespace XUnitTester.Glug {
         [Fact]
         public void Evaluation() {
             var code = @"
-                [1, -2, 2--2, false, (), nil, -(1 + 2), if (true) 1, if (false) 2, `{}]
+                [1, -2, 2--2, nil ~= nil, (), nil, -(1 + 2), if (true) 1, if (false) 2, `{}]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -72,19 +77,37 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertEnd();
         }
 
-        [Fact]
-        public void RecursiveGcd() {
-            var code = @"
+        private static uint gcd(uint x, uint y) {
+            if (x > y) return gcd(y, x);
+            if (x == 0) return y;
+            return gcd(y % x, x);
+        }
+
+        public static IEnumerable<object[]> GcdTestCases(int count) {
+            var rngx = new I32ToU32RNG<PCG>();
+            var rngy = new I32ToU32RNG<PCG>();
+
+            return rngx.Zip(rngy, (x, y) => new object[] { x, y, gcd(x, y) }).Take(count).ToList();
+        }
+
+        public static IEnumerable<object[]> GcdSmallTestCases(int count) {
+            var rngx = new I32ToU32RNG<PCG>();
+            var rngy = new I32ToU32RNG<PCG>();
+
+            return rngx.Zip(rngy, (x, y) => new object[] { x & 0xfffu, y & 0xfffu, gcd(x & 0xfffu, y & 0xfffu) }).Take(count).ToList();
+        }
+
+        [Theory]
+        [MemberData(nameof(GcdTestCases), 1024)]
+        [MemberData(nameof(GcdSmallTestCases), 512)]
+        public void RecursiveGcd(uint x, uint y, uint expected) {
+            var code = @$"
                 !gcd = [a, b] -> if (a > b) gcd[b, a] elif (~(0 < a)) b else gcd[b % a, a];
-                [gcd[4, 6], gcd[2, 1], gcd[117, 39], gcd[1, 1], gcd[15, 28]]
+                [gcd[{x}, {y}]]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(2)
-                .MoveNext().AssertInteger(1)
-                .MoveNext().AssertInteger(39)
-                .MoveNext().AssertInteger(1)
-                .MoveNext().AssertInteger(1)
+                .First().AssertInteger(expected)
                 .MoveNext().AssertEnd();
         }
 

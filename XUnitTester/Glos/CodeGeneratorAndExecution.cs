@@ -57,7 +57,7 @@ namespace XUnitTester.Glos {
         }
 
         [Theory]
-        [MemberData(nameof(GetIntegerBinaryOperatorTestcases), 1024)]
+        [MemberData(nameof(GetIntegerBinaryOperatorTestcases), 2048)]
         public void BinaryOperatorTest(GlosOp op, long opl, long opr, long result) {
             var fgen = Builder.AddFunction();
 
