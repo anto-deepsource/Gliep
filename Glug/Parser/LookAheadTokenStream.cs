@@ -19,22 +19,23 @@ namespace GeminiLab.Glug.Parser {
 
         private GlugToken? _buff;
 
-        public GlugToken? PeekToken() {
+        public bool NextEof() {
+            return _buff == null && !_source.HasNext();
+        }
+
+        public GlugToken PeekToken() {
             return _buff ??= GetToken();
         }
 
-        public GlugToken PeekTokenNonNull() => PeekToken() ?? throw new UnexpectedEndOfTokenStreamException();
-        
-        public GlugToken? GetToken() {
+        public GlugToken GetToken() {
             if (_buff != null) {
                 var rv = _buff;
                 _buff = null;
                 return rv;
             }
 
-            return _source.GetToken();
+            if (NextEof()) throw new ArgumentOutOfRangeException();
+            return _source.Next();
         }
-
-        public GlugToken GetTokenNonNull() => GetToken() ?? throw new UnexpectedEndOfTokenStreamException();
     }
 }

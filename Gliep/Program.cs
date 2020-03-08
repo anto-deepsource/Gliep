@@ -134,11 +134,13 @@ namespace GeminiLab.Gliep {
         }
 
         public static void DumpTokenStream(IGlugTokenStream stream) {
-            GlugToken? tok;
-            while ((tok = stream.GetToken()) != null) {
-                var output = tok.Type.ToString();
+            while (stream.HasNext()) {
+                var tok = stream.Next();
+                var output = string.Format($"{{0,-{tok.Source.Length + 10}}}", $"({tok.Source}:{tok.Row}:{tok.Column})");
+
+                output += tok.Type.ToString();
                 if (tok.Type.HasInteger()) output += $", {tok.ValueInt}(0x{tok.ValueInt:x16})";
-                if (tok.Type.HasString()) output += $", \"{tok.ValueString}\"";
+                if (tok.Type.HasString()) output += $", \"{EscapeSequenceConverter.Encode(tok.ValueString!)}\"";
                 Console.WriteLine(output);
             }
         }
@@ -146,23 +148,16 @@ namespace GeminiLab.Gliep {
         public static void Main(string[] args) {
             var options = CommandLineParser<CommandLineOptions>.Parse(args);
 
-            string code = "";
-            if (options.Code != null) {
-                code = options.Code;
-            } else {
-                if (options.Input == "-") {
-                    var sb = new StringBuilder();
-                    string s;
-                    while ((s = Console.ReadLine()) != null) sb.AppendLine(s);
-                    code = sb.ToString();
-                } else {
-                    using var fs = new FileStream(options.Input, FileMode.Open, FileAccess.Read);
-                    using var sr = new StreamReader(fs);
-                    code = sr.ReadToEnd();
-                }
-            }
+            var sourceName = 
+                options.Code != null ? "<command-line>" : 
+                options.Input == "-" ? "<stdin>" : 
+                options.Input;
+            using var sourceReader =
+                options.Code != null ? new StringReader(options.Code) :
+                options.Input == "-" ? Console.In :
+                new StreamReader(new FileStream(options.Input, FileMode.Open, FileAccess.Read));
 
-            using var tok = TypicalCompiler.Tokenize(code);
+            using var tok = new GlugTokenizer(sourceReader, sourceName);
 
             if (options.DumpTokenStreamAndExit) {
                 DumpTokenStream(tok);

@@ -116,7 +116,7 @@ namespace GeminiLab.Glug.Parser {
         };
 
         private static void Consume(LookAheadTokenStream stream, GlugTokenType expected) {
-            if (expected != stream.GetToken()?.Type) throw new ArgumentOutOfRangeException();
+            if (expected != stream.GetToken().Type) throw new ArgumentOutOfRangeException();
         }
 
 
@@ -127,13 +127,11 @@ namespace GeminiLab.Glug.Parser {
             var statements = new List<Expr>();
 
             while (true) {
-                var tok = stream.PeekToken();
-                if (tok == null || tok.Type == GlugTokenType.SymbolRParen) break;
+                if (stream.NextEof() || stream.PeekToken().Type == GlugTokenType.SymbolRParen) break;
 
                 statements.Add(ReadExprGreedily(stream));
 
-                tok = stream.PeekToken();
-                if (tok?.Type == GlugTokenType.SymbolSemicolon) Consume(stream, GlugTokenType.SymbolSemicolon);
+                if (!stream.NextEof() && stream.PeekToken().Type == GlugTokenType.SymbolSemicolon) Consume(stream, GlugTokenType.SymbolSemicolon);
             }
 
             return new Block(statements);
@@ -146,14 +144,9 @@ namespace GeminiLab.Glug.Parser {
             bool lastDot = false;
 
             while (true) {
-                if (lastDot) {
-                    expr = new LiteralString(ReadIdentifier(stream));
-                } else {
-                    expr = ReadExprItem(stream);
-                }
+                expr = lastDot ? new LiteralString(ReadIdentifier(stream)) : ReadExprItem(stream);
                 
-                var tok = stream.PeekToken();
-                var op = tok?.Type ?? GlugTokenType.NotAToken;
+                var op = stream.NextEof() ? GlugTokenType.NotAToken : stream.PeekToken().Type;
 
                 if (op == GlugTokenType.SymbolRArrow) {
                     if (expr is VarRef vr) {
@@ -163,6 +156,7 @@ namespace GeminiLab.Glug.Parser {
                         stream.GetToken();
                         expr = new Function(null, osl.List.Cast<VarRef>().Select(x => x.Id).ToList(), ReadExprGreedily(stream));
                     } else {
+                        // let it crash elsewhere
                         break;
                     }
                 }
@@ -216,10 +210,10 @@ namespace GeminiLab.Glug.Parser {
         }
 
         private static Expr ReadExprItem(LookAheadTokenStream stream) {
-            var tok = stream.PeekTokenNonNull();
+            var tok = stream.PeekToken();
 
             if (tok.Type.GetCategory() == GlugTokenTypeCategory.Literal) {
-                tok = stream.GetTokenNonNull();
+                tok = stream.GetToken();
 
                 return tok.Type switch {
                     GlugTokenType.LiteralTrue => (Expr)new LiteralBool(true),
@@ -274,7 +268,7 @@ namespace GeminiLab.Glug.Parser {
         }
 
         private static string ReadIdentifier(LookAheadTokenStream stream) {
-            var tok = stream.GetTokenNonNull();
+            var tok = stream.GetToken();
 
             return tok.Type == GlugTokenType.Identifier ? tok.ValueString! : throw new ArgumentOutOfRangeException();
         }
@@ -294,14 +288,14 @@ namespace GeminiLab.Glug.Parser {
             Expr? block = ReadExprGreedily(stream);
             branches.Add(new IfBranch(expr, block));
 
-            while (stream.PeekToken()?.Type == GlugTokenType.KeywordElif) {
+            while (!stream.NextEof() && stream.PeekToken().Type == GlugTokenType.KeywordElif) {
                 Consume(stream, GlugTokenType.KeywordElif);
                 expr = ReadBlockInParen(stream);
                 block = ReadExprGreedily(stream);
                 branches.Add(new IfBranch(expr, block));
             }
 
-            if (stream.PeekToken()?.Type == GlugTokenType.KeywordElse) {
+            if (!stream.NextEof() && stream.PeekToken().Type == GlugTokenType.KeywordElse) {
                 Consume(stream, GlugTokenType.KeywordElse);
                 block = ReadExprGreedily(stream);
             } else {
@@ -330,13 +324,13 @@ namespace GeminiLab.Glug.Parser {
         private static Function ReadFunction(LookAheadTokenStream stream, bool skipFn = false) {
             if (!skipFn) Consume(stream, GlugTokenType.KeywordFn);
             string? name = null;
-            if (stream.PeekTokenNonNull().Type == GlugTokenType.Identifier) {
-                name = stream.GetTokenNonNull().ValueString!;
+            if (stream.PeekToken().Type == GlugTokenType.Identifier) {
+                name = stream.GetToken().ValueString!;
             }
 
             var plist = ReadOptionalParamList(stream);
 
-            if (stream.PeekTokenNonNull().Type == GlugTokenType.SymbolRArrow) {
+            if (stream.PeekToken().Type == GlugTokenType.SymbolRArrow) {
                 stream.GetToken();
             }
 
@@ -348,15 +342,21 @@ namespace GeminiLab.Glug.Parser {
         private static List<string> ReadOptionalParamList(LookAheadTokenStream stream) {
             var rv = new List<string>();
 
-            if (stream.PeekTokenNonNull().Type == GlugTokenType.SymbolLBracket) {
+            // Optional parameter list will never be the last part of of a legal code
+            if (stream.PeekToken().Type == GlugTokenType.SymbolLBracket) {
                 Consume(stream, GlugTokenType.SymbolLBracket);
-                GlugToken? tok;
-                while (((tok = stream.PeekToken()) != null)) {
-                    if (tok.Type == GlugTokenType.Identifier) rv.Add(tok.ValueString!);
-                    else throw new ArgumentOutOfRangeException();
+                for (;;) {
+                    var tok = stream.PeekToken();
+                    if (tok.Type == GlugTokenType.Identifier) {
+                        rv.Add(tok.ValueString!);
+                    } else if (tok.Type == GlugTokenType.SymbolRBracket) {
+                        break;
+                    } else {
+                        throw new ArgumentOutOfRangeException();
+                    }
                     stream.GetToken();
-                    tok = stream.PeekToken();
-                    if (tok?.Type != GlugTokenType.SymbolComma) {
+
+                    if (stream.PeekToken().Type != GlugTokenType.SymbolComma) {
                         break;
                     }
 
@@ -373,12 +373,12 @@ namespace GeminiLab.Glug.Parser {
             var rv = new List<Expr>();
 
             Consume(stream, GlugTokenType.SymbolLBracket);
-            GlugToken? tok;
-            while (((tok = stream.PeekToken()) != null)) {
+            for (;;) {
+                var tok = stream.PeekToken();
                 if (tok.Type == GlugTokenType.SymbolRBracket) break;
                 rv.Add(ReadExprGreedily(stream));
 
-                tok = stream.PeekTokenNonNull();
+                tok = stream.PeekToken();
                 if (tok.Type != GlugTokenType.SymbolComma) {
                     break;
                 }
@@ -397,7 +397,7 @@ namespace GeminiLab.Glug.Parser {
             Consume(stream, GlugTokenType.SymbolLBrace);
 
             while (true) {
-                var tok = stream.PeekTokenNonNull();
+                var tok = stream.PeekToken();
                 if (tok.Type == GlugTokenType.SymbolRBrace) break;
 
                 Expr key;
@@ -413,7 +413,7 @@ namespace GeminiLab.Glug.Parser {
 
                 rv.Add(new TableDefPair(key, ReadExprGreedily(stream)));
 
-                tok = stream.PeekTokenNonNull();
+                tok = stream.PeekToken();
                 if (tok.Type == GlugTokenType.SymbolComma) Consume(stream, GlugTokenType.SymbolComma);
             }
 

@@ -35,7 +35,8 @@ namespace GeminiLab.Glug {
         }
 
         public static GlosUnit Compile(string code) {
-            var ast = Parse(Tokenize(code));
+            using var tok = Tokenize(code);
+            var ast = Parse(tok);
             ProcessTree(ref ast);
             return CodeGen(ast);
         }

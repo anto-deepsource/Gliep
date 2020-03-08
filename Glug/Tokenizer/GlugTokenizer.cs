@@ -172,39 +172,49 @@ namespace GeminiLab.Glug.Tokenizer {
             });
         }
 
-        private static IEnumerable<GlugToken> GetTokensFromLine(string line) {
+        private static GlugToken? ReadNextToken(string line, ref int ptr, string source, int row) {
             int len = line.Length;
-            int ptr = 0;
 
-            while (ptr < len) {
+            for (;;) {
                 while (ptr < len && line[ptr].IsWhitespace()) ++ptr;
-                if (ptr >= len) yield break;
+                if (ptr >= len) return null;
+
+                var rv = new GlugToken { Source = source, Row = row, Column = ptr + 1 };
 
                 var type = Trie.Read(line, len, ref ptr);
                 if (type != GlugTokenType.NotAToken) {
-                    yield return new GlugToken { Type = type };
-                    continue;
+                    rv.Type = type;
+                    return rv;
                 }
 
                 char c = line[ptr];
                 if (c.IsDecimalDigit()) {
-                    yield return new GlugToken { Type = GlugTokenType.LiteralInteger, ValueInt = ReadDecimalInteger(line, len, ref ptr) };
-                } else if (IsIdentifierLeadingChar(c)) {
+                    rv.Type = GlugTokenType.LiteralInteger;
+                    rv.ValueInt = ReadDecimalInteger(line, len, ref ptr);
+                    return rv;
+                }
+
+                if (IsIdentifierLeadingChar(c)) {
                     var id = ReadIdentifier(line, len, ref ptr);
 
-                    yield return id switch {
-                        "nil" => new GlugToken { Type = GlugTokenType.LiteralNil },
-                        "true" => new GlugToken { Type = GlugTokenType.LiteralTrue },
-                        "false" => new GlugToken { Type = GlugTokenType.LiteralFalse },
-                        "if" => new GlugToken { Type = GlugTokenType.KeywordIf },
-                        "else" => new GlugToken { Type = GlugTokenType.KeywordElse },
-                        "elif" => new GlugToken { Type = GlugTokenType.KeywordElif },
-                        "fn" => new GlugToken { Type = GlugTokenType.KeywordFn },
-                        "return" => new GlugToken { Type = GlugTokenType.KeywordReturn },
-                        "while" => new GlugToken { Type = GlugTokenType.KeywordWhile },
-                        _ => new GlugToken { Type = GlugTokenType.Identifier, ValueString = id },
+                    rv.Type = id switch {
+                        "nil" => GlugTokenType.LiteralNil,
+                        "true" => GlugTokenType.LiteralTrue,
+                        "false" => GlugTokenType.LiteralFalse,
+                        "if" => GlugTokenType.KeywordIf,
+                        "else" => GlugTokenType.KeywordElse,
+                        "elif" => GlugTokenType.KeywordElif,
+                        "fn" => GlugTokenType.KeywordFn,
+                        "return" => GlugTokenType.KeywordReturn,
+                        "while" => GlugTokenType.KeywordWhile,
+                        _ => GlugTokenType.Identifier,
                     };
-                } else if (c == '\"') {
+
+                    if (rv.Type == GlugTokenType.Identifier) rv.ValueString = id;
+                    return rv;
+                }
+
+                if (c == '\"') {
                     var begin = ptr;
                     ++ptr;
                     while (ptr < len) {
@@ -212,37 +222,73 @@ namespace GeminiLab.Glug.Tokenizer {
                         ++ptr;
                     }
 
-                    yield return new GlugToken { Type = GlugTokenType.LiteralString, ValueString = EscapeSequenceConverter.Decode(line.AsSpan(begin + 1, ptr - begin - 1)) };
+                    // TODO: throw if close quote not found
+
+                    rv.Type = GlugTokenType.LiteralString;
+                    rv.ValueString = EscapeSequenceConverter.Decode(line.AsSpan(begin + 1, ptr - begin - 1));
                     ++ptr;
-                } else if (c == '#') {
-                    yield break;
-                } else {
-                    // TODO: WARN here
-                    ++ptr;
+
+                    return rv;
                 }
+
+                if (c == '#') return null;
+
+                // TODO: WARN here
+                ++ptr;
             }
         }
+        
+        public TextReader Source { get; }
+        
+        public string SourceName { get; }
 
-        private static IEnumerable<string> ReadLines(TextReader reader) {
-            string line;
-            while ((line = reader.ReadLine()) != null) yield return line;
+        public GlugTokenizer(TextReader source, string sourceName = "<anonymous>") {
+            Source = source;
+            SourceName = sourceName;
+            _eof = false;
+            _currLine = null;
+            _row = 0;
         }
 
-        private static IEnumerable<GlugToken> GetTokens(TextReader reader) {
-            return ReadLines(reader).Select(GetTokensFromLine).Flatten();
+        private bool _eof;
+        private string? _currLine;
+        private int _row;
+        private int _ptr;
+        private GlugToken? _buffer = null;
+
+        private bool readNewLine() {
+            _currLine = Source.ReadLine();
+            ++_row;
+            _ptr = 0;
+
+            _eof = _currLine == null;
+            return !_eof;
         }
 
-        private readonly TextReader _source;
-        private IEnumerator<GlugToken> _en;
+        private GlugToken? readNextToken() {
+            if (_eof) return null;
+            if ((_currLine == null || _ptr >= _currLine.Length) && !readNewLine()) return null;
 
-        public GlugToken? GetToken() {
-            if (_disposed) throw new InvalidOperationException();
-            return !_en.MoveNext() ? null : _en.Current;
+            GlugToken? tok = null;
+            do tok = ReadNextToken(_currLine!, ref _ptr, SourceName, _row); while (tok == null && readNewLine());
+            return tok;
         }
 
-        public GlugTokenizer(TextReader source) {
-            _source = source;
-            _en = GetTokens(source).GetEnumerator();
+        public bool HasNext() {
+            if (_disposed) throw new ObjectDisposedException(nameof(GlugTokenizer));
+            return (_buffer ??= readNextToken()) != null;
+        }
+
+        public GlugToken Next() {
+            if (_disposed) throw new ObjectDisposedException(nameof(GlugTokenizer));
+            
+            if (_buffer != null) {
+                var rv = _buffer;
+                _buffer = null;
+                return rv;
+            }
+
+            return readNextToken() ?? throw new InvalidOperationException();
         }
 
         #region IDisposable Support
@@ -251,10 +297,9 @@ namespace GeminiLab.Glug.Tokenizer {
         protected virtual void Dispose(bool disposing) {
             if (!_disposed) {
                 if (disposing) {
-                    _source?.Dispose();
+                    Source?.Dispose();
                 }
 
-                _en = null!;
                 _disposed = true;
             }
         }
