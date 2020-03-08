@@ -17,7 +17,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertInteger(0)
+                .FirstOne().AssertInteger(0)
                 .MoveNext().AssertEnd();
         }
 
@@ -54,7 +54,7 @@ namespace XUnitTester.Glos {
 
             unchecked {
                 GlosValueArrayChecker.Create(res)
-                    .First().AssertInteger((long)0x0000000000000001ul)
+                    .FirstOne().AssertInteger((long)0x0000000000000001ul)
                     .MoveNext().AssertInteger((long)0x0000000000000003ul)
                     .MoveNext().AssertInteger((long)0xfffffffffffffffeul)
                     .MoveNext().AssertInteger((long)0x0000000012345678ul)
@@ -92,7 +92,7 @@ namespace XUnitTester.Glos {
 
             unchecked {
                 GlosValueArrayChecker.Create(res)
-                    .First().AssertInteger((long)0x0000000000000001ul)
+                    .FirstOne().AssertInteger((long)0x0000000000000001ul)
                     .MoveNext().AssertInteger((long)0x0000000000000002ul)
                     .MoveNext().AssertInteger((long)0x0000000000000002ul)
                     .MoveNext().AssertInteger((long)0x0000000000000001ul)
@@ -127,7 +127,7 @@ namespace XUnitTester.Glos {
             var res = Execute(new[] { GlosValue.NewNil(), GlosValue.NewNil(), GlosValue.NewBoolean(true) });
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertNil()
+                .FirstOne().AssertNil()
                 .MoveNext().AssertFloat(0x40e02cba12000000ul)
                 .MoveNext().AssertTrue()
                 .MoveNext().AssertFalse()
@@ -172,7 +172,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertTable(t => {
+                .FirstOne().AssertTable(t => {
                     GlosTableChecker.Create(t).
                         Has(0, v => v.AssertInteger() == 1).
                         Has(1, v => v.AssertInteger() == 0).
@@ -222,7 +222,7 @@ namespace XUnitTester.Glos {
             var res = Execute(parentContext: global);
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertInteger(0)
+                .FirstOne().AssertInteger(0)
                 .MoveNext().AssertInteger(2)
                 .MoveNext().AssertEnd();
         }

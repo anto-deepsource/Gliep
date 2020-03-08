@@ -10,7 +10,7 @@ using GeminiLab.Core2.Text;
 namespace GeminiLab.Glug.AST {
     // we do not test this class
     [ExcludeFromCodeCoverage]
-    public class DumpVisitor : VisitorBase {
+    public class DumpVisitor : RecursiveVisitor {
         public DumpVisitor(IndentedWriter writer) {
             Writer = writer;
         }

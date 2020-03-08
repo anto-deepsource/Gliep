@@ -69,7 +69,7 @@ namespace XUnitTester.Glos {
 
             var res = Execute();
 
-            var checker = GlosValueArrayChecker.Create(res).First();
+            var checker = GlosValueArrayChecker.Create(res).FirstOne();
 
             if (op == GlosOp.Gtr || op == GlosOp.Lss || op == GlosOp.Geq || op == GlosOp.Leq || op == GlosOp.Equ || op == GlosOp.Neq) {
                 checker.AssertBoolean(result != 0);
@@ -124,7 +124,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertBoolean(result)
+                .FirstOne().AssertBoolean(result)
                 .MoveNext().AssertEnd();
         }
 
@@ -184,7 +184,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertFloat(9360.0)
+                .FirstOne().AssertFloat(9360.0)
                 .MoveNext().AssertFloat(9360.0)
                 .MoveNext().AssertFloat(0.0)
                 .MoveNext().AssertFloat(0x3d70000000000000ul)
@@ -225,7 +225,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertString(s1)
+                .FirstOne().AssertString(s1)
                 .MoveNext().AssertString(s1 + s2)
                 .MoveNext().AssertEnd();
         }
@@ -274,7 +274,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertInteger(2)
+                .FirstOne().AssertInteger(2)
                 .MoveNext().AssertInteger(3)
                 .MoveNext().AssertInteger(1)
                 .MoveNext().AssertNil()
@@ -412,7 +412,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertTable(t => {
+                .FirstOne().AssertTable(t => {
                     GlosTableChecker.Create(t)
                         .Has(0, v => v.AssertInteger() == 1)
                         .Has(1, v => v.AssertInteger() == 1)
@@ -499,7 +499,7 @@ namespace XUnitTester.Glos {
             var res = Execute(new GlosValue[] { uen, ren });
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertTable(t => {
+                .FirstOne().AssertTable(t => {
                     GlosTableChecker.Create(t)
                         .Has(0, v => v.AssertInteger() == 3)
                         .AssertAllKeyChecked();
@@ -594,7 +594,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertInteger(0)
+                .FirstOne().AssertInteger(0)
                 .MoveNext().AssertInteger(1)
                 .MoveNext().AssertInteger(1)
                 .MoveNext().AssertInteger(2)
@@ -662,7 +662,7 @@ namespace XUnitTester.Glos {
             Assert.Equal(4, global.GetVariableReference(idx).AssertInteger());
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertInteger(4)
+                .FirstOne().AssertInteger(4)
                 .MoveNext().AssertEnd();
         }
 
@@ -725,7 +725,7 @@ namespace XUnitTester.Glos {
                 var val = idx >= 0 ? list[idx] : -1;
 
                 GlosValueArrayChecker.Create(res)
-                    .First().AssertInteger(idx)
+                    .FirstOne().AssertInteger(idx)
                     .MoveNext().AssertInteger(val)
                     .MoveNext().AssertEnd();
             }
@@ -755,7 +755,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertInteger(expected)
+                .FirstOne().AssertInteger(expected)
                 .MoveNext().AssertEnd();
         }
 
@@ -785,7 +785,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertString(expected)
+                .FirstOne().AssertString(expected)
                 .MoveNext().AssertEnd();
         }
 
@@ -821,7 +821,7 @@ namespace XUnitTester.Glos {
             var res = Execute(new GlosValue[] { 1024 });
 
             var checker = GlosValueArrayChecker.Create(res);
-            var it = checker.First();
+            var it = checker.FirstOne();
 
             for (int i = 0; i < 1024; ++i) {
                 it.AssertInteger(i + 1).MoveNext();
@@ -851,7 +851,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertInteger((size - 1) * size / 2)
+                .FirstOne().AssertInteger((size - 1) * size / 2)
                 .MoveNext().AssertEnd();
         }
 
@@ -901,7 +901,7 @@ namespace XUnitTester.Glos {
             fgen.AppendRet();
 
             var res = Execute();
-            var checker = GlosValueArrayChecker.Create(res).First();
+            var checker = GlosValueArrayChecker.Create(res).FirstOne();
 
             checker.AssertInteger(locc).MoveNext();
             for (int i = 0; i < locc; ++i) {
@@ -933,7 +933,7 @@ namespace XUnitTester.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .First().AssertString(nameof(GlosValueType.Nil).ToLowerInvariant())
+                .FirstOne().AssertString(nameof(GlosValueType.Nil).ToLowerInvariant())
                 .MoveNext().AssertString(nameof(GlosValueType.Integer).ToLowerInvariant())
                 .MoveNext().AssertEnd();
         }

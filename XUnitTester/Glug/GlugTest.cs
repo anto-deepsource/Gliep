@@ -15,18 +15,18 @@ namespace XUnitTester.Glug {
         [Fact]
         public void Return0() {
             GlosValueArrayChecker.Create(Execute("0"))
-                .First().AssertInteger(0)
+                .FirstOne().AssertInteger(0)
                 .MoveNext().AssertEnd();
         }
 
         [Fact]
         public void Evaluation() {
             var code = @"
-                [1, -2, 2--2, nil ~= nil, (), nil, -(1 + 2), if (true) 1, if (false) 2, `{}]
+                [1, -2, 2--2, nil ~= nil, (), nil, -(1 + 2), if (true) 1, if (false) 2, `{},]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(1)
+                .FirstOne().AssertInteger(1)
                 .MoveNext().AssertInteger(-2)
                 .MoveNext().AssertInteger(4)
                 .MoveNext().AssertFalse()
@@ -47,7 +47,7 @@ namespace XUnitTester.Glug {
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(0)
+                .FirstOne().AssertInteger(0)
                 .MoveNext().AssertInteger(1)
                 .MoveNext().AssertInteger(55)
                 .MoveNext().AssertEnd();
@@ -56,14 +56,14 @@ namespace XUnitTester.Glug {
         [Fact]
         public void Counter() {
             var code = @"
-                fn counter [begin] ( begin = begin - 1; fn -> begin = begin + 1 );
+                fn counter [begin,] ( begin = begin - 1; fn -> begin = begin + 1 ); # test duplicate comma here
                 [!ca, cb, !cc, cd] = [counter 0, counter(0), counter[7], counter$-1];
 
                 return [ca == cb, ca ~= cb, ca[], ca[], ca[], cb[], ca[], cc[], ca[], cd[], ca[]];
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertFalse()
+                .FirstOne().AssertFalse()
                 .MoveNext().AssertTrue()
                 .MoveNext().AssertInteger(0)
                 .MoveNext().AssertInteger(1)
@@ -107,7 +107,7 @@ namespace XUnitTester.Glug {
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(expected)
+                .FirstOne().AssertInteger(expected)
                 .MoveNext().AssertEnd();
         }
 
@@ -119,7 +119,7 @@ namespace XUnitTester.Glug {
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(3628800)
+                .FirstOne().AssertInteger(3628800)
                 .MoveNext().AssertEnd();
         }
 
@@ -132,7 +132,7 @@ namespace XUnitTester.Glug {
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertString(strA)
+                .FirstOne().AssertString(strA)
                 .MoveNext().AssertString(strA + strB)
                 .MoveNext().AssertString(EscapeSequenceConverter.Decode(strEscape))
                 .MoveNext().AssertEnd();
@@ -149,7 +149,7 @@ namespace XUnitTester.Glug {
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(1)
+                .FirstOne().AssertInteger(1)
                 .MoveNext().AssertInteger(0)
                 .MoveNext().AssertInteger(3)
                 .MoveNext().AssertInteger(6)
@@ -175,7 +175,7 @@ namespace XUnitTester.Glug {
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger((1L + 131072) * 131072 / 2)
+                .FirstOne().AssertInteger((1L + 131072) * 131072 / 2)
                 .MoveNext().AssertInteger(362880)
                 .MoveNext().AssertEnd();
         }
@@ -194,7 +194,7 @@ namespace XUnitTester.Glug {
             context.CreateVariable("ext", (GlosExternalFunction)((param) => { context.GetVariableReference("x") = 3; return new GlosValue[] { 3 }; }));
 
             GlosValueArrayChecker.Create(Execute(code, context))
-                .First().AssertNil()
+                .FirstOne().AssertNil()
                 .MoveNext().AssertInteger(1)
                 .MoveNext().AssertInteger(2)
                 .MoveNext().AssertInteger(1)
@@ -215,7 +215,7 @@ namespace XUnitTester.Glug {
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(1)
+                .FirstOne().AssertInteger(1)
                 .MoveNext().AssertInteger(2)
                 .MoveNext().AssertInteger(3)
                 .MoveNext().AssertInteger(4)
@@ -279,7 +279,7 @@ namespace XUnitTester.Glug {
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(1)
+                .FirstOne().AssertInteger(1)
                 .MoveNext().AssertInteger(2)
                 .MoveNext().AssertInteger(3)
                 .MoveNext().AssertInteger(4)
@@ -334,7 +334,73 @@ namespace XUnitTester.Glug {
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .First().AssertInteger(unchecked((long)expected))
+                .FirstOne().AssertInteger(unchecked((long)expected))
+                .MoveNext().AssertEnd();
+        }
+
+
+        [Fact]
+        public void LogicalInteger128() {
+            var code = @"
+                i128 = {
+                    .__and: [x, y] -> i128.new[x.hi & y.hi, x.lo & y.lo],
+                    .__orr: [x, y] -> i128.new[x.hi | y.hi, x.lo | y.lo],
+                    .__xor: [x, y] -> i128.new[x.hi ^ y.hi, x.lo ^ y.lo],
+
+                    .new: [hi, lo] -> (rv = { .hi: hi, .lo: lo }; `rv = i128; rv),
+                };
+
+
+                x = i128.new[0x00000000ffffffff, 0xffffffff00000000];
+                y = i128.new[0x3333cccc3333cccc, 0x5555aaaa5555aaaa];
+                a = x & y;
+                b = x | y;
+                c = x ^ y;
+
+                [ a.hi, a.lo, b.hi, b.lo, c.hi, c.lo ];
+            ";
+
+            unchecked {
+                GlosValueArrayChecker.Create(Execute(code))
+                    .FirstOne().AssertInteger((long)0x000000003333ccccul)
+                    .MoveNext().AssertInteger((long)0x5555aaaa00000000ul)
+                    .MoveNext().AssertInteger((long)0x3333ccccfffffffful)
+                    .MoveNext().AssertInteger((long)0xffffffff5555aaaaul)
+                    .MoveNext().AssertInteger((long)0x3333cccccccc3333ul)
+                    .MoveNext().AssertInteger((long)0xaaaa55555555aaaaul)
+                    .MoveNext().AssertEnd();
+            }
+        }
+
+        [Theory]
+        [InlineData("a", "b", "c")]
+        [InlineData("d", "f", "e")]
+        [InlineData("h", "g", "i")]
+        [InlineData("k", "l", "j")]
+        [InlineData("o", "m", "n")]
+        [InlineData("r", "q", "p")]
+        public void ThreeStringSort(string a, string b, string c) {
+            var code = $@"
+                [a, b, c] = [""{a}"", ""{b}"", ""{c}""];
+                if (a >= b)
+                    if (c < a)
+                        if (b > c) [c, b, a]
+                        else [b, c, a]
+                    else [b, a, c]
+                else
+                    if (c <= b)
+                        if (a > c) [c, a, b]
+                        else [a, c, b]
+                    else [a, b, c]
+            ";
+
+            var list = new List<string> { a, b, c };
+            list.Sort();
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertString(list[0])
+                .MoveNext().AssertString(list[1])
+                .MoveNext().AssertString(list[2])
                 .MoveNext().AssertEnd();
         }
     }

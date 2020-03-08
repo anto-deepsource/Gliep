@@ -195,7 +195,7 @@ namespace XUnitTester.Misc {
 
         public static GlosValueArrayChecker Create(GlosValue[] target) => new GlosValueArrayChecker(target);
 
-        public GlosValueArrayItemChecker First() => new GlosValueArrayItemChecker(this, 0);
+        public GlosValueArrayItemChecker FirstOne() => new GlosValueArrayItemChecker(this, 0);
     }
 
     public class GlosTableChecker {
