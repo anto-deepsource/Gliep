@@ -306,5 +306,36 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertTrue()
                 .MoveNext().AssertEnd();
         }
+
+        private static ulong reverseBit(ulong x) {
+            ulong rv = 0;
+            for (int i = 0; i < 64; ++i) {
+                if ((x & (1ul << i)) != 0) rv |= 1ul << (63 - i);
+            }
+            return rv;
+        }
+
+        public static IEnumerable<object[]> BitsReverseTestCases(int count) {
+            return new I32ToU64RNG<PCG>().Map(x => new object[] { x, reverseBit(x) }).Take(count).ToList();
+        }
+
+        [Theory]
+        [MemberData(nameof(BitsReverseTestCases), 1024)]
+        public void BitsReverse(ulong origin, ulong expected) {
+            var code = $@"
+                x = 0x{origin:x16};
+                x = ((x & 0x5555555555555555) <<  1) | ((x & 0xAAAAAAAAAAAAAAAA) >>  1);
+                x = ((x & 0x3333333333333333) <<  2) | ((x & 0xCCCCCCCCCCCCCCCC) >>  2);
+                x = ((x & 0x0F0F0F0F0F0F0F0F) <<  4) | ((x & 0xF0F0F0F0F0F0F0F0) >>  4);
+                x = ((x & 0x00FF00FF00FF00FF) <<  8) | ((x & 0xFF00FF00FF00FF00) >>  8);
+                x = ((x & 0x0000FFFF0000FFFF) << 16) | ((x & 0xFFFF0000FFFF0000) >> 16);
+                x = ((x & 0x00000000FFFFFFFF) << 32) | ((x & 0xFFFFFFFF00000000) >> 32);
+                x;
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .First().AssertInteger(unchecked((long)expected))
+                .MoveNext().AssertEnd();
+        }
     }
 }

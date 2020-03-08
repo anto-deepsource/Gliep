@@ -75,11 +75,29 @@ namespace GeminiLab.Glug.Tokenizer {
         private static long ReadDecimalInteger(string value, int len, ref int ptr) {
             long rv = 0;
 
-            unchecked {
-                while (ptr < len) { 
-                    if (value[ptr].IsDecimalDigit()) rv = rv * 10 + (value[ptr] - '0');
-                    else return rv;
-                    ++ptr;
+            if (len - ptr >= 3 && value[ptr] == '0' && (value[ptr + 1] == 'x' || value[ptr + 1] == 'X') && value[ptr + 2].IsHexadecimalDigit()) {
+                ptr += 2;
+                while (ptr < len) {
+                    unchecked {
+                        char c = value[ptr];
+                        if (c.IsHexadecimalDigit()) {
+                            if (c.IsDecimalDigit()) rv = rv * 16 + (c - '0');
+                            else rv = rv * 16 + ((c & 0xdf) - 'A' + 10);
+                        } else {
+                            break;
+                        }
+
+                        ++ptr;
+                    }
+                }
+            } else {
+                while (ptr < len) {
+                    unchecked {
+                        char c = value[ptr];
+                        if (c.IsDecimalDigit()) rv = rv * 10 + (c - '0');
+                        else break;
+                        ++ptr;
+                    }
                 }
             }
 
