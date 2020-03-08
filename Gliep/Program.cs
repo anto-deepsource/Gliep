@@ -208,7 +208,13 @@ namespace GeminiLab.Gliep {
             }));
 
             var vm = new GlosViMa();
-            vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);
+
+            try {
+                vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);
+            } catch (Exception ex) {
+                Console.WriteLine($@"{ex.GetType().Name}: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+            }
         }
     }
 }

@@ -45,24 +45,78 @@ namespace GeminiLab.Glos.ViMa {
             return true;
         }
 
+        private void pushNewCallFrame(int bptr, GlosFunction function, int argc) {
+            ref var frame = ref pushCallStackFrame();
+
+            frame.Function = function;
+            frame.Context = new GlosContext(function.ParentContext);
+
+            frame.StackBase = bptr;
+            frame.ArgumentsBase = bptr;
+            frame.ArgumentsCount = argc;
+            frame.LocalVariablesBase = frame.ArgumentsBase + frame.ArgumentsCount;
+            frame.PrivateStackBase = frame.LocalVariablesBase + function.Prototype.LocalVariableSize;
+            frame.InstructionPointer = 0;
+            frame.DelimiterStackBase = _dptr;
+
+            foreach (var s in function.Prototype.VariableInContext) frame.Context.CreateVariable(s);
+        }
+
+        // TODO: assess whether this struct is necessary
+        // is it really slower fetching following values from call stack than caching them here?
+        private ref struct ExecutorContext {
+            public int CallStackBase;
+            public int CurrentCallStack;
+            public int InstructionPointer;
+            public GlosFunctionPrototype Prototype;
+            public ReadOnlySpan<byte> Code;
+            public int Length;
+            public GlosUnit Unit;
+            public GlosContext Context;
+            public GlosContext Global;
+        }
+
+        void restoreStatus(ref ExecutorContext ctx) {
+            if (_cptr <= ctx.CallStackBase) return;
+            ref var frame = ref callStackTop();
+
+            ctx.CurrentCallStack = _cptr - 1;
+            ctx.InstructionPointer = frame.InstructionPointer;
+            ctx.Prototype = frame.Function.Prototype;
+            ctx.Code = ctx.Prototype.Code;
+            ctx.Length = ctx.Code.Length;
+            ctx.Unit = ctx.Prototype.Unit;
+            ctx.Context = frame.Context;
+            ctx.Global = ctx.Context.Root;
+        }
+
+        void storeStatus(ref ExecutorContext ctx) {
+            ref var frame = ref _callStack[ctx.CurrentCallStack];
+
+            frame.InstructionPointer = ctx.InstructionPointer;
+        }
+
         public GlosValue[] ExecuteFunction(GlosFunction function, GlosValue[]? args = null) {
             var callStackBase = _cptr;
             var bptr = _sptr;
 
-            var ip = 0;
-            GlosFunctionPrototype proto = null!;
-            ReadOnlySpan<byte> code = default;
-            var len = 0;
-            GlosUnit unit = null!;
-            GlosContext ctx = null!;
-            GlosContext global = null!;
+            ExecutorContext execCtx = default;
+            execCtx.CallStackBase = callStackBase;
+
+            ref var ip = ref execCtx.InstructionPointer;
+            ref GlosFunctionPrototype proto = ref execCtx.Prototype!;
+            ref var code = ref execCtx.Code;
+            ref var len = ref execCtx.Length;
+            ref GlosUnit unit = ref execCtx.Unit!;
+            ref GlosContext ctx = ref execCtx.Context!;
+            ref GlosContext global = ref execCtx.Global!;
 
             try {
                 var firstArgc = args?.Length ?? 0;
                 args?.AsSpan().CopyTo(_stack.AsSpan(bptr, firstArgc));
 
-                NewCallFrame(bptr, function, firstArgc);
-                RestoreStatus(ref code);
+                pushNewCallFrame(bptr, function, firstArgc);
+                restoreStatus(ref execCtx);
                 pushUntil(callStackTop().PrivateStackBase);
 
                 while (_cptr > callStackBase) {
@@ -211,9 +265,9 @@ namespace GeminiLab.Glos.ViMa {
                             popUntil(ptr + nextRetc);
                         } else if (funv.Type == GlosValueType.Function) {
                             var fun = funv.AssertFunction();
-                            StoreStatus();
-                            NewCallFrame(ptr, fun, nextArgc);
-                            RestoreStatus(ref code);
+                            storeStatus(ref execCtx);
+                            pushNewCallFrame(ptr, fun, nextArgc);
+                            restoreStatus(ref execCtx);
                             pushUntil(callStackTop().PrivateStackBase);
                         } else {
                             throw new GlosValueNotCallableException(funv);
@@ -227,7 +281,7 @@ namespace GeminiLab.Glos.ViMa {
                         popUntil(callStackTop().StackBase + retc);
                         popCurrentFrameDelimiter();
                         popCallStackFrame();
-                        RestoreStatus(ref code);
+                        restoreStatus(ref execCtx);
                     } else if (op == GlosOp.Bind) {
                         stackTop().AssertFunction().ParentContext = ctx;
                     } else if (cat == GlosOpCategory.ShpRv) {
@@ -259,46 +313,10 @@ namespace GeminiLab.Glos.ViMa {
                 _stack.AsSpan(bptr, rc).CopyTo(rv);
                 popUntil(bptr);
                 return rv;
-            } catch (GlosException ex) {
-                // bug here: if this method invokes a external function, which call this method, which throws, this statement will write to wrong stackframe
-                StoreStatus();
+            } catch (GlosException ex) when (!(ex is GlosRuntimeException)) {
                 throw new GlosRuntimeException(this, ex);
-            }
-
-            void NewCallFrame(int bptr, GlosFunction function, int argc) {
-                ref var frame = ref pushCallStackFrame();
-
-                frame.Function = function;
-                frame.Context = new GlosContext(function.ParentContext);
-
-                frame.StackBase = bptr;
-                frame.ArgumentsBase = bptr;
-                frame.ArgumentsCount = argc;
-                frame.LocalVariablesBase = frame.ArgumentsBase + frame.ArgumentsCount;
-                frame.PrivateStackBase = frame.LocalVariablesBase + function.Prototype.LocalVariableSize;
-                frame.InstructionPointer = 0;
-                frame.DelimiterStackBase = _dptr;
-
-                foreach (var s in function.Prototype.VariableInContext) frame.Context.CreateVariable(s);
-            }
-
-            void RestoreStatus(ref ReadOnlySpan<byte> code) {
-                if (_cptr <= callStackBase) return;
-                ref var frame = ref callStackTop();
-
-                ip = frame.InstructionPointer;
-                proto = frame.Function.Prototype;
-                code = proto.Code;
-                len = code.Length;
-                unit = proto.Unit;
-                ctx = frame.Context;
-                global = ctx.Root;
-            }
-
-            void StoreStatus() {
-                ref var frame = ref callStackTop();
-
-                frame.InstructionPointer = ip;
+            } finally {
+                storeStatus(ref execCtx);
             }
         }
 
