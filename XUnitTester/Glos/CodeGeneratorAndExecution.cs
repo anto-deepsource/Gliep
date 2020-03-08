@@ -9,7 +9,7 @@ using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glos.ViMa;
 
 using Xunit;
-using XUnitTester.Checker;
+using XUnitTester.Misc;
 
 namespace XUnitTester.Glos {
     public class CodeGeneratorAndExecution : GlosTestBase {
@@ -67,7 +67,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             var checker = GlosValueArrayChecker.Create(res).First();
 
@@ -121,7 +121,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertBoolean(result)
@@ -181,7 +181,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertFloat(9360.0)
@@ -222,7 +222,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertString(s1)
@@ -271,7 +271,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertInteger(2)
@@ -409,7 +409,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertTable(t => {
@@ -496,7 +496,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, new GlosValue[] { uen, ren });
+            var res = Execute(new GlosValue[] { uen, ren });
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertTable(t => {
@@ -591,7 +591,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertInteger(0)
@@ -657,7 +657,7 @@ namespace XUnitTester.Glos {
             var global = new GlosContext(null);
             global.CreateVariable(idx, 0);
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>(), global);
+            var res = Execute(parentContext: global);
 
             Assert.Equal(4, global.GetVariableReference(idx).AssertInteger());
 
@@ -720,7 +720,7 @@ namespace XUnitTester.Glos {
                     list.Add(v);
                 }
 
-                var res = ViMa.ExecuteUnit(Unit, args.ToArray());
+                var res = Execute(args.ToArray());
                 var idx = list.FindIndex(x => x < 0);
                 var val = idx >= 0 ? list[idx] : -1;
 
@@ -752,7 +752,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertInteger(expected)
@@ -782,7 +782,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertString(expected)
@@ -818,7 +818,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, new GlosValue[] { 1024 });
+            var res = Execute(new GlosValue[] { 1024 });
 
             var checker = GlosValueArrayChecker.Create(res);
             var it = checker.First();
@@ -848,7 +848,7 @@ namespace XUnitTester.Glos {
             list.ForEach(fgen.AppendLdLoc);
             (size - 1).Times(fgen.AppendAdd);
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertInteger((size - 1) * size / 2)
@@ -900,7 +900,7 @@ namespace XUnitTester.Glos {
 
             fgen.AppendRet();
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
             var checker = GlosValueArrayChecker.Create(res).First();
 
             checker.AssertInteger(locc).MoveNext();
@@ -930,7 +930,7 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertString(nameof(GlosValueType.Nil).ToLowerInvariant())

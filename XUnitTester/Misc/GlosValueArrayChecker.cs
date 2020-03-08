@@ -5,7 +5,7 @@ using GeminiLab.Glos.ViMa;
 
 using Xunit;
 
-namespace XUnitTester.Checker {
+namespace XUnitTester.Misc {
     public class GlosValueArrayItemChecker {
         public GlosValueArrayChecker Checker { get; }
         public int Position { get; private set; }

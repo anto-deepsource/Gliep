@@ -4,10 +4,10 @@ using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
 
 using Xunit;
+using XUnitTester.Misc;
 
 namespace XUnitTester.Glos {
     public class Exceptions : GlosTestBase {
-        // TODO: a custom exception assert mechanic
         [Fact]
         public void BadBranch() {
             var fun = Builder.AddFunctionRaw(new[] {
@@ -20,11 +20,11 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fun;
 
-            var exception = Assert.Throws<GlosRuntimeException>(() => {
-                ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var exception = GlosRuntimeExceptionCatcher.Catch<GlosInvalidInstructionPointerException>(() => {
+                Execute();
             });
 
-            // Assert.Equal(44, exception.InstructionPointer);
+            Assert.Equal(44, ViMa.CallStackFrames[^1].InstructionPointer);
         }
 
         [Fact]
@@ -38,8 +38,8 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fun;
 
-            Assert.Throws<GlosRuntimeException>(() => {
-                ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            GlosRuntimeExceptionCatcher.Catch<GlosUnexpectedEndOfCodeException>(() => {
+                Execute();
             });
         }
 
@@ -51,11 +51,11 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fun;
 
-            var exception = Assert.Throws<GlosRuntimeException>(() => {
-                ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var exception = GlosRuntimeExceptionCatcher.Catch<GlosLocalVariableIndexOutOfRangeException>(() => {
+                Execute();
             });
 
-            // Assert.Equal(0, exception.Index);
+            Assert.Equal(0, exception.Index);
 
             fun = Builder.AddFunctionRaw(new[] {
                 (byte)GlosOp.StLoc1,
@@ -63,11 +63,11 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fun;
 
-            exception = Assert.Throws<GlosRuntimeException>(() => {
-                ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            exception = GlosRuntimeExceptionCatcher.Catch<GlosLocalVariableIndexOutOfRangeException>(() => {
+                Execute();
             });
 
-            // Assert.Equal(1, exception.Index);
+            Assert.Equal(1, exception.Index);
         }
 
         [Fact]
@@ -78,11 +78,11 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fun;
 
-            var exception = Assert.Throws<GlosRuntimeException>(() => {
-                ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var exception = GlosRuntimeExceptionCatcher.Catch<GlosUnknownOpException>(() => {
+                Execute();
             });
 
-            // Assert.Equal((byte)0xff, exception.Op);
+            Assert.Equal((byte)GlosOp.Invalid, exception.Op);
         }
 
         [Fact]
@@ -95,11 +95,12 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var exception = Assert.Throws<GlosRuntimeException>(() => {
-                ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var exception = GlosRuntimeExceptionCatcher.Catch<GlosValueNotCallableException>(() => {
+                Execute();
             });
 
-            // Assert.Equal((byte)0xff, exception.Op);
+            Assert.Equal(GlosValueType.Integer, exception.Value.Type);
+            Assert.Equal(1, exception.Value.AssumeInteger());
         }
 
         [Fact]
@@ -112,11 +113,13 @@ namespace XUnitTester.Glos {
 
             fgen.SetEntry();
 
-            var exception = Assert.Throws<GlosRuntimeException>(() => {
-                ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var exception = GlosRuntimeExceptionCatcher.Catch<GlosValueTypeAssertionFailedException>(() => {
+                Execute();
             });
 
-            // Assert.Equal((byte)0xff, exception.Op);
+            Assert.Equal(GlosValueType.Table, exception.Expected);
+            Assert.Equal(GlosValueType.Integer, exception.Value.Type);
+            Assert.Equal(1, exception.Value.AssumeInteger());
         }
     }
 }

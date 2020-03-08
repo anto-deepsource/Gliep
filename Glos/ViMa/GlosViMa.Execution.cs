@@ -321,12 +321,8 @@ namespace GeminiLab.Glos.ViMa {
         }
 
         // though ViMa shouldn't manage units, this function is necessary
-        public GlosValue[] ExecuteUnit(GlosUnit unit, GlosValue[]? args = null) {
-            return ExecuteFunction(new GlosFunction(unit.FunctionTable[unit.Entry], new GlosContext(null)), args);
-        }
-
-        public GlosValue[] ExecuteUnit(GlosUnit unit, GlosValue[]? args, GlosContext parentContext) {
-            return ExecuteFunction(new GlosFunction(unit.FunctionTable[unit.Entry], parentContext), args);
+        public GlosValue[] ExecuteUnit(GlosUnit unit, GlosValue[]? args = null, GlosContext? parentContext = null) {
+            return ExecuteFunction(new GlosFunction(unit.FunctionTable[unit.Entry], parentContext ?? new GlosContext(null)), args);
         }
     }
 }

@@ -12,5 +12,9 @@ namespace XUnitTester.Glos {
             ViMa = new GlosViMa();
             Builder = new GlosUnitBuilder();
         }
+
+        protected GlosValue[] Execute(GlosValue[]? args = null, GlosContext? parentContext = null) {
+            return ViMa.ExecuteUnit(Unit, args, parentContext);
+        }
     }
 }

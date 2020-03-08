@@ -8,7 +8,7 @@ using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
 
 using Xunit;
-using XUnitTester.Checker;
+using XUnitTester.Misc;
 
 namespace XUnitTester.Glug {
     public class GlugTest : GlugExecutionTestBase {

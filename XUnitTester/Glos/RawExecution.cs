@@ -1,7 +1,7 @@
-using System;
 using GeminiLab.Glos.ViMa;
+
 using Xunit;
-using XUnitTester.Checker;
+using XUnitTester.Misc;
 
 namespace XUnitTester.Glos {
     public class RawExecution : GlosTestBase {
@@ -14,7 +14,7 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fid;
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertInteger(0)
@@ -50,7 +50,7 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fid;
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             unchecked {
                 GlosValueArrayChecker.Create(res)
@@ -88,7 +88,7 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fid;
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             unchecked {
                 GlosValueArrayChecker.Create(res)
@@ -124,7 +124,7 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fid;
 
-            var res = ViMa.ExecuteUnit(Unit, new[] { GlosValue.NewNil(), GlosValue.NewNil(), GlosValue.NewBoolean(true) });
+            var res = Execute(new[] { GlosValue.NewNil(), GlosValue.NewNil(), GlosValue.NewBoolean(true) });
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertNil()
@@ -169,7 +169,7 @@ namespace XUnitTester.Glos {
 
             Builder.Entry = fid;
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>());
+            var res = Execute();
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertTable(t => {
@@ -219,7 +219,7 @@ namespace XUnitTester.Glos {
             
             Builder.Entry = fid;
 
-            var res = ViMa.ExecuteUnit(Unit, Array.Empty<GlosValue>(), global);
+            var res = Execute(parentContext: global);
 
             GlosValueArrayChecker.Create(res)
                 .First().AssertInteger(0)
