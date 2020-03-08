@@ -196,6 +196,11 @@ namespace GeminiLab.Glug.Tokenizer {
 
                     yield return new GlugToken { Type = GlugTokenType.LiteralString, ValueString = EscapeSequenceConverter.Decode(line.AsSpan(begin + 1, ptr - begin - 1)) };
                     ++ptr;
+                } else if (c == '#') {
+                    yield break;
+                } else {
+                    // TODO: WARN here
+                    ++ptr;
                 }
             }
         }
