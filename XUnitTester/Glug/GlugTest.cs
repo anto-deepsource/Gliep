@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using GeminiLab.Core2;
 using GeminiLab.Core2.Random;
 using GeminiLab.Core2.Random.RNG;

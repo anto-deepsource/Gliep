@@ -1,4 +1,4 @@
-﻿namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos.ViMa {
     public enum GlosOp: byte {
         Add     = 0x00,
         Sub     = 0x01,

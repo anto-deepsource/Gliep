@@ -1,4 +1,4 @@
-﻿namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos.ViMa {
     public enum GlosOpCategory : byte {
         NotUsed,
         BinaryOperator,

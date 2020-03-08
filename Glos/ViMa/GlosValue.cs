@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace GeminiLab.Glos.ViMa {
     [StructLayout(LayoutKind.Explicit, Size = 8)]

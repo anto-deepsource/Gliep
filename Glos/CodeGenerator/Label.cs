@@ -1,4 +1,4 @@
-﻿namespace GeminiLab.Glos.CodeGenerator {
+namespace GeminiLab.Glos.CodeGenerator {
     public class Label {
         internal readonly GlosFunctionBuilder Builder;
         internal int TargetCounter;

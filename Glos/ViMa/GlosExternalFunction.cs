@@ -1,4 +1,4 @@
-﻿namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos.ViMa {
     // TODO: answer following questions:
     // Question I: should external functions receive a vm as an argument?
     // Question II: how to avoid copy at calling

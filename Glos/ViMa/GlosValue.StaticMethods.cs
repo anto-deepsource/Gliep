@@ -1,4 +1,4 @@
-﻿namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos.ViMa {
     public partial struct GlosValue {
         public static implicit operator GlosValue(long v) => NewInteger(v);
         public static implicit operator GlosValue(double v) => NewFloat(v);

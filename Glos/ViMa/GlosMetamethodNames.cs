@@ -1,4 +1,4 @@
-﻿namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos.ViMa {
     public static class GlosMetamethodNames {
         public static readonly string Add = "__add";
         public static readonly string Sub = "__sub";

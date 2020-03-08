@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
