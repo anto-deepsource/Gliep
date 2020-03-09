@@ -263,6 +263,7 @@ namespace GeminiLab.Glug.Parser {
                 GlugTokenType.SymbolLParen => (Expr)ReadBlockInParen(stream),
                 GlugTokenType.KeywordIf => ReadIf(stream),
                 GlugTokenType.KeywordWhile => ReadWhile(stream),
+                GlugTokenType.KeywordBreak => ReadBreak(stream),
                 GlugTokenType.KeywordReturn => ReadReturn(stream),
                 GlugTokenType.KeywordFn => ReadFunction(stream),
                 GlugTokenType.SymbolLBracket => ReadOnStackList(stream),
@@ -308,7 +309,7 @@ namespace GeminiLab.Glug.Parser {
 
             return new If(branches, block);
         }
-
+        
         private static While ReadWhile(LookAheadTokenStream stream) {
             Expr expr;
             Expr block;
@@ -318,6 +319,11 @@ namespace GeminiLab.Glug.Parser {
             block = ReadExprGreedily(stream);
 
             return new While(expr, block);
+        }
+
+        private static Break ReadBreak(LookAheadTokenStream stream) {
+            Consume(stream, GlugTokenType.KeywordBreak);
+            return new Break(ReadExprGreedily(stream));
         }
 
         private static Return ReadReturn(LookAheadTokenStream stream) {

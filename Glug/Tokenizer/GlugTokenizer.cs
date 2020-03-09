@@ -207,6 +207,7 @@ namespace GeminiLab.Glug.Tokenizer {
                         "fn" => GlugTokenType.KeywordFn,
                         "return" => GlugTokenType.KeywordReturn,
                         "while" => GlugTokenType.KeywordWhile,
+                        "break" => GlugTokenType.KeywordBreak,
                         _ => GlugTokenType.Identifier,
                     };
 

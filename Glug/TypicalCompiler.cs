@@ -17,8 +17,11 @@ namespace GeminiLab.Glug {
         public static void ProcessTree(ref Expr root) {
             root = new Function("<root>", false, new List<string>(), root);
 
-            var vdv = new FunctionAndVarDefVisitor();
-            vdv.Visit(root);
+            var wbv = new WhileVisitor();
+            wbv.Visit(root, null);
+
+            var vdv = new VarDefVisitor();
+            vdv.Visit(root, vdv.RootTable);
 
             var vcv = new VarRefVisitor(vdv.RootTable);
             vcv.Visit(root);

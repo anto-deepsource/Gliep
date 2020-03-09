@@ -83,13 +83,38 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitWhile(While val) {
-            base.VisitWhile(val);
+            val.EndLabel = CurrentFunction!.AllocateLabel();
+
+            if (val.IsOnStackList) CurrentFunction!.AppendLdDel();
+            else CurrentFunction!.AppendLdNil();
+
+            var beginLabel = CurrentFunction!.AllocateAndInsertLabel();
+
+            visitAndConvertResultToValue(val.Condition);
+            CurrentFunction!.AppendBf(val.EndLabel);
+
+            if (val.IsOnStackList) CurrentFunction!.AppendShpRv(0);
+            else CurrentFunction!.AppendPop();
+
+            CurrentFunction!.AppendLdDel();
+            Visit(val.Body);
+            CurrentFunction!.AppendPopDel();
+            CurrentFunction!.AppendB(beginLabel);
+
+            CurrentFunction!.InsertLabel(val.EndLabel);
         }
 
         public override void VisitReturn(Return val) {
             visitAndConvertResultToOsl(val.Expr);
 
             CurrentFunction!.AppendRet();
+        }
+
+        public override void VisitBreak(Break val) {
+            CurrentFunction!.AppendShpRv(0);
+            if (val.IsOnStackList) visitAndConvertResultToOsl(val.Expr);
+            else visitAndConvertResultToValue(val.Expr);
+            CurrentFunction!.AppendB(val.Parent.EndLabel);
         }
 
         public override void VisitOnStackList(OnStackList val) {

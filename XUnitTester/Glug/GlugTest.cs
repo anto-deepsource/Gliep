@@ -111,6 +111,22 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertEnd();
         }
 
+        [Theory]
+        [MemberData(nameof(GcdTestCases), 1024)]
+        [MemberData(nameof(GcdSmallTestCases), 512)]
+        public void LoopGcd(uint x, uint y, uint expected) {
+            var code = @$"
+                !gcd = [a, b] -> (while (b > 0) [a, b] = [b, a % b]; a);
+                fn gcd_long[a, b] while (true) ( if (b == 0) break a; [a, b] = [b, a % b]; a);
+                [gcd[{x}, {y}], gcd_long[{x}, {y}]]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(expected)
+                .MoveNext().AssertInteger(expected)
+                .MoveNext().AssertEnd();
+        }
+
         [Fact]
         public void YCombinator() {
             var code = @"

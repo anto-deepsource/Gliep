@@ -38,6 +38,7 @@ ExprItem    : literal
             | If
             | While
             | Return
+            | Break
             | Function
             | Lambda
             | OnStackList
@@ -59,6 +60,9 @@ While       : "while" BlockInParen Expr
             ;
 
 Return      : "return" Expr
+            ;
+
+Break       : "break" Expr
             ;
 
 Function    : "fn" identifier? OptionalParamList OptionalRightArrow Expr

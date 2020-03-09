@@ -86,6 +86,13 @@ namespace GeminiLab.Glug.AST {
             Writer.DecreaseIndent();
         }
 
+        public override void VisitBreak(Break val) {
+            Writer.WriteLine("<break>");
+            Writer.IncreaseIndent();
+            Visit(val.Expr);
+            Writer.DecreaseIndent();
+        }
+
         public override void VisitFunction(Function val) {
             Writer.WriteLine($"function \"{val.Name}\" {(val.Parameters.Count > 0 ? $"[{val.Parameters.Select(x => $"\"{x}\"").JoinBy(", ")}]" : "[]")}");
             Writer.IncreaseIndent();

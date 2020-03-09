@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using GeminiLab.Glos.CodeGenerator;
 
 namespace GeminiLab.Glug.AST {
     public abstract class Node { }
@@ -78,6 +79,8 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class While : Expr {
+        public override bool IsOnStackList => Body.IsOnStackList || Breaks.Any(b => b.IsOnStackList);
+
         public While(Expr condition, Expr body) {
             Condition = condition;
             Body = body;
@@ -85,6 +88,13 @@ namespace GeminiLab.Glug.AST {
 
         public Expr Condition { get; }
         public Expr Body { get; }
+        // CAUTION:
+        // All properties of all node classes are readonly, except While.Breaks and Break.Parent
+        // because these properties cannot be calculated by current parser (stateless, static, lock-free)
+        // these properties should be assigned by only WhileVisitor
+        public IList<Break> Breaks { get; set; } = new List<Break>();
+
+        public Label EndLabel { get; set; } = null!;
     }
 
     public class Return : Expr {
@@ -94,7 +104,16 @@ namespace GeminiLab.Glug.AST {
 
         public Expr Expr { get; }
     }
-    
+
+    public class Break : Expr {
+        public Break(Expr expr) {
+            Expr = expr;
+        }
+
+        public Expr Expr { get; }
+        public While Parent { get; set; } = null!;
+    }
+
     public class Function : Expr {
         public VariableTable VariableTable { get; set; } = null!;
 

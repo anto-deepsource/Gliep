@@ -2,37 +2,30 @@ using System;
 using System.Collections.Generic;
 
 namespace GeminiLab.Glug.AST {
-    public class FunctionAndVarDefVisitor : RecursiveVisitor {
-        public VariableTable RootTable { get; }
-        public VariableTable CurrentScope { get; set; }
+    public class VarDefVisitor : RecursiveInVisitor<VariableTable> {
+        public VariableTable RootTable { get; } = new VariableTable(null!, null!);
         public IList<Function> Functions { get; } = new List<Function>();
 
-        public FunctionAndVarDefVisitor() {
-            CurrentScope = RootTable = new VariableTable(null!, null!);
-        }
-
-        public override void VisitFunction(Function val) {
+        public override void VisitFunction(Function val, VariableTable currentScope) {
             Functions.Add(val);
 
             if (val.ExplicitlyNamed) {
-                val.Self = CurrentScope.CreateVariable(val.Name);
+                val.Self = currentScope.CreateVariable(val.Name);
             }
 
-            var oldScope = CurrentScope;
-            CurrentScope = val.VariableTable = new VariableTable(val, oldScope);
+            val.VariableTable = new VariableTable(val, currentScope);
 
             for (int i = 0; i < val.Parameters.Count; ++i) {
-                CurrentScope.CreateVariable(val.Parameters[i], i);
+                val.VariableTable.CreateVariable(val.Parameters[i], i);
             }
-            
-            base.VisitFunction(val);
-            CurrentScope = oldScope;
+
+            base.VisitFunction(val, val.VariableTable);
         }
 
-        public override void VisitVarRef(VarRef val) {
-            base.VisitVarRef(val);
+        public override void VisitVarRef(VarRef val, VariableTable currentScope) {
+            base.VisitVarRef(val, currentScope);
 
-            if (val.IsDef) val.Variable = CurrentScope.CreateVariable(val.Id);
+            if (val.IsDef) val.Variable = currentScope.CreateVariable(val.Id);
             else if (val.IsGlobal) val.Variable = RootTable.CreateVariable(val.Id);
         }
 

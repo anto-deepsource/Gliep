@@ -62,6 +62,7 @@ namespace GeminiLab.Glug.Tokenizer {
         KeywordFn       = 0x003_004_00,
         KeywordReturn   = 0x003_005_00,
         KeywordWhile    = 0x003_006_00,
+        KeywordBreak    = 0x003_007_00,
         Identifier      = 0x004_000_01,
         NotAToken       = 0x7ff_000_04,
     }
