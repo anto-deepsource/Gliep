@@ -15,7 +15,7 @@ namespace GeminiLab.Glug {
         public static Expr Parse(IGlugTokenStream stream) => GlugParser.Parse(stream);
 
         public static void ProcessTree(ref Expr root) {
-            root = new Function("<root>", new List<string>(), root);
+            root = new Function("<root>", false, new List<string>(), root);
 
             var vdv = new FunctionAndVarDefVisitor();
             vdv.Visit(root);

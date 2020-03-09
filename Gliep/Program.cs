@@ -122,7 +122,7 @@ namespace GeminiLab.Gliep {
             for (int i = 0; i < unit.FunctionTable.Count; ++i) {
                 var fun = unit.FunctionTable[i];
 
-                Console.WriteLine($@"#{i}: loc size {fun.LocalVariableSize}{(fun.VariableInContext.Count > 0 ? $", ctx var: {fun.VariableInContext.JoinBy(", ")}" : "")}{(unit.Entry == i ? ", entry" : "")}");
+                Console.WriteLine($@"#{i}: ""{fun.Name}"", loc size {fun.LocalVariableSize}{(fun.VariableInContext.Count > 0 ? $", ctx var: {fun.VariableInContext.JoinBy(", ")}" : "")}{(unit.Entry == i ? ", entry" : "")}");
 
                 var ops = fun.Code;
                 var ip = 0;

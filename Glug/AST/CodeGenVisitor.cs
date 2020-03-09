@@ -16,6 +16,7 @@ namespace GeminiLab.Glug.AST {
             CurrentFunction = fun;
 
             if (oldFun == null) fun.SetEntry();
+            fun.Name = val.Name!;
 
             var variables = val.VariableTable.Variables.Values.ToArray();
             fun.VariableInContext = variables.Where(x => x.Place == VariablePlace.Context).Select(x => x.Name).ToArray();

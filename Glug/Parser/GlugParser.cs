@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using GeminiLab.Core2;
 using GeminiLab.Glug.AST;
 using GeminiLab.Glug.Tokenizer;
 
 namespace GeminiLab.Glug.Parser {
     public static class GlugParser {
+        private static string DefaultLambdaName(List<string> paramList, GlugToken tok) => $"<lambda[{paramList.JoinBy(", ")}] at {tok.Source}:{tok.Row}:{tok.Column}>";
+
         private static bool LikelyExpr(GlugTokenType type) {
             return type.GetCategory() == GlugTokenTypeCategory.Literal
                    || IsUnOp(type)
@@ -149,16 +151,18 @@ namespace GeminiLab.Glug.Parser {
                 var op = stream.NextEof() ? GlugTokenType.NotAToken : stream.PeekToken().Type;
 
                 if (op == GlugTokenType.SymbolRArrow) {
+                    var param = new List<string>();
+                    
                     if (expr is VarRef vr) {
-                        stream.GetToken();
-                        expr = new Function(null, new List<string>(new[] { vr.Id }), ReadExprGreedily(stream));
+                        param.Add(vr.Id);
                     } else if (expr is OnStackList osl && osl.IsVarRef) {
-                        stream.GetToken();
-                        expr = new Function(null, osl.List.Cast<VarRef>().Select(x => x.Id).ToList(), ReadExprGreedily(stream));
+                        param.AddRange(osl.List.Cast<VarRef>().Select(x => x.Id));
                     } else {
-                        // let it crash elsewhere
                         break;
                     }
+
+                    var arrow = stream.GetToken();
+                    expr = new Function(DefaultLambdaName(param, arrow), false, param, ReadExprGreedily(stream));
                 }
 
                 int p = Precedence(op);
@@ -321,12 +325,11 @@ namespace GeminiLab.Glug.Parser {
             return new Return(ReadExprGreedily(stream));
         }
 
-        private static Function ReadFunction(LookAheadTokenStream stream, bool skipFn = false) {
-            if (!skipFn) Consume(stream, GlugTokenType.KeywordFn);
-            string? name = null;
-            if (stream.PeekToken().Type == GlugTokenType.Identifier) {
-                name = stream.GetToken().ValueString!;
-            }
+        private static Function ReadFunction(LookAheadTokenStream stream) {
+            var fn = stream.PeekToken();
+            Consume(stream, GlugTokenType.KeywordFn);
+
+            string? name = stream.PeekToken().Type == GlugTokenType.Identifier ? stream.GetToken().ValueString : null;
 
             var plist = ReadOptionalParamList(stream);
 
@@ -336,7 +339,7 @@ namespace GeminiLab.Glug.Parser {
 
             var block = ReadExprGreedily(stream);
 
-            return new Function(name, plist, block);
+            return new Function(name ?? DefaultLambdaName(plist, fn), name != null, plist, block);
         }
 
         private static List<string> ReadOptionalParamList(LookAheadTokenStream stream) {

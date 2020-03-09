@@ -14,7 +14,7 @@ namespace GeminiLab.Glug.AST {
         public override void VisitFunction(Function val) {
             Functions.Add(val);
 
-            if (val.Name != null) {
+            if (val.ExplicitlyNamed) {
                 val.Self = CurrentScope.CreateVariable(val.Name);
             }
 

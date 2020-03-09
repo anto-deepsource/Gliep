@@ -100,13 +100,15 @@ namespace GeminiLab.Glug.AST {
 
         public Variable Self { get; set; } = null!;
 
-        public Function(string? name, List<string> parameters, Expr body) {
+        public Function(string name, bool explicitlyNamed, List<string> parameters, Expr body) {
             Name = name;
+            ExplicitlyNamed = explicitlyNamed;
             Parameters = parameters;
             Body = body;
         }
 
-        public string? Name { get; }
+        public string Name { get; }
+        public bool ExplicitlyNamed { get; }
         public List<string> Parameters { get; }
         public Expr Body { get; }
     }

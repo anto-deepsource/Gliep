@@ -30,10 +30,8 @@ namespace GeminiLab.Glos.CodeGenerator {
             return fun;
         }
 
-        public int AddFunctionRaw(ReadOnlySpan<byte> op, int localVariableSize) => AddFunctionRaw(op, localVariableSize, Array.Empty<string>());
-
-        public int AddFunctionRaw(ReadOnlySpan<byte> op, int localVariableSize, IReadOnlyCollection<string> variableInContext) {
-            _functions.Add(new GlosFunctionPrototype(op, localVariableSize, variableInContext));
+        public int AddFunctionRaw(ReadOnlySpan<byte> op, int localVariableSize, IReadOnlyCollection<string>? variableInContext = null, string? name = null) {
+            _functions.Add(new GlosFunctionPrototype(name ?? $"function#{_func}", op, localVariableSize, variableInContext ?? Array.Empty<string>()));
             return _func++;
         }
 
@@ -42,7 +40,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         
         public GlosUnit GetResult() {
             foreach (var builder in _builders) {
-                _functions[builder.Id] = new GlosFunctionPrototype(builder.GetOpArray(), builder.LocalVariableCount, builder.VariableInContext ?? Array.Empty<string>());
+                _functions[builder.Id] = new GlosFunctionPrototype(builder.Name, builder.GetOpArray(), builder.LocalVariableCount, builder.VariableInContext ?? Array.Empty<string>());
             }
 
             return new GlosUnit(_functions, Entry, _stringList);

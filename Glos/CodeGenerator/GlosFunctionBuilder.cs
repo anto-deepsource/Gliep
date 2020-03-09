@@ -8,6 +8,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         internal GlosFunctionBuilder(GlosUnitBuilder parent, int id) {
             Parent = parent;
             Id = id;
+            Name = $"function#{id}";
         }
 
         public GlosUnitBuilder Parent { get; }
@@ -16,6 +17,8 @@ namespace GeminiLab.Glos.CodeGenerator {
 
         // TODO: replace temporary workaround
         public IReadOnlyCollection<string> VariableInContext { get; set; } = Array.Empty<string>();
+
+        public string Name { get; set; }
 
         #region instruction buffer
         private class Instruction {
