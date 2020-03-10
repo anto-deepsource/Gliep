@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using GeminiLab.Core2;
-using GeminiLab.Core2.Random;
+
 using GeminiLab.Core2.Random.RNG;
-using GeminiLab.Core2.Text;
 using GeminiLab.Core2.Yielder;
 using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
@@ -12,32 +10,6 @@ using XUnitTester.Misc;
 
 namespace XUnitTester.Glug {
     public class GlugTest : GlugExecutionTestBase {
-        [Fact]
-        public void Return0() {
-            GlosValueArrayChecker.Create(Execute("0"))
-                .FirstOne().AssertInteger(0)
-                .MoveNext().AssertEnd();
-        }
-
-        [Fact]
-        public void Evaluation() {
-            var code = @"
-                [1, -2, 2--2, nil ~= nil, (), nil, -(1 + 2), if (true) 1, if (false) 2, `{},]
-            ";
-
-            GlosValueArrayChecker.Create(Execute(code))
-                .FirstOne().AssertInteger(1)
-                .MoveNext().AssertInteger(-2)
-                .MoveNext().AssertInteger(4)
-                .MoveNext().AssertFalse()
-                .MoveNext().AssertNil()
-                .MoveNext().AssertNil()
-                .MoveNext().AssertInteger(-3)
-                .MoveNext().AssertInteger(1)
-                .MoveNext().AssertNil()
-                .MoveNext().AssertNil()
-                .MoveNext().AssertEnd();
-        }
 
         [Fact]
         public void Fibonacci() {
@@ -139,105 +111,6 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertEnd();
         }
 
-        [Fact]
-        public void String() {
-            string strA = "strA", strB = "ユニコードイグザンプル\u4396";
-            string strEscape = "\\n";
-            var code = $@"
-                [""{strA}"", ""{strA}"" + ""{strB}"", ""{strEscape}""]
-            ";
-
-            GlosValueArrayChecker.Create(Execute(code))
-                .FirstOne().AssertString(strA)
-                .MoveNext().AssertString(strA + strB)
-                .MoveNext().AssertString(EscapeSequenceConverter.Decode(strEscape))
-                .MoveNext().AssertEnd();
-        }
-
-        [Fact]
-        public void Beide() {
-            var code = @"
-                fn beide -> [1, 2];
-                fn sum2[x, y] -> x + y;
-                fn sum3[x, y, z] x + y + z;
-
-                return [beide[], beide[] - 1, sum2$beide[], sum3$(beide[]..3)] .. beide[]
-            ";
-
-            GlosValueArrayChecker.Create(Execute(code))
-                .FirstOne().AssertInteger(1)
-                .MoveNext().AssertInteger(0)
-                .MoveNext().AssertInteger(3)
-                .MoveNext().AssertInteger(6)
-                .MoveNext().AssertInteger(1)
-                .MoveNext().AssertInteger(2)
-                .MoveNext().AssertEnd();
-        }
-
-        [Fact]
-        public void DeepRecursiveLoop() {
-            var code = @"
-                fn loop[from, to, step, body] (
-                    if (from < to) (
-                        body[from];
-                        loop[from + step, to, step, body];
-                    )
-                );
-                !sum = 0;
-                loop[1, 131072 + 1, 1, i -> sum = sum + i];
-                !mul = 1;
-                loop[1, 10, 1, i -> mul = mul * i];
-                return [sum, mul];
-            ";
-
-            GlosValueArrayChecker.Create(Execute(code))
-                .FirstOne().AssertInteger((1L + 131072) * 131072 / 2)
-                .MoveNext().AssertInteger(362880)
-                .MoveNext().AssertEnd();
-        }
-
-        [Fact]
-        public void GlobalAndLocal() {
-            var code = @"
-                fn a -> x = 1;
-                fn b -> !!x = 2;
-                fn c -> !!x;
-
-                return [c[], a[], b[], a[], c[], !!ext[], c[]]
-            ";
-
-            var context = new GlosContext(null);
-            context.CreateVariable("ext", (GlosExternalFunction)((param) => { context.GetVariableReference("x") = 3; return new GlosValue[] { 3 }; }));
-
-            GlosValueArrayChecker.Create(Execute(code, context))
-                .FirstOne().AssertNil()
-                .MoveNext().AssertInteger(1)
-                .MoveNext().AssertInteger(2)
-                .MoveNext().AssertInteger(1)
-                .MoveNext().AssertInteger(2)
-                .MoveNext().AssertInteger(3)
-                .MoveNext().AssertInteger(3)
-                .MoveNext().AssertEnd();
-        }
-
-        [Fact]
-        public void Table() {
-            var code = @"
-                d = ""d"";
-                e = ""ee"";
-                a = { .a: 1, .b: 2, d: 4, @e: 5 };
-                a.c = 3;
-                [a.a, a.b, a.c, a@d, a.ee]
-            ";
-
-            GlosValueArrayChecker.Create(Execute(code))
-                .FirstOne().AssertInteger(1)
-                .MoveNext().AssertInteger(2)
-                .MoveNext().AssertInteger(3)
-                .MoveNext().AssertInteger(4)
-                .MoveNext().AssertInteger(5)
-                .MoveNext().AssertEnd();
-        }
 
         [Theory]
         [InlineData("1 + true", GlosOp.Add, GlosValueType.Integer, GlosValueType.Boolean)]

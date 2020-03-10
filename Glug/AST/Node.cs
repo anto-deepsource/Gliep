@@ -95,6 +95,8 @@ namespace GeminiLab.Glug.AST {
         public IList<Break> Breaks { get; set; } = new List<Break>();
 
         public Label EndLabel { get; set; } = null!;
+
+        public bool ResultUsed { get; set; } // NASTY!!!
     }
 
     public class Return : Expr {

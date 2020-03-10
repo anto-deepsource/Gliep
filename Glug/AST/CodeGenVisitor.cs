@@ -118,31 +118,33 @@ namespace GeminiLab.Glug.AST {
             var (parent, ru) = ctx;
             val.EndLabel = parent.AllocateLabel();
 
-            if (val.IsOnStackList) parent.AppendLdDel();
-            else parent.AppendLdNil();
+            val.ResultUsed = ru;
+
+            if (ru) {
+                if (val.IsOnStackList) parent.AppendLdDel();
+                else parent.AppendLdNil();
+            }
 
             var beginLabel = parent.AllocateAndInsertLabel();
 
             visitForValue(val.Condition, parent);
             parent.AppendBf(val.EndLabel);
 
-            if (val.IsOnStackList) parent.AppendShpRv(0);
-            else parent.AppendPop();
+            if (ru) {
+                if (val.IsOnStackList) parent.AppendShpRv(0);
+                else parent.AppendPop();
+            }
 
             parent.AppendLdDel();
             
-            if (val.IsOnStackList) visitForOsl(val.Body, parent);
+            if (!ru) visitForDiscard(val.Body, parent);
+            else if (val.IsOnStackList) visitForOsl(val.Body, parent);
             else visitForValue(val.Body, parent);
 
             parent.AppendPopDel();
             parent.AppendB(beginLabel);
 
             parent.InsertLabel(val.EndLabel);
-
-            if (!ru) {
-                if (val.IsOnStackList) parent.AppendShpRv(0);
-                else parent.AppendPop();
-            }
         }
 
         public override void VisitReturn(Return val, CodeGenContext ctx) {
@@ -156,7 +158,8 @@ namespace GeminiLab.Glug.AST {
             var (parent, _) = ctx;
 
             parent.AppendShpRv(0);
-            if (val.Parent.IsOnStackList) visitForOsl(val.Expr, parent);
+            if (!val.Parent.ResultUsed) visitForDiscard(val.Expr, parent);
+            else if (val.Parent.IsOnStackList) visitForOsl(val.Expr, parent);
             else visitForValue(val.Expr, parent);
             parent.AppendB(val.Parent.EndLabel);
         }
