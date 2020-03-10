@@ -5,18 +5,49 @@ using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glos.ViMa;
 
 namespace GeminiLab.Glug.AST {
-    public class CodeGenVisitor : RecursiveVisitor {
+    public struct CodeGenContext {
+        public GlosFunctionBuilder CurrentFunction;
+        public bool ResultUsed;
+        public CodeGenContext(GlosFunctionBuilder currentFunction, bool resultUsed) {
+            CurrentFunction = currentFunction;
+            ResultUsed = resultUsed;
+        }
+
+
+        public void Deconstruct(out GlosFunctionBuilder currentFunction, out bool resultUsed) => (currentFunction, resultUsed) = (CurrentFunction, ResultUsed);
+    }
+
+    public class CodeGenVisitor : RecursiveInVisitor<CodeGenContext> {
         public GlosUnitBuilder Builder { get; } = new GlosUnitBuilder();
 
-        public GlosFunctionBuilder? CurrentFunction { get; private set; }
 
-        public override void VisitFunction(Function val) {
+        private void visitForDiscard(Expr expr, GlosFunctionBuilder parent) {
+            Visit(expr, new CodeGenContext(parent, false));
+        }
+
+        private void visitForValue(Expr expr, GlosFunctionBuilder parent) {
+            Visit(expr, new CodeGenContext(parent, true));
+
+            if (expr.IsOnStackList) parent.AppendShpRv(1);
+        }
+        
+        private void visitForOsl(Expr expr, GlosFunctionBuilder parent) {
+            if (!expr.IsOnStackList) parent.AppendLdDel();
+
+            Visit(expr, new CodeGenContext(parent, true));
+        }
+
+        private void visitForAny(Expr expr, GlosFunctionBuilder parent) {
+            Visit(expr, new CodeGenContext(parent, true));
+        }
+
+
+        public override void VisitFunction(Function val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
             var fun = Builder.AddFunction();
-            var oldFun = CurrentFunction;
-            CurrentFunction = fun;
-
-            if (oldFun == null) fun.SetEntry();
-            fun.Name = val.Name!;
+            
+            if (parent == null) fun.SetEntry();
+            fun.Name = val.Name;
 
             var variables = val.VariableTable.Variables.Values.ToArray();
             fun.VariableInContext = variables.Where(x => x.Place == VariablePlace.Context).Select(x => x.Name).ToArray();
@@ -35,187 +66,200 @@ namespace GeminiLab.Glug.AST {
                 }
             }
 
-            base.VisitFunction(val);
+            visitForAny(val.Body, fun);
+            fun.AppendRetIfNone();
 
-            CurrentFunction.AppendRetIfNone();
-
-            CurrentFunction = oldFun;
-            if (CurrentFunction != null) {
-                CurrentFunction.AppendLdFun(fun);
-                CurrentFunction.AppendBind();
+            if (parent != null) {
+                if (val.Self != null || ru) {
+                    parent.AppendLdFun(fun);
+                    parent.AppendBind();
+                }
 
                 if (val.Self != null) {
-                    CurrentFunction.AppendDup();
-                    val.Self.CreateStoreInstr(CurrentFunction);
+                    if (ru) parent.AppendDup();
+                    val.Self.CreateStoreInstr(parent);
                 }
             }
         }
 
-        public override void VisitIf(If val) {
-            int brc = val.Branches.Count;
+        public override void VisitIf(If val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
             Label? nextLabel = null;
-            Label endLabel = CurrentFunction!.AllocateLabel();
+            var endLabel = parent.AllocateLabel();
 
-            for (int i = 0; i < brc; ++i) {
-                if (nextLabel != null) CurrentFunction!.InsertLabel(nextLabel);
-                nextLabel = CurrentFunction!.AllocateLabel();
+            foreach (var branch in val.Branches) {
+                if (nextLabel != null) parent.InsertLabel(nextLabel);
+                nextLabel = parent.AllocateLabel();
 
-                var (cond, expr) = val.Branches[i];
-                visitAndConvertResultToValue(cond);
-                CurrentFunction!.AppendBf(nextLabel);
-                
-                if (val.IsOnStackList) visitAndConvertResultToOsl(expr);
-                else visitAndConvertResultToValue(expr);
+                visitForValue(branch.Condition, parent);
+                parent.AppendBf(nextLabel);
 
-                CurrentFunction!.AppendB(endLabel);
+                if (!ru) visitForDiscard(branch.Body, parent);
+                else if (val.IsOnStackList) visitForOsl(branch.Body, parent);
+                else visitForValue(branch.Body, parent);
+
+                parent.AppendB(endLabel);
             }
 
-            CurrentFunction!.InsertLabel(nextLabel!); // brc must be at least 1 when this ast is well-formed
+            parent.InsertLabel(nextLabel!); // brc must be at least 1 when this ast is well-formed
             if (val.ElseBranch != null) {
-                if (val.IsOnStackList) visitAndConvertResultToOsl(val.ElseBranch);
-                else visitAndConvertResultToValue(val.ElseBranch);
-            } else {
-                if (val.IsOnStackList) CurrentFunction!.AppendLdDel();
-                else CurrentFunction!.AppendLdNil();
+                if (!ru) visitForDiscard(val.ElseBranch, parent);
+                else if (val.IsOnStackList) visitForOsl(val.ElseBranch, parent);
+                else visitForValue(val.ElseBranch, parent);
+            } else if (ru) {
+                if (val.IsOnStackList) parent.AppendLdDel();
+                else parent.AppendLdNil();
             }
 
-            CurrentFunction.InsertLabel(endLabel);
+            parent.InsertLabel(endLabel);
         }
 
-        public override void VisitWhile(While val) {
-            val.EndLabel = CurrentFunction!.AllocateLabel();
+        public override void VisitWhile(While val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            val.EndLabel = parent.AllocateLabel();
 
-            if (val.IsOnStackList) CurrentFunction!.AppendLdDel();
-            else CurrentFunction!.AppendLdNil();
+            if (val.IsOnStackList) parent.AppendLdDel();
+            else parent.AppendLdNil();
 
-            var beginLabel = CurrentFunction!.AllocateAndInsertLabel();
+            var beginLabel = parent.AllocateAndInsertLabel();
 
-            visitAndConvertResultToValue(val.Condition);
-            CurrentFunction!.AppendBf(val.EndLabel);
+            visitForValue(val.Condition, parent);
+            parent.AppendBf(val.EndLabel);
 
-            if (val.IsOnStackList) CurrentFunction!.AppendShpRv(0);
-            else CurrentFunction!.AppendPop();
+            if (val.IsOnStackList) parent.AppendShpRv(0);
+            else parent.AppendPop();
 
-            CurrentFunction!.AppendLdDel();
-            Visit(val.Body);
-            CurrentFunction!.AppendPopDel();
-            CurrentFunction!.AppendB(beginLabel);
+            parent.AppendLdDel();
+            
+            if (val.IsOnStackList) visitForOsl(val.Body, parent);
+            else visitForValue(val.Body, parent);
 
-            CurrentFunction!.InsertLabel(val.EndLabel);
+            parent.AppendPopDel();
+            parent.AppendB(beginLabel);
+
+            parent.InsertLabel(val.EndLabel);
+
+            if (!ru) {
+                if (val.IsOnStackList) parent.AppendShpRv(0);
+                else parent.AppendPop();
+            }
         }
 
-        public override void VisitReturn(Return val) {
-            visitAndConvertResultToOsl(val.Expr);
+        public override void VisitReturn(Return val, CodeGenContext ctx) {
+            var (parent, _) = ctx;
 
-            CurrentFunction!.AppendRet();
+            visitForOsl(val.Expr, parent);
+            parent.AppendRet();
         }
 
-        public override void VisitBreak(Break val) {
-            CurrentFunction!.AppendShpRv(0);
-            if (val.IsOnStackList) visitAndConvertResultToOsl(val.Expr);
-            else visitAndConvertResultToValue(val.Expr);
-            CurrentFunction!.AppendB(val.Parent.EndLabel);
+        public override void VisitBreak(Break val, CodeGenContext ctx) {
+            var (parent, _) = ctx;
+
+            parent.AppendShpRv(0);
+            if (val.Parent.IsOnStackList) visitForOsl(val.Expr, parent);
+            else visitForValue(val.Expr, parent);
+            parent.AppendB(val.Parent.EndLabel);
         }
 
-        public override void VisitOnStackList(OnStackList val) {
-            CurrentFunction!.AppendLdDel();
+        public override void VisitOnStackList(OnStackList val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            
+            if (ru) parent.AppendLdDel();
 
             foreach (var item in val.List) {
-                visitAndConvertResultToValue(item);
+                if (ru) visitForValue(item, parent);
+                else visitForDiscard(item, parent);
             }
         }
 
-        public override void VisitBlock(Block val) {
+        public override void VisitBlock(Block val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
             var count = val.List.Count;
 
             if (count == 0) {
-                CurrentFunction!.AppendLdNil();
+                if (ru) parent.AppendLdNil();
             } else {
                 for (int i = 0; i < count; ++i) {
-                    Visit(val.List[i]);
-
-                    if (i != count - 1) {
-                        if (val.List[i].IsOnStackList) {
-                            CurrentFunction!.AppendShpRv(0);
-                        } else {
-                            CurrentFunction!.AppendPop();
-                        }
+                    if (i < count - 1) {
+                        visitForDiscard(val.List[i], parent);
+                    } else {
+                        if (ru) visitForAny(val.List[i], parent);
+                        else visitForDiscard(val.List[i], parent);
                     }
                 }
             }
         }
 
-        private void visitAndConvertResultToValue(Expr expr) {
-            Visit(expr);
-
-            if (expr.IsOnStackList) CurrentFunction!.AppendShpRv(1);
-        }
-
-        private void visitAndConvertResultToOsl(Expr expr) {
-            if (!expr.IsOnStackList) CurrentFunction!.AppendLdDel();
-
-            Visit(expr);
-        }
-
-        public override void VisitUnOp(UnOp val) {
-            visitAndConvertResultToValue(val.Expr);
+        public override void VisitUnOp(UnOp val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            visitForValue(val.Expr, parent);
 
             switch (val.Op) {
-            case GlugUnOpType.Neg:
-                CurrentFunction!.AppendNeg();
-                break;
-            case GlugUnOpType.Not:
-                CurrentFunction!.AppendNot();
-                break;
-            case GlugUnOpType.Typeof:
-                CurrentFunction!.AppendTypeof();
-                break;
+                case GlugUnOpType.Neg:
+                    parent.AppendNeg();
+                    break;
+                case GlugUnOpType.Not:
+                    parent.AppendNot();
+                    break;
+                case GlugUnOpType.Typeof:
+                    parent.AppendTypeof();
+                    break;
             }
+
+            if (!ru) parent.AppendPop();
         }
 
-        public override void VisitBiOp(BiOp val) {
+        public override void VisitBiOp(BiOp val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
             if (val.Op == GlugBiOpType.Call) {
-                visitAndConvertResultToOsl(val.ExprR);
-                visitAndConvertResultToValue(val.ExprL);
-                CurrentFunction!.AppendCall();
+                visitForOsl(val.ExprR, parent);
+                visitForValue(val.ExprL, parent);
+                parent.AppendCall();
+
+                if (!ru) parent.AppendShpRv(0);
             } else if (val.Op == GlugBiOpType.Assign) {
                 if (val.ExprL.IsOnStackList) {
-                    visitAndConvertResultToOsl(val.ExprR);
+                    visitForOsl(val.ExprR, parent);
 
                     var list = ((OnStackList)(val.ExprL)).List;
                     var count = list.Count;
 
-                    CurrentFunction!.AppendShpRv(count);
-                    for (int i = count - 1; i >= 0; --i) ((VarRef)(list[i])).Variable.CreateStoreInstr(CurrentFunction!);
+                    parent.AppendShpRv(count);
+                    for (int i = count - 1; i >= 0; --i) ((VarRef)(list[i])).Variable.CreateStoreInstr(parent);
 
-                    CurrentFunction.AppendLdNil();
+                    if (ru) parent.AppendLdNil();
                 } else if (val.ExprL is VarRef vr) {
-                    visitAndConvertResultToValue(val.ExprR);
-                    CurrentFunction!.AppendDup();
-                    vr.Variable.CreateStoreInstr(CurrentFunction!);
+                    visitForValue(val.ExprR, parent);
+                    if (ru) parent.AppendDup();
+                    vr.Variable.CreateStoreInstr(parent);
                 } else if (val.ExprL is BiOp { Op: GlugBiOpType.Index } ind) {
-                    visitAndConvertResultToValue(val.ExprR);
-                    CurrentFunction!.AppendDup();
-                    visitAndConvertResultToValue(ind.ExprL);
-                    visitAndConvertResultToValue(ind.ExprR);
-                    CurrentFunction!.AppendUen();
+                    visitForValue(val.ExprR, parent);
+                    if (ru) parent.AppendDup();
+                    visitForValue(ind.ExprL, parent);
+                    visitForValue(ind.ExprR, parent);
+                    parent.AppendUen();
                 } else if (val.ExprL is Metatable mt) {
-                    visitAndConvertResultToValue(val.ExprR);
-                    CurrentFunction!.AppendDup();
-                    visitAndConvertResultToValue(mt.Table);
-                    CurrentFunction!.AppendSmt();
+                    visitForValue(val.ExprR, parent);
+                    if (ru) parent.AppendDup();
+                    visitForValue(mt.Table, parent);
+                    parent.AppendSmt();
                 } else {
                     throw new ArgumentOutOfRangeException();
                 }
             } else if (val.Op == GlugBiOpType.Concat) {
-                visitAndConvertResultToOsl(val.ExprL);
-                visitAndConvertResultToOsl(val.ExprR);
-                CurrentFunction!.AppendPopDel();
+                if (ru) {
+                    visitForOsl(val.ExprL, parent);
+                    visitForOsl(val.ExprR, parent);
+                    parent.AppendPopDel();
+                } else {
+                    visitForDiscard(val.ExprL, parent);
+                    visitForDiscard(val.ExprR, parent);
+                }
             } else {
-                visitAndConvertResultToValue(val.ExprL);
-                visitAndConvertResultToValue(val.ExprR);
+                visitForValue(val.ExprL, parent);
+                visitForValue(val.ExprR, parent);
 
-                CurrentFunction!.AppendInstruction(val.Op switch {
+                parent.AppendInstruction(val.Op switch {
                     GlugBiOpType.Add => GlosOp.Add,
                     GlugBiOpType.Sub => GlosOp.Sub,
                     GlugBiOpType.Mul => GlosOp.Mul,
@@ -235,43 +279,56 @@ namespace GeminiLab.Glug.AST {
                     GlugBiOpType.Index => GlosOp.Ren,
                     _ => GlosOp.Nop, // Add a exception here
                 });
+
+                if (!ru) parent.AppendPop();
             }
         }
 
-        public override void VisitLiteralInteger(LiteralInteger val) {
-            CurrentFunction!.AppendLd(val.Value);
+        public override void VisitLiteralInteger(LiteralInteger val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            if (ru) parent.AppendLd(val.Value);
         }
 
-        public override void VisitLiteralBool(LiteralBool val) {
-            if (val.Value) CurrentFunction!.AppendLdTrue();
-            else CurrentFunction!.AppendLdFalse();
+        public override void VisitLiteralBool(LiteralBool val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            if (ru) parent.AppendLdBool(val.Value);
         }
 
-        public override void VisitLiteralString(LiteralString val) {
-            CurrentFunction!.AppendLdStr(val.Value);
+        public override void VisitLiteralString(LiteralString val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            if (ru) parent.AppendLdStr(val.Value);
         }
 
-        public override void VisitLiteralNil(LiteralNil val) {
-            CurrentFunction!.AppendLdNil();
+        public override void VisitLiteralNil(LiteralNil val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            if (ru) parent.AppendLdNil();
         }
 
-        public override void VisitVarRef(VarRef val) {
-            val.Variable.CreateLoadInstr(CurrentFunction!);
+        public override void VisitVarRef(VarRef val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            val.Variable.CreateLoadInstr(parent);
+            if (!ru) parent.AppendPop();
         }
 
-        public override void VisitTableDef(TableDef val) {
-            CurrentFunction!.AppendLdNTbl();
+        public override void VisitTableDef(TableDef val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+
+            parent.AppendLdNTbl();
 
             foreach (var (key, value) in val.Pairs) {
-                visitAndConvertResultToValue(key);
-                visitAndConvertResultToValue(value);
-                CurrentFunction.AppendIen();
+                visitForValue(key, parent);
+                visitForValue(value, parent);
+                parent.AppendIen();
             }
+
+            if (!ru) parent.AppendPop();
         }
 
-        public override void VisitMetatable(Metatable val) {
-            visitAndConvertResultToValue(val.Table);
-            CurrentFunction!.AppendGmt();
+        public override void VisitMetatable(Metatable val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            visitForValue(val.Table, parent);
+            parent.AppendGmt();
+            if (!ru) parent.AppendPop();
         }
     }
 }

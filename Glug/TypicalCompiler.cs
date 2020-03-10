@@ -32,7 +32,7 @@ namespace GeminiLab.Glug {
 
         public static GlosUnit CodeGen(Expr root) {
             var gen = new CodeGenVisitor();
-            gen.Visit(root);
+            gen.Visit(root, new CodeGenContext(null!, false));
 
             return gen.Builder.GetResult();
         }

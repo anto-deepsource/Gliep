@@ -79,7 +79,7 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class While : Expr {
-        public override bool IsOnStackList => Body.IsOnStackList || Breaks.Any(b => b.IsOnStackList);
+        public override bool IsOnStackList => Body.IsOnStackList || Breaks.Any(b => b.Expr.IsOnStackList);
 
         public While(Expr condition, Expr body) {
             Condition = condition;
