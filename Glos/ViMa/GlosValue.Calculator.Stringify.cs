@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 using GeminiLab.Core2.Text;
@@ -11,8 +12,8 @@ namespace GeminiLab.Glos.ViMa {
             public static string DebugStringify(in GlosValue v) {
                 return v.Type switch {
                     GlosValueType.Nil => "nil",
-                    GlosValueType.Integer => v.ToString(),
-                    GlosValueType.Float => v.ToString(),
+                    GlosValueType.Integer => v.AssumeInteger().ToString(),
+                    GlosValueType.Float => v.AssumeFloat().ToString(CultureInfo.InvariantCulture),
                     GlosValueType.Boolean => v.AssumeBoolean() ? "true" : "false",
                     GlosValueType.Table => $"<table: {RuntimeHelpers.GetHashCode(v.AssumeTable()):x8}>",
                     GlosValueType.String => $"\"{EscapeSequenceConverter.Encode(v.AssumeString())}\"",
