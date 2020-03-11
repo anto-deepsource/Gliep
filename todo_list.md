@@ -4,6 +4,8 @@ REFACTOR!!!!
 
 **Check in-file TODOs first**!
 
+FIRST OF ALL: Rework on AST, move all extra informations in AST to other structure.
+
 ## Glos
 
 - add `duplist` instruction.
