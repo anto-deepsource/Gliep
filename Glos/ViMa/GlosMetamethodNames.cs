@@ -24,6 +24,7 @@ namespace GeminiLab.Glos.ViMa {
 
         public static readonly string Not = "__not";
         public static readonly string Neg = "__neg";
+        public static readonly string Str = "__str";
 
         public static readonly string Hash = "__hash";
     }

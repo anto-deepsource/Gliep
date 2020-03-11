@@ -38,19 +38,12 @@ namespace GeminiLab.Glos.ViMa {
         private int _hashCode;
 
         public override string ToString() {
-            return Type switch {
-                GlosValueType.Nil => "nil",
-                GlosValueType.Integer => ValueNumber.Integer.ToString(),
-                GlosValueType.String => (ValueObject as string)!,
-                GlosValueType.Boolean => this.AssumeBoolean() ? "true" : "false",
-                _ => ""
-            };
+            return Calculator.DebugStringify(this);
         }
 
         // TODO: find a better place for following method(s)
         public static bool TryGetMetamethodOfOperand(in GlosValue v, string name, out GlosValue fun) {
             fun = default;
-            ref var rf = ref fun;
             fun.SetNil();
 
             return v.Type == GlosValueType.Table && v.AssumeTable().TryGetMetamethod(name, out fun);
@@ -68,8 +61,7 @@ namespace GeminiLab.Glos.ViMa {
 
         public static bool TryGetMetamethodOfOperand(in GlosValue x, in GlosValue y, string name, bool lookupMetatableOfLatterFirst, out GlosValue fun) {
             fun = default;
-            ref var rf = ref fun;
-            rf.SetNil();
+            fun.SetNil();
 
             if (!lookupMetatableOfLatterFirst) {
                 if (x.Type == GlosValueType.Table && x.AssumeTable().TryGetMetamethod(name, out fun)) return true;

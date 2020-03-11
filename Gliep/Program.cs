@@ -181,9 +181,16 @@ namespace GeminiLab.Gliep {
                 if (options.DumpUnitAndExit) return;
             }
 
+            var vm = new GlosViMa();
+
             var global = new GlosContext(null!);
             global.CreateVariable("print", GlosValue.NewExternalFunction(param => {
-                Console.WriteLine(param.Select(x => x.ToString()).JoinBy(" "));
+                Console.WriteLine(param.Select(x => vm.Calculator.Stringify(x)).JoinBy(" "));
+
+                return Array.Empty<GlosValue>();
+            }));
+            global.CreateVariable("debug", GlosValue.NewExternalFunction(param => {
+                Console.WriteLine(param.Select(x => GlosValue.Calculator.DebugStringify(x)).JoinBy(" "));
 
                 return Array.Empty<GlosValue>();
             }));
@@ -201,8 +208,6 @@ namespace GeminiLab.Gliep {
 
                 return new GlosValue[] { string.Format(format, args: args) };
             }));
-
-            var vm = new GlosViMa();
 
             try {
                 vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);

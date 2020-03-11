@@ -12,6 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="GeminiLab.Core2" Version="1.0.0-preview-20191013-238" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="i18n\Strings.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
