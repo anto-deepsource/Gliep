@@ -147,6 +147,7 @@ namespace XUnitTester.Glug {
                                       else a.x * b.x + a.y * b.y,
                     .__lss: [a, b] -> vector.len2$a < vector.len2$b,
                     .__equ: [a, b] -> a.x == b.x & a.y == b.y,
+                    .__neg: v -> vector.new[-(v.x), -(v.y)],
 
                     .new: [x, y] -> (rv = { .x: x, .y: y }; `rv = vector; rv),
                     .len2: v -> v * v,
@@ -156,7 +157,7 @@ namespace XUnitTester.Glug {
                 x = vector.new[1, 0];
                 y = vector.new[0, 1];
                 c = x * 1 + 2 * y;
-                d = x * 3 - (-4) * y;
+                d = x * 3 - 4 * -y;
                 e = x * 5;
 
                 [
@@ -235,6 +236,7 @@ namespace XUnitTester.Glug {
                     .__and: [x, y] -> i128.new[x.hi & y.hi, x.lo & y.lo],
                     .__orr: [x, y] -> i128.new[x.hi | y.hi, x.lo | y.lo],
                     .__xor: [x, y] -> i128.new[x.hi ^ y.hi, x.lo ^ y.lo],
+                    .__not: v -> i128.new[~(x.hi), ~(x.lo)],
 
                     .new: [hi, lo] -> (rv = { .hi: hi, .lo: lo }; `rv = i128; rv),
                 };
@@ -245,8 +247,9 @@ namespace XUnitTester.Glug {
                 a = x & y;
                 b = x | y;
                 c = x ^ y;
+                d = ~x;
 
-                [ a.hi, a.lo, b.hi, b.lo, c.hi, c.lo ];
+                [ a.hi, a.lo, b.hi, b.lo, c.hi, c.lo, d.hi, d.lo ];
             ";
 
             unchecked {
@@ -257,6 +260,8 @@ namespace XUnitTester.Glug {
                     .MoveNext().AssertInteger((long)0xffffffff5555aaaaul)
                     .MoveNext().AssertInteger((long)0x3333cccccccc3333ul)
                     .MoveNext().AssertInteger((long)0xaaaa55555555aaaaul)
+                    .MoveNext().AssertInteger((long)0xffffffff00000000ul)
+                    .MoveNext().AssertInteger((long)0x00000000fffffffful)
                     .MoveNext().AssertEnd();
             }
         }

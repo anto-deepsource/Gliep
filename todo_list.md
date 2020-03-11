@@ -22,3 +22,8 @@ REFACTOR!!!!
   - ~~it can generate better code.~~
   - `[...] = [...]` will no longer be nil. (instruction `duplist` required).
 - allow empty expr `;`. e.g. `while (sth) ;`. a possible method is making `;` termination marks of expr, instead of seperators in blocks.
+- add short-circuit operators.
+- add null check operator `?` and `??`.
+- add compound assignment operator.
+- add lua-like integer index table optimization.
+- make `-a.b` `-(a.b)` instead of `(-a).b`. meanwhile should we keep `-a@b` `(-a)@b`?

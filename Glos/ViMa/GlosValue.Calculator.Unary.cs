@@ -6,12 +6,14 @@ namespace GeminiLab.Glos.ViMa {
             public void Not(ref GlosValue dest, in GlosValue v) {
                 if (v.Type == GlosValueType.Integer) dest.SetInteger(unchecked((long)~(ulong)v.AssumeInteger()));
                 else if (v.Type == GlosValueType.Boolean) dest.SetBoolean(!v.AssumeBoolean());
+                else if (TryInvokeMetamethod(ref dest, v, _viMa, GlosMetamethodNames.Not)) ;
                 else throw new GlosInvalidUnaryOperandTypeException(GlosOp.Not, v);
             }
 
             public void Neg(ref GlosValue dest, in GlosValue v) {
                 if (v.Type == GlosValueType.Integer) dest.SetInteger(-v.AssumeInteger());
                 else if (v.Type == GlosValueType.Float) dest.SetFloat(-v.AssertFloat());
+                else if (TryInvokeMetamethod(ref dest, v, _viMa, GlosMetamethodNames.Neg)) ;
                 else throw new GlosInvalidUnaryOperandTypeException(GlosOp.Neg, v);
             }
 

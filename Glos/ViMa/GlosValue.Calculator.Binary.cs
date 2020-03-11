@@ -160,7 +160,7 @@ namespace GeminiLab.Glos.ViMa {
                 else if (BothString(x, y, out var xstring, out var ystring)) dest.SetBoolean(xstring == ystring);
                 else if (BothBoolean(x, y, out var xbool, out var ybool)) dest.SetBoolean(xbool == ybool);
                 else if (BothFunction(x, y, out var xfun, out var yfun)) dest.SetBoolean(xfun.Prototype == yfun.Prototype && xfun.ParentContext == yfun.ParentContext);
-                else if (TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Equ, false)) dest.Truthy();
+                else if (TryInvokeMetamethod(ref dest, x, y, _viMa, GlosMetamethodNames.Equ, false)) dest.SetBoolean(dest.Truthy());
 
                 else dest.SetBoolean(x.Type == y.Type && ReferenceEquals(x.ValueObject, y.ValueObject));
             }
