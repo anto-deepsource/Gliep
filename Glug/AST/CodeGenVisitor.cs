@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using GeminiLab.Glos.CodeGenerator;
@@ -19,6 +20,8 @@ namespace GeminiLab.Glug.AST {
 
     public class CodeGenVisitor : RecursiveInVisitor<CodeGenContext> {
         private readonly NodeInformation _info;
+        private readonly Dictionary<While, Label> _whileEndLabel = new Dictionary<While, Label>();
+        private readonly Dictionary<While, bool> _whileResultUsed = new Dictionary<While, bool>();
 
         public CodeGenVisitor(NodeInformation info) {
             _info = info;
@@ -124,10 +127,9 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitWhile(While val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
-            val.EndLabel = parent.AllocateLabel();
-
-            val.ResultUsed = ru;
-
+            var endLabel = _whileEndLabel[val] = parent.AllocateLabel();
+            _whileResultUsed[val] = ru;
+            
             if (ru) {
                 if (_info.IsOnStackList[val]) parent.AppendLdDel();
                 else parent.AppendLdNil();
@@ -136,7 +138,7 @@ namespace GeminiLab.Glug.AST {
             var beginLabel = parent.AllocateAndInsertLabel();
 
             visitForValue(val.Condition, parent);
-            parent.AppendBf(val.EndLabel);
+            parent.AppendBf(endLabel);
 
             if (ru) {
                 if (_info.IsOnStackList[val]) parent.AppendShpRv(0);
@@ -152,7 +154,7 @@ namespace GeminiLab.Glug.AST {
             parent.AppendPopDel();
             parent.AppendB(beginLabel);
 
-            parent.InsertLabel(val.EndLabel);
+            parent.InsertLabel(endLabel);
         }
 
         public override void VisitReturn(Return val, CodeGenContext ctx) {
@@ -166,10 +168,10 @@ namespace GeminiLab.Glug.AST {
             var (parent, _) = ctx;
 
             parent.AppendShpRv(0);
-            if (!_info.BreakParent[val].ResultUsed) visitForDiscard(val.Expr, parent);
+            if (!_whileResultUsed[_info.BreakParent[val]]) visitForDiscard(val.Expr, parent);
             else if (_info.IsOnStackList[_info.BreakParent[val]]) visitForOsl(val.Expr, parent);
             else visitForValue(val.Expr, parent);
-            parent.AppendB(_info.BreakParent[val].EndLabel);
+            parent.AppendB(_whileEndLabel[_info.BreakParent[val]]);
         }
 
         public override void VisitOnStackList(OnStackList val, CodeGenContext ctx) {

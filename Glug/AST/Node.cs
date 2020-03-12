@@ -77,13 +77,6 @@ namespace GeminiLab.Glug.AST {
 
         public Expr Condition { get; }
         public Expr Body { get; }
-        // CAUTION:
-        // All properties of all node classes are readonly, except While.Breaks and Break.Parent
-        // because these properties cannot be calculated by current parser (stateless, static, lock-free)
-        // these properties should be assigned by only WhileVisitor
-        public Label EndLabel { get; set; } = null!;
-
-        public bool ResultUsed { get; set; } // NASTY!!!
     }
 
     public class Return : Expr {
