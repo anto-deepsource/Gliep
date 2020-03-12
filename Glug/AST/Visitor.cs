@@ -27,7 +27,13 @@ namespace GeminiLab.Glug.AST {
 
         public abstract void VisitMetatable(Metatable val);
 
+        protected virtual void PreVisit(Node node) { }
+
+        protected virtual void PostVisit(Node node) { }
+
         public void Visit(Node node) {
+            PreVisit(node);
+
             switch (node) {
                 case LiteralInteger li:
                     VisitLiteralInteger(li);
@@ -80,6 +86,8 @@ namespace GeminiLab.Glug.AST {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            PostVisit(node);
         }
     }
 
@@ -175,7 +183,13 @@ namespace GeminiLab.Glug.AST {
 
         public abstract void VisitMetatable(Metatable val, TParameter arg);
 
+        protected virtual void PreVisit(Node node) { }
+
+        protected virtual void PostVisit(Node node) { }
+
         public void Visit(Node node, TParameter arg) {
+            PreVisit(node);
+
             switch (node) {
                 case LiteralInteger li:
                     VisitLiteralInteger(li, arg);
@@ -228,6 +242,8 @@ namespace GeminiLab.Glug.AST {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            PostVisit(node);
         }
     }
 

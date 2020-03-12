@@ -3,36 +3,40 @@ using System.Collections.Generic;
 
 namespace GeminiLab.Glug.AST {
     public class VarDefVisitor : RecursiveInVisitor<VariableTable> {
+        private readonly NodeInformation _info;
+
+        public VarDefVisitor(NodeInformation info) {
+            _info = info;
+        }
+
         public VariableTable RootTable { get; } = new VariableTable(null!, null!);
         public IList<Function> Functions { get; } = new List<Function>();
 
         public override void VisitFunction(Function val, VariableTable currentScope) {
             Functions.Add(val);
 
-            if (val.ExplicitlyNamed) {
-                val.Self = currentScope.CreateVariable(val.Name);
-            }
+            _info.Variable[val] = val.ExplicitlyNamed ? currentScope.CreateVariable(val.Name) : null!;
 
-            val.VariableTable = new VariableTable(val, currentScope);
+            var table = _info.VariableTable[val] = new VariableTable(val, currentScope);
 
             for (int i = 0; i < val.Parameters.Count; ++i) {
-                val.VariableTable.CreateVariable(val.Parameters[i], i);
+                table.CreateVariable(val.Parameters[i], i);
             }
 
-            base.VisitFunction(val, val.VariableTable);
+            base.VisitFunction(val, table);
         }
 
         public override void VisitVarRef(VarRef val, VariableTable currentScope) {
             base.VisitVarRef(val, currentScope);
 
-            if (val.IsDef) val.Variable = currentScope.CreateVariable(val.Id);
-            else if (val.IsGlobal) val.Variable = RootTable.CreateVariable(val.Id);
+            if (val.IsDef) _info.Variable[val] = currentScope.CreateVariable(val.Id);
+            else if (val.IsGlobal) _info.Variable[val] = RootTable.CreateVariable(val.Id);
         }
 
         // place this function here temporarily, TODO: find a better place for it
         public void DetermineVariablePlace() {
             foreach (var function in Functions) {
-                function.VariableTable.DetermineVariablePlace();
+                _info.VariableTable[function].DetermineVariablePlace();
             }
 
             RootTable.DetermineVariablePlace();
@@ -40,19 +44,22 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class VarRefVisitor : RecursiveVisitor {
-        public VariableTable RootTable { get; }
-        public VariableTable CurrentScope { get; set; }
+        private readonly NodeInformation _info;
 
-        public VarRefVisitor(VariableTable root) {
+        public VarRefVisitor(VariableTable root, NodeInformation info) {
+            _info = info;
             CurrentScope = RootTable = root;
         }
 
+        public VariableTable RootTable { get; }
+        public VariableTable CurrentScope { get; set; }
+
         public override void VisitFunction(Function val) {
             // actually we move this to previous visitor but ... it's not bad here
-            val.Self?.MarkAssigned();
+            _info.Variable[val]?.MarkAssigned();
 
             var oldScope = CurrentScope;
-            CurrentScope = val.VariableTable;
+            CurrentScope = _info.VariableTable[val];
 
             base.VisitFunction(val);
             CurrentScope = oldScope;
@@ -63,7 +70,7 @@ namespace GeminiLab.Glug.AST {
             _beingAssigned = false;
 
             if (val.Op == GlugBiOpType.Assign) {
-                if (!val.ExprL.IsVarRef) {
+                if (!_info.IsAssignable[val.ExprL]) {
                     throw new ArgumentOutOfRangeException();
                 }
 
@@ -73,10 +80,10 @@ namespace GeminiLab.Glug.AST {
                 Visit(val.ExprR);
 
                 if (val.ExprL is VarRef vr) {
-                    vr.Variable.MarkAssigned();
+                    _info.Variable[vr].MarkAssigned();
                 } else if (val.ExprL is OnStackList osl) {
                     foreach (var expr in osl.List) {
-                        ((VarRef)expr).Variable.MarkAssigned();
+                        _info.Variable[(VarRef)expr].MarkAssigned();
                     }
                 } else {
                     // throw new ArgumentOutOfRangeException();
@@ -93,15 +100,15 @@ namespace GeminiLab.Glug.AST {
         public override void VisitVarRef(VarRef val) {
             base.VisitVarRef(val);
 
-            if (val.Variable == null) {
+            if (!_info.Variable.TryGetValue(val, out _)) {
                 if (!CurrentScope.TryLookupVariable(val.Id, out var v)) {
                     v = (_beingAssigned ? CurrentScope : RootTable).CreateVariable(val.Id);
                 }
 
-                val.Variable = v;
+                _info.Variable[val] = v;
             }
 
-            val.Variable.HintUsedIn(CurrentScope);
+            _info.Variable[val].HintUsedIn(CurrentScope);
         }
     }
 }

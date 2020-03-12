@@ -155,7 +155,7 @@ namespace GeminiLab.Glug.Parser {
                     
                     if (expr is VarRef vr) {
                         param.Add(vr.Id);
-                    } else if (expr is OnStackList osl && osl.IsVarRef) {
+                    } else if (expr is OnStackList osl && osl.List.All(x => x is VarRef { IsDef: false, IsGlobal: false })) {
                         param.AddRange(osl.List.Cast<VarRef>().Select(x => x.Id));
                     } else {
                         break;
@@ -247,12 +247,12 @@ namespace GeminiLab.Glug.Parser {
 
             if (tok.Type == GlugTokenType.SymbolBang) {
                 stream.GetToken();
-                return new VarRef(ReadIdentifier(stream)) { IsDef = true };
+                return new VarRef(ReadIdentifier(stream), isDef: true);
             }
 
             if (tok.Type == GlugTokenType.SymbolBangBang) {
                 stream.GetToken();
-                return new VarRef(ReadIdentifier(stream)) { IsGlobal = true };
+                return new VarRef(ReadIdentifier(stream), isGlobal: true);
             }
 
             if (tok.Type == GlugTokenType.Identifier) {

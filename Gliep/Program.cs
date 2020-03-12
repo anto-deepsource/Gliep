@@ -172,8 +172,7 @@ namespace GeminiLab.Gliep {
                 if (options.DumpASTAndExit) return;
             }
 
-            TypicalCompiler.ProcessTree(ref root);
-            var unit = TypicalCompiler.CodeGen(root);
+            var unit = TypicalCompiler.PostProcessAndCodeGen(root);
 
             if (options.DumpUnit || options.DumpUnitAndExit) {
                 DumpUnit(unit);

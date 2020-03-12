@@ -18,6 +18,12 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class CodeGenVisitor : RecursiveInVisitor<CodeGenContext> {
+        private readonly NodeInformation _info;
+
+        public CodeGenVisitor(NodeInformation info) {
+            _info = info;
+        }
+
         public GlosUnitBuilder Builder { get; } = new GlosUnitBuilder();
 
 
@@ -28,11 +34,11 @@ namespace GeminiLab.Glug.AST {
         private void visitForValue(Expr expr, GlosFunctionBuilder parent) {
             Visit(expr, new CodeGenContext(parent, true));
 
-            if (expr.IsOnStackList) parent.AppendShpRv(1);
+            if (_info.IsOnStackList[expr]) parent.AppendShpRv(1);
         }
         
         private void visitForOsl(Expr expr, GlosFunctionBuilder parent) {
-            if (!expr.IsOnStackList) parent.AppendLdDel();
+            if (!_info.IsOnStackList[expr]) parent.AppendLdDel();
 
             Visit(expr, new CodeGenContext(parent, true));
         }
@@ -49,7 +55,7 @@ namespace GeminiLab.Glug.AST {
             if (parent == null) fun.SetEntry();
             fun.Name = val.Name;
 
-            var variables = val.VariableTable.Variables.Values.ToArray();
+            var variables = _info.VariableTable[val].Variables.Values.ToArray();
             fun.VariableInContext = variables.Where(x => x.Place == VariablePlace.Context).Select(x => x.Name).ToArray();
 
             foreach (var variable in variables.Where(x => x.Place == VariablePlace.LocalVariable)) {
@@ -70,14 +76,16 @@ namespace GeminiLab.Glug.AST {
             fun.AppendRetIfNone();
 
             if (parent != null) {
-                if (val.Self != null || ru) {
+                var self = _info.Variable[val];
+
+                if (self != null || ru) {
                     parent.AppendLdFun(fun);
                     parent.AppendBind();
                 }
 
-                if (val.Self != null) {
+                if (self != null) {
                     if (ru) parent.AppendDup();
-                    val.Self.CreateStoreInstr(parent);
+                    self.CreateStoreInstr(parent);
                 }
             }
         }
@@ -95,7 +103,7 @@ namespace GeminiLab.Glug.AST {
                 parent.AppendBf(nextLabel);
 
                 if (!ru) visitForDiscard(branch.Body, parent);
-                else if (val.IsOnStackList) visitForOsl(branch.Body, parent);
+                else if (_info.IsOnStackList[val]) visitForOsl(branch.Body, parent);
                 else visitForValue(branch.Body, parent);
 
                 parent.AppendB(endLabel);
@@ -104,10 +112,10 @@ namespace GeminiLab.Glug.AST {
             parent.InsertLabel(nextLabel!); // brc must be at least 1 when this ast is well-formed
             if (val.ElseBranch != null) {
                 if (!ru) visitForDiscard(val.ElseBranch, parent);
-                else if (val.IsOnStackList) visitForOsl(val.ElseBranch, parent);
+                else if (_info.IsOnStackList[val]) visitForOsl(val.ElseBranch, parent);
                 else visitForValue(val.ElseBranch, parent);
             } else if (ru) {
-                if (val.IsOnStackList) parent.AppendLdDel();
+                if (_info.IsOnStackList[val]) parent.AppendLdDel();
                 else parent.AppendLdNil();
             }
 
@@ -121,7 +129,7 @@ namespace GeminiLab.Glug.AST {
             val.ResultUsed = ru;
 
             if (ru) {
-                if (val.IsOnStackList) parent.AppendLdDel();
+                if (_info.IsOnStackList[val]) parent.AppendLdDel();
                 else parent.AppendLdNil();
             }
 
@@ -131,14 +139,14 @@ namespace GeminiLab.Glug.AST {
             parent.AppendBf(val.EndLabel);
 
             if (ru) {
-                if (val.IsOnStackList) parent.AppendShpRv(0);
+                if (_info.IsOnStackList[val]) parent.AppendShpRv(0);
                 else parent.AppendPop();
             }
 
             parent.AppendLdDel();
             
             if (!ru) visitForDiscard(val.Body, parent);
-            else if (val.IsOnStackList) visitForOsl(val.Body, parent);
+            else if (_info.IsOnStackList[val]) visitForOsl(val.Body, parent);
             else visitForValue(val.Body, parent);
 
             parent.AppendPopDel();
@@ -158,10 +166,10 @@ namespace GeminiLab.Glug.AST {
             var (parent, _) = ctx;
 
             parent.AppendShpRv(0);
-            if (!val.Parent.ResultUsed) visitForDiscard(val.Expr, parent);
-            else if (val.Parent.IsOnStackList) visitForOsl(val.Expr, parent);
+            if (!_info.BreakParent[val].ResultUsed) visitForDiscard(val.Expr, parent);
+            else if (_info.IsOnStackList[_info.BreakParent[val]]) visitForOsl(val.Expr, parent);
             else visitForValue(val.Expr, parent);
-            parent.AppendB(val.Parent.EndLabel);
+            parent.AppendB(_info.BreakParent[val].EndLabel);
         }
 
         public override void VisitOnStackList(OnStackList val, CodeGenContext ctx) {
@@ -221,20 +229,20 @@ namespace GeminiLab.Glug.AST {
 
                 if (!ru) parent.AppendShpRv(0);
             } else if (val.Op == GlugBiOpType.Assign) {
-                if (val.ExprL.IsOnStackList) {
+                if (_info.IsOnStackList[val.ExprL]) {
                     visitForOsl(val.ExprR, parent);
 
                     var list = ((OnStackList)(val.ExprL)).List;
                     var count = list.Count;
 
                     parent.AppendShpRv(count);
-                    for (int i = count - 1; i >= 0; --i) ((VarRef)(list[i])).Variable.CreateStoreInstr(parent);
+                    for (int i = count - 1; i >= 0; --i) _info.Variable[(VarRef)(list[i])].CreateStoreInstr(parent);
 
                     if (ru) parent.AppendLdNil();
                 } else if (val.ExprL is VarRef vr) {
                     visitForValue(val.ExprR, parent);
                     if (ru) parent.AppendDup();
-                    vr.Variable.CreateStoreInstr(parent);
+                    _info.Variable[vr].CreateStoreInstr(parent);
                 } else if (val.ExprL is BiOp { Op: GlugBiOpType.Index } ind) {
                     visitForValue(val.ExprR, parent);
                     if (ru) parent.AppendDup();
@@ -309,7 +317,7 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitVarRef(VarRef val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
-            val.Variable.CreateLoadInstr(parent);
+            _info.Variable[val].CreateLoadInstr(parent);
             if (!ru) parent.AppendPop();
         }
 

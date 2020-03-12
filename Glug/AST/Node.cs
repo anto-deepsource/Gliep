@@ -5,10 +5,7 @@ using GeminiLab.Glos.CodeGenerator;
 namespace GeminiLab.Glug.AST {
     public abstract class Node { }
     
-    public abstract class Expr : Node {
-        public virtual bool IsVarRef { get; } = false;
-        public virtual bool IsOnStackList { get; } = false;
-    }
+    public abstract class Expr : Node { }
 
     public abstract class Literal : Expr { }
 
@@ -39,17 +36,15 @@ namespace GeminiLab.Glug.AST {
     public class LiteralNil : Literal { }
 
     public class VarRef : Expr {
-        public Variable Variable { get; set; } = null!;
-        public bool IsDef { get; set; }
-        public bool IsGlobal { get; set; }
-
-        public override bool IsVarRef { get; } = true;
-
-        public VarRef(string id) {
+        public VarRef(string id, bool isDef = false, bool isGlobal = false) {
             Id = id;
+            IsDef = isDef;
+            IsGlobal = isGlobal;
         }
 
         public string Id { get; }
+        public bool IsDef { get; }
+        public bool IsGlobal { get; }
     }
 
     public struct IfBranch {
@@ -65,13 +60,9 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class If : Expr {
-        public override bool IsOnStackList { get; }
-
         public If(IList<IfBranch> branches, Expr? elseBranch) {
             Branches = branches;
             ElseBranch = elseBranch;
-
-            IsOnStackList = Branches.Any(x => x.Body.IsOnStackList) || (ElseBranch?.IsOnStackList ?? false);
         }
 
         public IList<IfBranch> Branches { get; }
@@ -79,8 +70,6 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class While : Expr {
-        public override bool IsOnStackList => Body.IsOnStackList || Breaks.Any(b => b.Expr.IsOnStackList);
-
         public While(Expr condition, Expr body) {
             Condition = condition;
             Body = body;
@@ -92,8 +81,6 @@ namespace GeminiLab.Glug.AST {
         // All properties of all node classes are readonly, except While.Breaks and Break.Parent
         // because these properties cannot be calculated by current parser (stateless, static, lock-free)
         // these properties should be assigned by only WhileVisitor
-        public IList<Break> Breaks { get; set; } = new List<Break>();
-
         public Label EndLabel { get; set; } = null!;
 
         public bool ResultUsed { get; set; } // NASTY!!!
@@ -113,14 +100,9 @@ namespace GeminiLab.Glug.AST {
         }
 
         public Expr Expr { get; }
-        public While Parent { get; set; } = null!;
     }
 
     public class Function : Expr {
-        public VariableTable VariableTable { get; set; } = null!;
-
-        public Variable Self { get; set; } = null!;
-
         public Function(string name, bool explicitlyNamed, List<string> parameters, Expr body) {
             Name = name;
             ExplicitlyNamed = explicitlyNamed;
@@ -135,25 +117,16 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class OnStackList : Expr {
-        public override bool IsVarRef { get; }
-        public override bool IsOnStackList { get; } = true;
-
         public OnStackList(List<Expr> list) {
             List = list;
-
-            IsVarRef = list.All(x => x is VarRef);
         }
 
         public List<Expr> List { get; }
     }
 
     public class Block : Expr {
-        public override bool IsOnStackList { get; }
-
         public Block(IList<Expr> list) {
             List = list;
-
-            IsOnStackList = List.Count > 0 && List[^1].IsOnStackList;
         }
 
         public IList<Expr> List { get; }
@@ -199,16 +172,10 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class BiOp : Expr {
-        public override bool IsOnStackList { get; }
-        public override bool IsVarRef { get; }
-
         public BiOp(GlugBiOpType op, Expr exprL, Expr exprR) {
             Op = op;
             ExprL = exprL;
             ExprR = exprR;
-
-            IsOnStackList = op == GlugBiOpType.Call || op == GlugBiOpType.Concat;
-            IsVarRef = op == GlugBiOpType.Index;
         }
 
         public GlugBiOpType Op { get; }
@@ -237,8 +204,6 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class Metatable : Expr {
-        public override bool IsVarRef { get; } = true;
-
         public Metatable(Expr table) {
             Table = table;
         }
