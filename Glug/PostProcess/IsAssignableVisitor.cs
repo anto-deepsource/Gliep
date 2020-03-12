@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 
-namespace GeminiLab.Glug.AST {
+using GeminiLab.Glug.AST;
+
+namespace GeminiLab.Glug.PostProcess {
     public class IsAssignableVisitor : RecursiveVisitor {
         private readonly NodeInformation _info;
         
@@ -21,7 +23,7 @@ namespace GeminiLab.Glug.AST {
         public override void VisitOnStackList(OnStackList val) {
             base.VisitOnStackList(val);
 
-            _info.IsAssignable[val] = val.List.All(v => _info.IsAssignable[v]);
+            _info.IsAssignable[val] = val.List.All(v => _info.IsAssignable[v] && !(v is OnStackList));
         }
 
         public override void VisitBiOp(BiOp val) {

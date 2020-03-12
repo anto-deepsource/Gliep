@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using GeminiLab.Glos.CodeGenerator;
+using GeminiLab.Glug.AST;
 
-namespace GeminiLab.Glug.AST {
+namespace GeminiLab.Glug.PostProcess {
     public enum VariablePlace {
         Argument,
         LocalVariable,

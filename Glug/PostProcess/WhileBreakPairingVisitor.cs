@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GeminiLab.Glug.AST {
-    public class WhileBreakPairingVisitor : RecursiveInVisitor<While?> {
+using GeminiLab.Glug.AST;
+
+namespace GeminiLab.Glug.PostProcess {
+    public class WhileBreakPairingVisitor : RecursiveInVisitor<While> {
         private readonly NodeInformation _info;
 
         public WhileBreakPairingVisitor(NodeInformation info) {

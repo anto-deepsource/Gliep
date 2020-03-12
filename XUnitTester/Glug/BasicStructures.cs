@@ -160,15 +160,13 @@ namespace XUnitTester.Glug {
         }
 
         [Fact]
-        public void Table() {
+        public void TableAndAssign() {
             var code = @"
                 e = ""ee"";
                 a = { .a: 1, .b: 2, ""dd"": 0, @e: 0 };
-                a.c = 3; a@""dd"" = ((a@e = 5) - 1);
+                [a.c, a@""dd"", b, !mt] = [3, (a@e = 5) - 1, { .a: a.ee },  { .__add: [x, y] -> x.a + y.a }];
                 
-                b = { .a: a.ee };
-                
-                `a = `b = { .__add: [x, y] -> x.a + y.a };
+                [`a, `b] = [mt, mt];
 
                 [a.a, a.b, a.c, a.dd, a.ee, a + b]
             ";

@@ -15,7 +15,6 @@ REFACTOR!!!!
 
 ## Glug
 
-- make index in osl ref. i.e. allow `[a.a, a.b] = [1, 2]`.
 - add locally ren and uen operators.
 - ~~code generator could take is_value_used as a parameter so~~
   - ~~it can generate better code.~~

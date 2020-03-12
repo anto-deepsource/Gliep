@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 
-namespace GeminiLab.Glug.AST {
+using GeminiLab.Glug.AST;
+
+namespace GeminiLab.Glug.PostProcess {
     public class IsOnStackListVisitor : RecursiveVisitor {
         private readonly NodeInformation _info;
 

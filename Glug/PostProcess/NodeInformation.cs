@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace GeminiLab.Glug.AST {
+using GeminiLab.Glug.AST;
+
+namespace GeminiLab.Glug.PostProcess {
     public class NodeInformation {
         public Dictionary<Node, bool> IsAssignable { get; set; } = new Dictionary<Node, bool>();
         public Dictionary<Node, bool> IsOnStackList { get; set; } = new Dictionary<Node, bool>();

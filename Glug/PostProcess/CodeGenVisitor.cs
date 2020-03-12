@@ -4,11 +4,13 @@ using System.Linq;
 
 using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glos.ViMa;
+using GeminiLab.Glug.AST;
 
-namespace GeminiLab.Glug.AST {
+namespace GeminiLab.Glug.PostProcess {
     public struct CodeGenContext {
-        public GlosFunctionBuilder CurrentFunction;
-        public bool ResultUsed;
+        public readonly GlosFunctionBuilder CurrentFunction;
+        public readonly bool ResultUsed;
+
         public CodeGenContext(GlosFunctionBuilder currentFunction, bool resultUsed) {
             CurrentFunction = currentFunction;
             ResultUsed = resultUsed;
@@ -222,6 +224,30 @@ namespace GeminiLab.Glug.AST {
             if (!ru) parent.AppendPop();
         }
 
+        private void createStoreInstr(Node node, GlosFunctionBuilder parent) {
+            switch (node) {
+                case OnStackList { List: var list } osl when _info.IsAssignable[osl]:
+                    var count = list.Count;
+                    parent.AppendShpRv(count);
+                    for (int i = count - 1; i >= 0; --i) createStoreInstr(list[i], parent);
+                    break;
+                case VarRef vr:
+                    _info.Variable[vr].CreateStoreInstr(parent);
+                    break;
+                case BiOp { Op: GlugBiOpType.Index, ExprL: var table, ExprR: var index }:
+                    visitForValue(table, parent);
+                    visitForValue(index, parent);
+                    parent.AppendUen();
+                    break;
+                case Metatable { Table: var table }:
+                    visitForValue(table, parent);
+                    parent.AppendSmt();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         public override void VisitBiOp(BiOp val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
             if (val.Op == GlugBiOpType.Call) {
@@ -231,34 +257,17 @@ namespace GeminiLab.Glug.AST {
 
                 if (!ru) parent.AppendShpRv(0);
             } else if (val.Op == GlugBiOpType.Assign) {
-                if (_info.IsOnStackList[val.ExprL]) {
+                if (val.ExprL is OnStackList) {
                     visitForOsl(val.ExprR, parent);
-
-                    var list = ((OnStackList)(val.ExprL)).List;
-                    var count = list.Count;
-
-                    parent.AppendShpRv(count);
-                    for (int i = count - 1; i >= 0; --i) _info.Variable[(VarRef)(list[i])].CreateStoreInstr(parent);
-
-                    if (ru) parent.AppendLdNil();
-                } else if (val.ExprL is VarRef vr) {
-                    visitForValue(val.ExprR, parent);
-                    if (ru) parent.AppendDup();
-                    _info.Variable[vr].CreateStoreInstr(parent);
-                } else if (val.ExprL is BiOp { Op: GlugBiOpType.Index } ind) {
-                    visitForValue(val.ExprR, parent);
-                    if (ru) parent.AppendDup();
-                    visitForValue(ind.ExprL, parent);
-                    visitForValue(ind.ExprR, parent);
-                    parent.AppendUen();
-                } else if (val.ExprL is Metatable mt) {
-                    visitForValue(val.ExprR, parent);
-                    if (ru) parent.AppendDup();
-                    visitForValue(mt.Table, parent);
-                    parent.AppendSmt();
+                    // if (ru) parent.AppendDupList();
                 } else {
-                    throw new ArgumentOutOfRangeException();
+                    visitForValue(val.ExprR, parent);
+                    if (ru) parent.AppendDup();
                 }
+
+                createStoreInstr(val.ExprL, parent);
+
+                if (val.ExprL is OnStackList && ru) parent.AppendLdNil();
             } else if (val.Op == GlugBiOpType.Concat) {
                 if (ru) {
                     visitForOsl(val.ExprL, parent);

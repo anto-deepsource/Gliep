@@ -5,6 +5,7 @@ using System.IO;
 using GeminiLab.Glos.ViMa;
 using GeminiLab.Glug.AST;
 using GeminiLab.Glug.Parser;
+using GeminiLab.Glug.PostProcess;
 using GeminiLab.Glug.Tokenizer;
 
 namespace GeminiLab.Glug {
@@ -27,7 +28,7 @@ namespace GeminiLab.Glug {
             vdv.Visit(root, vdv.RootTable);
 
             var vcv = new VarRefVisitor(vdv.RootTable, it);
-            vcv.Visit(root);
+            vcv.Visit(root, new VarRefVisitorContext(vdv.RootTable, false));
 
             vdv.DetermineVariablePlace();
 
