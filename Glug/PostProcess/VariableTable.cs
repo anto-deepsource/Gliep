@@ -127,7 +127,7 @@ namespace GeminiLab.Glug.PostProcess {
         public bool TryLookupVariable(string name, [NotNullWhen(true)] out Variable? variable) {
             if (TryLookupVariableLocally(name, out variable)) return true;
 
-            return Parent?.TryLookupVariableLocally(name, out variable) ?? false;
+            return Parent?.TryLookupVariable(name, out variable) ?? false;
         }
 
         public Variable CreateVariable(string name) {
