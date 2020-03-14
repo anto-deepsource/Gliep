@@ -26,6 +26,31 @@ namespace XUnitTester.Glug {
         }
 
         [Fact]
+        public void EightQueens() {
+            var code = @"
+                !ans = 0;
+
+                fn dfs[r, c, md, ad] (
+                    if (r >= 8) return ans = ans + 1;
+
+                    nx = 0;
+                    while (nx < 8) (
+                        if ((c & (1 << nx)) == 0 & (md & (1 << (r - nx + 7))) == 0 & (ad & (1 << (r + nx))) == 0)
+                            dfs[r + 1, c | (1 << nx), md | (1 << (r - nx + 7)), ad | (1 << (r + nx))];
+                        nx = nx + 1;
+                    )
+                );
+
+                dfs[0, 0, 0, 0];
+                ans;
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(92)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
         public void Counter() {
             var code = @"
                 fn counter [begin,] ( begin = begin - 1; fn -> begin = begin + 1 ); # test duplicate comma here

@@ -28,11 +28,11 @@ namespace GeminiLab.Glos {
 
         protected T[] _items;
 
-        public Span<T> AsSpan() => _items.AsSpan();
+        public Span<T> AsSpan() => _items.AsSpan(0, Count);
 
-        public Span<T> AsSpan(Index startIndex) => _items.AsSpan(startIndex);
+        public Span<T> AsSpan(Index startIndex) => _items.AsSpan(startIndex..Count);
 
-        public Span<T> AsSpan(int start) => _items.AsSpan(start);
+        public Span<T> AsSpan(int start) => _items.AsSpan(start, Count - start);
 
         public Span<T> AsSpan(Range range) {
             if (!range.End.IsFromEnd && range.End.Value > Capacity) {

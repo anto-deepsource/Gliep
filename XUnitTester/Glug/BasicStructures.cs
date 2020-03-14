@@ -114,6 +114,44 @@ namespace XUnitTester.Glug {
         }
 
         [Fact]
+        public void Assign() {
+            var code = @"
+                [a, b] = [c] = [1, 2, 3];
+                [d, e] = f = [4, 5, 6];
+
+                [a, b, c, d, e, f]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(1)
+                .MoveNext().AssertInteger(2)
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(4)
+                .MoveNext().AssertNil()
+                .MoveNext().AssertInteger(4)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void Curry() {
+            var code = @"
+                curry2 = f -> x -> y -> f[x, y];
+                curry3 = f -> x -> y -> z -> f[x, y, z];
+                sumc2 = curry2 [x, y] -> x + y;
+                sumc3 = curry3 [x, y, z] -> x + y + z;
+                mulc2 = curry2 [x, y] -> x * y;
+
+                return [sumc2 1 2, sumc3 3 4 5, mulc2 6 7]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(3)
+                .MoveNext().AssertInteger(12)
+                .MoveNext().AssertInteger(42)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
         public void DeepRecursiveLoop() {
             var code = @"
                 fn loop[from, to, step, body] (
