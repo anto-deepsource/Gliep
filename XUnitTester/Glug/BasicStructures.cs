@@ -138,7 +138,7 @@ namespace XUnitTester.Glug {
         [Fact]
         public void GlobalAndLocal() {
             var code = @"
-                fn a -> x = 1;
+                fn a -> !x = 1;
                 fn b -> !!x = 2;
                 fn c -> !!x;
 
