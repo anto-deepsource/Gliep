@@ -298,6 +298,14 @@ namespace GeminiLab.Glos.ViMa {
                         }
                     } else if (op == GlosOp.PopDel) {
                         popDelimiter();
+                    } else if (op == GlosOp.DupList) {
+                        var del = peekDelimiter();
+                        var count = _sptr - del;
+
+                        pushDelimiter();
+
+                        _stack.PreparePush(count);
+                        _stack.AsSpan(del).CopyTo(_stack.AsSpan(_sptr, count));
                     } else if (op == GlosOp.Nop) {
                         // nop;
                     } else if (cat == GlosOpCategory.Syscall) {

@@ -6,8 +6,6 @@ REFACTOR!!!!
 
 ## Glos
 
-- add `duplist` instruction.
-- add debug and normal stringify function for glosvalue.
 - add tostring instruction.
 - add hash instruction.
   - find a good way to evaluate and update glosvalue's hash.
@@ -16,9 +14,6 @@ REFACTOR!!!!
 ## Glug
 
 - add locally ren and uen operators.
-- ~~code generator could take is_value_used as a parameter so~~
-  - ~~it can generate better code.~~
-  - `[...] = [...]` will no longer be nil. (instruction `duplist` required).
 - allow empty expr `;`. e.g. `while (sth) ;`. a possible method is making `;` termination marks of expr, instead of seperators in blocks.
 - add short-circuit operators.
 - add null check operator `?` and `??`.

@@ -221,7 +221,7 @@ namespace GeminiLab.Glos.ViMa {
             GlosOpCategory.Others,
             GlosOpCategory.Others,
             GlosOpCategory.Others,
-            GlosOpCategory.NotUsed,
+            GlosOpCategory.Others,
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,
             // 0xb0

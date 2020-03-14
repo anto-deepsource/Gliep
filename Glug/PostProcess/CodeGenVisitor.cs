@@ -259,15 +259,13 @@ namespace GeminiLab.Glug.PostProcess {
             } else if (val.Op == GlugBiOpType.Assign) {
                 if (val.ExprL is OnStackList) {
                     visitForOsl(val.ExprR, parent);
-                    // if (ru) parent.AppendDupList();
+                    if (ru) parent.AppendDupList();
                 } else {
                     visitForValue(val.ExprR, parent);
                     if (ru) parent.AppendDup();
                 }
 
                 createStoreInstr(val.ExprL, parent);
-
-                if (val.ExprL is OnStackList && ru) parent.AppendLdNil();
             } else if (val.Op == GlugBiOpType.Concat) {
                 if (ru) {
                     visitForOsl(val.ExprL, parent);

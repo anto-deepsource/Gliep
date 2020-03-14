@@ -119,6 +119,7 @@ namespace GeminiLab.Glos.ViMa {
         Ret     = 0xaa,
         Bind    = 0xab,
         PopDel  = 0xac,
+        DupList = 0xad,
 
         ShpRv0  = 0xb0,
         ShpRv1  = 0xb1,
