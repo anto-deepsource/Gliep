@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GeminiLab.Core2" Version="1.0.0-preview-20191013-238" />
+    <PackageReference Include="GeminiLab.Core2" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
