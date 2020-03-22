@@ -9,6 +9,7 @@
     <Authors>Gemini Laboratory</Authors>
     <Description>Glos, a stack-based virtual machine.</Description>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+    <Configurations>Develop;Preview;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

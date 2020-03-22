@@ -1,0 +1,18 @@
+math = require "math.gl";
+
+return !v2d = {
+    .__add: [a, b] -> v2d.new[a.x + b.x, a.y + b.y],
+    .__sub: [a, b] -> v2d.new[a.x - b.x, a.y - b.y],
+    .__mul: [a, b] -> if (math.is_numeric$a) v2d.new[a * b.x, a * b.y] 
+                        elif (math.is_numeric$b) v2d.new[b * a.x, b * a.y] 
+                        else a.x * b.x + a.y * b.y,
+    .__div: [a, b] -> v2d.new[a.x / b, a.y / b],
+    .__equ: [a, b] -> a.x == b.x & a.y == b.y,
+    .__neg: v -> v2d.new[-(v.x), -(v.y)],
+
+    .__str: v -> format["({0}, {1})", v.x, v.y],
+
+    .new: [x, y] -> (rv = { .x: x, .y: y }; `rv = v2d; rv),
+    .len2: v -> v * v,
+    .len: v -> math.sqrt$v2d.len2$v,
+}

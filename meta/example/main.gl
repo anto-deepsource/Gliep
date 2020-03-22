@@ -1,0 +1,5 @@
+v2d = require "lib/v2d.gl";
+
+a = v2d.new[1, 2];
+print$a;
+print$v2d.len$a;

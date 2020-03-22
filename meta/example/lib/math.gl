@@ -1,0 +1,4 @@
+{
+    .is_numeric: x -> 'x == "integer" | 'x == "float",
+    .sqrt: !!__built_in_sqrt,
+}

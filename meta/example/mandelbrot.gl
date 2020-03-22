@@ -1,0 +1,34 @@
+complex = require "lib/complex.gl";
+
+MAX_TIME = 32;
+
+fn time[c] (
+    t = 0;
+    z = complex.new[c.r, c.i];
+
+    while (complex.mod$z < 2 & t < MAX_TIME) (
+        t = t + 1;
+        z = z * z + c;
+    );
+
+    t;
+);
+
+N = 41;
+R = !!__built_in_sqrt$4; # as we don't have float here...
+
+STEP = 2 * R / (N - 1);
+
+!i = 0;
+while (i < N) (
+    !j = 0;
+    !s = "";
+    while (j < N) (
+        c = complex.new[-R + j * STEP, R - i * STEP];
+        t = time[c];
+        s = s + if (t == 0) " " elif (t == 1) "." elif (t == 2) "," elif (t <= 6) "*" elif (t <= 24) "%" else "@";
+        j = j + 1;
+    );
+    print$s;
+    i = i + 1;
+);

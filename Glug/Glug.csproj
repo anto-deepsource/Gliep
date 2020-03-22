@@ -5,6 +5,7 @@
     <RootNamespace>GeminiLab.Glug</RootNamespace>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>Develop;Preview;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
