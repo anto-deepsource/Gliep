@@ -172,7 +172,7 @@ namespace XUnitTester.Glug {
                                       else a.x * b.x + a.y * b.y,
                     .__lss: [a, b] -> vector.len2$a < vector.len2$b,
                     .__equ: [a, b] -> a.x == b.x & a.y == b.y,
-                    .__neg: v -> vector.new[-(v.x), -(v.y)],
+                    .__neg: v -> vector.new[-v.x, -v.y],
 
                     .new: [x, y] -> (rv = { .x: x, .y: y }; `rv = vector; rv),
                     .len2: v -> v * v,

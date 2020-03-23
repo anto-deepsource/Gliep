@@ -27,9 +27,7 @@ Expr        : ExprItem
 
 # ExprItem also eats tokens greedily
 ExprItem    : literal
-            | identifier
-            | "!" identifier
-            | "!!" identifier
+            | QualifiedIdentifer
             | TableDef
             | "-" ExprItem
             | "~" ExprItem
@@ -44,11 +42,14 @@ ExprItem    : literal
             | OnStackList
             ;
 
+QualifiedIdentifer  : ("!" | "!!")? identifier ("." identifier)*
+                    ;
+
 TableDef    : "{" (TableDef ("," TableDef)*)? "}"
-                ;
+            ;
 
 TableDef    : (("@"? Expr ) | ("." identifier)) ":" Expr
-                    ;
+            ;
 
 BlockInParen    : "(" Block ")"
                 ;

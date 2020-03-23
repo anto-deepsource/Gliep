@@ -11,8 +11,8 @@ using GeminiLab.Glug.Tokenizer;
 namespace GeminiLab.Glug {
     [ExcludeFromCodeCoverage]
     public static class TypicalCompiler {
-        public static IGlugTokenStream Tokenize(TextReader input) => new GlugTokenizer(input);
-        public static IGlugTokenStream Tokenize(string value) => new GlugTokenizer(new StringReader(value));
+        public static IGlugTokenStream Tokenize(TextReader input, string? sourceName = null) => new GlugTokenizer(input, sourceName);
+        public static IGlugTokenStream Tokenize(string value, string? sourceName = null) => new GlugTokenizer(new StringReader(value), sourceName);
 
         public static Expr Parse(IGlugTokenStream stream) => GlugParser.Parse(stream);
         
@@ -39,8 +39,8 @@ namespace GeminiLab.Glug {
             return gen.Builder.GetResult();
         }
 
-        public static GlosUnit Compile(TextReader input) {
-            using var tok = Tokenize(input);
+        public static GlosUnit Compile(TextReader input, string? sourceName = null) {
+            using var tok = Tokenize(input, sourceName);
             var ast = Parse(tok);
             return PostProcessAndCodeGen(ast);
         }

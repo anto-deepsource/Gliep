@@ -4,6 +4,10 @@ REFACTOR!!!!
 
 **Check in-file TODOs first**!
 
+## Cross-project
+
+- add debug info in GlosUnit.
+
 ## Glos
 
 - add tostring instruction.

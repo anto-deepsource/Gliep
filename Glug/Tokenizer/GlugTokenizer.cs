@@ -243,9 +243,9 @@ namespace GeminiLab.Glug.Tokenizer {
         
         public string SourceName { get; }
 
-        public GlugTokenizer(TextReader source, string sourceName = "<anonymous>") {
+        public GlugTokenizer(TextReader source, string? sourceName = null) {
             Source = source;
-            SourceName = sourceName;
+            SourceName = sourceName ?? "<anonymous>";
             _eof = false;
             _currLine = null;
             _row = 0;

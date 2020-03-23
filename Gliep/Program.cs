@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 
 using GeminiLab.Core2;
+using GeminiLab.Core2.Collections;
+using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
 using GeminiLab.Glug;
 
@@ -18,13 +20,13 @@ namespace GeminiLab.Gliep {
 
             GlosUnit unit;
             if (args.Length <= 0 || args[0] == "-") {
-                unit = TypicalCompiler.Compile(Console.In);
+                unit = TypicalCompiler.Compile(Console.In, @"<stdin>");
             } else if (args[0] == "-c") {
-                unit = TypicalCompiler.Compile(new StringReader(args.Skip(1).JoinBy("\n")));
+                unit = TypicalCompiler.Compile(new StringReader(args.Skip(1).JoinBy("\n")), @"<commandline>");
             } else {
                 var entryLoc = new FileInfo(args[0]).FullName;
                 using var input = new StreamReader(new FileStream(entryLoc, FileMode.Open, FileAccess.Read));
-                unit2Location[unit = location2Unit[entryLoc] = TypicalCompiler.Compile(input)] = entryLoc;
+                unit2Location[unit = location2Unit[entryLoc] = TypicalCompiler.Compile(input, entryLoc)] = entryLoc;
             }
             
             var global = new GlosContext(null!);
@@ -54,7 +56,7 @@ namespace GeminiLab.Gliep {
             }));
             global.CreateVariable("require", GlosValue.NewExternalFunction(param => {
                 var callerUnit = vm.CallStackFrames[^1].Function.Prototype.Unit;
-                var callerLoc = unit2Location.TryGetValue(callerUnit, out var cl) ? cl : ".";
+                var callerLoc = unit2Location.TryGetValue(callerUnit, out var cl) ? cl : "./.pseudo";
 
                 var required = param[0].AssertString();
 
@@ -63,7 +65,7 @@ namespace GeminiLab.Gliep {
                 if (requireCache.TryGetValue(target, out var cached)) return cached;
 
                 using var targetFS = new StreamReader(new FileStream(target, FileMode.Open, FileAccess.Read));
-                var newUnit = TypicalCompiler.Compile(targetFS);
+                var newUnit = TypicalCompiler.Compile(targetFS, target);
 
                 unit2Location[newUnit] = target;
                 location2Unit[target] = newUnit; 
@@ -76,6 +78,12 @@ namespace GeminiLab.Gliep {
 
             try {
                 vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);
+            } catch (GlosRuntimeException rex) when (rex.InnerException is GlosException gex) {
+                Console.WriteLine($@"RE: {gex.GetType().Name}: {gex.Message}");
+                Console.WriteLine(@"Host stacktrace:");
+                Console.WriteLine(gex.StackTrace);
+                Console.WriteLine(@"Stacktrace:");
+                rex.CallStack.Reverse().Select(frame => $"   at {frame.Function.Prototype.Name}").ForEach(Console.WriteLine);
             } catch (Exception ex) {
                 Console.WriteLine($@"{ex.GetType().Name}: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);

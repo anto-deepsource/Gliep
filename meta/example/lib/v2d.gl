@@ -8,7 +8,7 @@ return !v2d = {
                         else a.x * b.x + a.y * b.y,
     .__div: [a, b] -> v2d.new[a.x / b, a.y / b],
     .__equ: [a, b] -> a.x == b.x & a.y == b.y,
-    .__neg: v -> v2d.new[-(v.x), -(v.y)],
+    .__neg: v -> v2d.new[-v.x, -v.y],
 
     .__str: v -> format["({0}, {1})", v.x, v.y],
 

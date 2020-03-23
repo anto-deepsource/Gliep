@@ -245,18 +245,25 @@ namespace GeminiLab.Glug.Parser {
                 return new Metatable(ReadExprItem(stream));
             }
 
+            VarRef? vr = null;
             if (tok.Type == GlugTokenType.SymbolBang) {
                 stream.GetToken();
-                return new VarRef(ReadIdentifier(stream), isDef: true);
-            }
-
-            if (tok.Type == GlugTokenType.SymbolBangBang) {
+                vr = new VarRef(ReadIdentifier(stream), isDef: true);
+            } else if (tok.Type == GlugTokenType.SymbolBangBang) {
                 stream.GetToken();
-                return new VarRef(ReadIdentifier(stream), isGlobal: true);
+                vr = new VarRef(ReadIdentifier(stream), isGlobal: true);
+            } else if (tok.Type == GlugTokenType.Identifier) {
+                vr = new VarRef(ReadIdentifier(stream));
             }
 
-            if (tok.Type == GlugTokenType.Identifier) {
-                return new VarRef(ReadIdentifier(stream));
+            if (vr != null) {
+                Expr rv = vr;
+                while (!stream.NextEof() && stream.PeekToken().Type == GlugTokenType.SymbolDot) {
+                    stream.GetToken();
+                    rv = new BiOp(GlugBiOpType.Index, rv, new LiteralString(ReadIdentifier(stream)));
+                }
+
+                return rv;
             }
 
             return tok.Type switch {

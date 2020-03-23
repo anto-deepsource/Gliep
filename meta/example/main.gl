@@ -1,4 +1,5 @@
 v2d = require "lib/v2d.gl";
+c = require "lib/complex.gl";
 
 a = v2d.new[1, 2];
 print$a;
