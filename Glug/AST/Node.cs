@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GeminiLab.Glos.CodeGenerator;
@@ -15,6 +16,16 @@ namespace GeminiLab.Glug.AST {
         }
 
         public long Value { get; }
+    }
+
+    public class LiteralFloat : Literal {
+        public unsafe LiteralFloat(long b) : this(*(double*)&b) { }
+
+        public LiteralFloat(double value) {
+            Value = value;
+        }
+
+        public double Value { get; }
     }
 
     public class LiteralString : Literal {

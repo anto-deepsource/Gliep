@@ -21,6 +21,10 @@ namespace GeminiLab.Glug.AST {
             Writer.WriteLine(val.Value);
         }
 
+        public override void VisitLiteralFloat(LiteralFloat val) {
+            Writer.WriteLine(val.Value);
+        }
+
         public override void VisitLiteralString(LiteralString val) {
             Writer.WriteLine($"\"{EscapeSequenceConverter.Encode(val.Value)}\"");
         }

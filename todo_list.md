@@ -23,4 +23,5 @@ REFACTOR!!!!
 - add null check operator `?` and `??`.
 - add compound assignment operator.
 - add lua-like integer index table optimization.
-- make `-a.b` `-(a.b)` instead of `(-a).b`. meanwhile should we keep `-a@b` `(-a)@b`?
+- ~~make `-a.b` `-(a.b)` instead of `(-a).b`. meanwhile should we keep `-a@b` `(-a)@b`?~~
+  - think it through.

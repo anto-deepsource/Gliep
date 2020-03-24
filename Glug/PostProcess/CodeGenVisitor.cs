@@ -309,6 +309,11 @@ namespace GeminiLab.Glug.PostProcess {
             if (ru) parent.AppendLd(val.Value);
         }
 
+        public override void VisitLiteralFloat(LiteralFloat val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            if (ru) parent.AppendLdFlt(val.Value);
+        }
+
         public override void VisitLiteralBool(LiteralBool val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
             if (ru) parent.AppendLdBool(val.Value);

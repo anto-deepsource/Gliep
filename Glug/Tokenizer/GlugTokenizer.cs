@@ -8,6 +8,7 @@ using GeminiLab.Core2;
 using GeminiLab.Core2.Collections;
 using GeminiLab.Core2.Text;
 using GeminiLab.Glos;
+using GeminiLab.Glos.ViMa;
 
 namespace GeminiLab.Glug.Tokenizer {
     // carefully make all these classes stateless so they can work lock-free. 
@@ -72,10 +73,10 @@ namespace GeminiLab.Glug.Tokenizer {
     }
 
     public class GlugTokenizer: IGlugTokenStream {
-        private static long ReadDecimalInteger(string value, int len, ref int ptr) {
-            long rv = 0;
-
+        // true means int
+        private static bool ReadNumeric(string value, int len, ref int ptr, out long resultInt, out double resultFloat) {
             if (len - ptr >= 3 && value[ptr] == '0' && (value[ptr + 1] == 'x' || value[ptr + 1] == 'X') && value[ptr + 2].IsHexadecimalDigit()) {
+                long rv = 0;
                 ptr += 2;
                 while (ptr < len) {
                     unchecked {
@@ -90,7 +91,15 @@ namespace GeminiLab.Glug.Tokenizer {
                         ++ptr;
                     }
                 }
+
+                resultInt = rv;
+                resultFloat = double.NaN;
+
+                return true;
             } else {
+                long rv = 0;
+                var begin = ptr;
+
                 while (ptr < len) {
                     unchecked {
                         char c = value[ptr];
@@ -99,9 +108,31 @@ namespace GeminiLab.Glug.Tokenizer {
                         ++ptr;
                     }
                 }
-            }
 
-            return rv;
+                if (ptr + 1 < len && value[ptr] == '.' && value[ptr + 1].IsDecimalDigit()) {
+                    var dot = ptr;
+                    ++ptr;
+                    while (ptr < len && value[ptr].IsDecimalDigit()) ++ptr;
+
+                    if (double.TryParse(value.AsSpan(begin, ptr - begin), out var flt)) {
+                        resultInt = 0;
+                        resultFloat = flt;
+
+                        return false;
+                    } else {
+                        ptr = dot;
+                        resultInt = rv;
+                        resultFloat = double.NaN;
+
+                        return true;
+                    }
+                } else {
+                    resultInt = rv;
+                    resultFloat = double.NaN;
+
+                    return true;
+                }
+            }
         }
 
         private static bool IsIdentifierChar(char c) {
@@ -189,8 +220,16 @@ namespace GeminiLab.Glug.Tokenizer {
 
                 char c = line[ptr];
                 if (c.IsDecimalDigit()) {
-                    rv.Type = GlugTokenType.LiteralInteger;
-                    rv.ValueInt = ReadDecimalInteger(line, len, ref ptr);
+                    if (ReadNumeric(line, len, ref ptr, out var ri, out var rf)) {
+                        rv.Type = GlugTokenType.LiteralInteger;
+                        rv.ValueInt = ri;
+                    } else {
+                        IntegerFloatUnion ifu = default;
+                        ifu.Float = rf;
+                        rv.Type = GlugTokenType.LiteralFloat;
+                        rv.ValueInt = ifu.Integer;
+                    }
+
                     return rv;
                 }
 

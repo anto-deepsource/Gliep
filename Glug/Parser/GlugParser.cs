@@ -223,6 +223,7 @@ namespace GeminiLab.Glug.Parser {
                     GlugTokenType.LiteralTrue => (Expr)new LiteralBool(true),
                     GlugTokenType.LiteralFalse => new LiteralBool(false),
                     GlugTokenType.LiteralInteger => new LiteralInteger(tok.ValueInt),
+                    GlugTokenType.LiteralFloat => new LiteralFloat(tok.ValueInt),
                     GlugTokenType.LiteralString => new LiteralString(tok.ValueString!),
                     GlugTokenType.LiteralNil => new LiteralNil(),
                     _ => throw new ArgumentOutOfRangeException()

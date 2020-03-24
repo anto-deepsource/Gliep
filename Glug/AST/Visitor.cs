@@ -4,6 +4,7 @@ using GeminiLab.Core2.Collections;
 namespace GeminiLab.Glug.AST {
     public abstract class Visitor {
         public abstract void VisitLiteralInteger(LiteralInteger val);
+        public abstract void VisitLiteralFloat(LiteralFloat val);
         public abstract void VisitLiteralBool(LiteralBool val);
         public abstract void VisitLiteralString(LiteralString val);
         public abstract void VisitLiteralNil(LiteralNil val);
@@ -37,6 +38,9 @@ namespace GeminiLab.Glug.AST {
             switch (node) {
                 case LiteralInteger li:
                     VisitLiteralInteger(li);
+                    break;
+                case LiteralFloat lf:
+                    VisitLiteralFloat(lf);
                     break;
                 case LiteralBool lb:
                     VisitLiteralBool(lb);
@@ -93,6 +97,7 @@ namespace GeminiLab.Glug.AST {
 
     public class RecursiveVisitor : Visitor {
         public override void VisitLiteralInteger(LiteralInteger val) { }
+        public override void VisitLiteralFloat(LiteralFloat val) { }
 
         public override void VisitLiteralBool(LiteralBool val) { }
 
@@ -160,6 +165,7 @@ namespace GeminiLab.Glug.AST {
 
     public abstract class InVisitor<TParameter> {
         public abstract void VisitLiteralInteger(LiteralInteger val, TParameter arg);
+        public abstract void VisitLiteralFloat(LiteralFloat val, TParameter arg);
         public abstract void VisitLiteralBool(LiteralBool val, TParameter arg);
         public abstract void VisitLiteralString(LiteralString val, TParameter arg);
         public abstract void VisitLiteralNil(LiteralNil val, TParameter arg);
@@ -193,6 +199,9 @@ namespace GeminiLab.Glug.AST {
             switch (node) {
                 case LiteralInteger li:
                     VisitLiteralInteger(li, arg);
+                    break;
+                case LiteralFloat lf:
+                    VisitLiteralFloat(lf, arg);
                     break;
                 case LiteralBool lb:
                     VisitLiteralBool(lb, arg);
@@ -249,6 +258,8 @@ namespace GeminiLab.Glug.AST {
 
     public class RecursiveInVisitor<TParameter> : InVisitor<TParameter> {
         public override void VisitLiteralInteger(LiteralInteger val, TParameter arg) { }
+
+        public override void VisitLiteralFloat(LiteralFloat val, TParameter arg) { }
 
         public override void VisitLiteralBool(LiteralBool val, TParameter arg) { }
 
