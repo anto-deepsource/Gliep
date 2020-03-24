@@ -72,6 +72,12 @@ namespace XUnitTester.Misc {
             return this;
         }
 
+        public GlosValueArrayItemChecker AssertFloat(double value, double error) {
+            AssertPositionInRange();
+            Assert.InRange(Current.AssumeFloat(), value * (1 - error), value * (1 + error));
+            return this;
+        }
+
         public GlosValueArrayItemChecker AssertFloat(Action<double> checker) {
             AssertPositionInRange();
             checker(Current.AssertFloat());

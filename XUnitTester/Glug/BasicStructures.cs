@@ -16,7 +16,7 @@ namespace XUnitTester.Glug {
         [Fact]
         public void Evaluation() {
             var code = @"
-                return [1, -2, 2--2, nil == (), nil ~= `{}, -(1 + 2),]
+                return [1, -2, 2--2, nil == (), nil ~= `{}, -(1 + 2), 3.14159,]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -26,6 +26,7 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertTrue()
                 .MoveNext().AssertFalse()
                 .MoveNext().AssertInteger(-3)
+                .MoveNext().AssertFloat(3.14159, 0.01)
                 .MoveNext().AssertEnd();
         }
 
