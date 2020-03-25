@@ -1,11 +1,14 @@
+using System;
 using System.Collections.Generic;
-
+using System.Diagnostics;
+using GeminiLab.Core2.Random;
 using GeminiLab.Core2.Random.RNG;
 using GeminiLab.Core2.Yielder;
 using GeminiLab.Glos;
 using GeminiLab.Glos.ViMa;
 
 using Xunit;
+using Xunit.Abstractions;
 using XUnitTester.Misc;
 
 namespace XUnitTester.Glug {
@@ -320,6 +323,68 @@ namespace XUnitTester.Glug {
                 .FirstOne().AssertString(list[0])
                 .MoveNext().AssertString(list[1])
                 .MoveNext().AssertString(list[2])
+                .MoveNext().AssertEnd();
+        }
+
+        public static IEnumerable<object[]> BisectionMethodTestCases(int count) {
+            var min = -(1 << 14);
+            var max = -min - 1;
+
+            for (int i = 0; i < count; ++i) {
+                int a, b, c;
+                int delta;
+
+                do {
+                    a = DefaultRNG.I32.Next(min, max);
+                    b = DefaultRNG.I32.Next(min, max);
+                    c = DefaultRNG.I32.Next(min, max);
+
+                    delta = b * b - 4 * a * c;
+                } while (delta <= 0 || a == 0);
+
+                var mid = -b / 2.0 / a;
+                var spa = Math.Sqrt(delta) / 2.0 / a;
+                var sol1 = mid - spa;
+                var sol2 = mid + spa;
+
+                if (sol1 > sol2) {
+                    var temp = sol1;
+                    sol1 = sol2;
+                    sol2 = temp;
+                }
+
+                var coin = DefaultRNG.Coin.Next();
+
+                var another = coin ? -Math.Abs(mid) - 2.5 * Math.Abs(spa) : Math.Abs(mid) + 2.5 * Math.Abs(spa);
+                var answer = coin ? sol1 : sol2;
+
+                yield return new object[] { a, b, c, Math.Min(mid, another), Math.Max(mid, another), answer };
+            }
+        }
+        
+        [Theory]
+        [MemberData(nameof(BisectionMethodTestCases), 1024)]
+        public void BisectionMethod(int a, int b, int c, double l, double r, double expected) {
+            const double epsilon = 1e-6;
+
+            var code = $@"
+                [a, b, c] = [{a}, {b}, {c}];
+                f = x -> a * x * x + b * x + c;
+                eps = {epsilon:F20};
+                [l, r] = [{l}, {r}];
+
+                rising = (f r) > 0;
+
+                while ((r - l) >= eps) (
+                    mid = (l + r) / 2.0;
+                    if (rising ^ (f mid) > 0) l = mid else r = mid;
+                );
+                
+                l;
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertFloatAbsoluteError(expected, epsilon)
                 .MoveNext().AssertEnd();
         }
     }

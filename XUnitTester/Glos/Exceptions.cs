@@ -121,5 +121,38 @@ namespace XUnitTester.Glos {
             Assert.Equal(GlosValueType.Integer, exception.Value.Type);
             Assert.Equal(1, exception.Value.AssumeInteger());
         }
+
+        [Fact]
+        public void InvalidUnOperand() {
+            var fgen = Builder.AddFunction();
+
+            fgen.AppendLdStr("");
+            fgen.AppendNeg();
+
+            fgen.SetEntry();
+
+            var exception = GlosRuntimeExceptionCatcher.Catch<GlosInvalidUnaryOperandTypeException>(() => {
+                Execute();
+            });
+
+            Assert.Equal(GlosOp.Neg, exception.Op);
+            Assert.Equal(GlosValueType.String, exception.Operand.Type);
+            Assert.Equal("", exception.Operand.AssumeString());
+
+            fgen = Builder.AddFunction();
+
+            fgen.AppendLdStr("");
+            fgen.AppendNot();
+
+            fgen.SetEntry();
+
+            exception = GlosRuntimeExceptionCatcher.Catch<GlosInvalidUnaryOperandTypeException>(() => {
+                Execute();
+            });
+
+            Assert.Equal(GlosOp.Not, exception.Op);
+            Assert.Equal(GlosValueType.String, exception.Operand.Type);
+            Assert.Equal("", exception.Operand.AssumeString());
+        }
     }
 }

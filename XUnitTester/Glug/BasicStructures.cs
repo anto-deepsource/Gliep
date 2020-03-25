@@ -26,14 +26,14 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertTrue()
                 .MoveNext().AssertFalse()
                 .MoveNext().AssertInteger(-3)
-                .MoveNext().AssertFloat(3.14159, 0.01)
+                .MoveNext().AssertFloatRelativeError(3.14159, 0.01)
                 .MoveNext().AssertEnd();
         }
 
         [Fact]
         public void String() {
-            string strA = "strA", strB = "ユニコードイグザンプル\u4396";
-            string strEscape = "\\n";
+            string strA = "strA", strB = "ユニコードイグザンプル";
+            string strEscape = "\\n\\u4396";
             var code = $@"
                 [""{strA}"", ""{strA}"" + ""{strB}"", ""{strEscape}""]
             ";
