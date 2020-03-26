@@ -12,7 +12,7 @@ REFACTOR!!!!
 
 - add tostring instruction.
 - add hash instruction.
-  - find a good way to evaluate and update glosvalue's hash.
+  - ~~find a good way to evaluate and update glosvalue's hash.~~
 - add truthy and falsey instruction.
 
 ## Glug
@@ -25,3 +25,9 @@ REFACTOR!!!!
 - add lua-like integer index table optimization.
 - ~~make `-a.b` `-(a.b)` instead of `(-a).b`. meanwhile should we keep `-a@b` `(-a)@b`?~~
   - think it through.
+- when an osl has a constant length, `lddel` and `shprv` may be safe to remove:
+
+  ```gl
+  a@[b]; # lddel and shprv.1 can be removed safely here
+  x = [1, 2]; # and here
+  ```

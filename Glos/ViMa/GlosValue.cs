@@ -19,27 +19,15 @@ namespace GeminiLab.Glos.ViMa {
             get => _type;
             set {
                 _type = value;
-                _hashCodeCalculated = value != GlosValueType.Table;
-                if (_hashCodeCalculated) {
-                    _hashCode = value switch {
-                        GlosValueType.Integer => (int)ValueNumber.Integer,
-                        GlosValueType.Float => (int)ValueNumber.Integer,
-                        GlosValueType.Boolean => (int)ValueNumber.Integer,
-                        GlosValueType.String => this.AssertString().GetHashCode(),
-                        GlosValueType.Function => this.AssertFunction().GetHashCode(),
-                        // Nil
-                        _ => 0,
-                    };
-                }
+                preEvalHash();
             }
         }
-
-        private bool _hashCodeCalculated;
-        private int _hashCode;
 
         public override string ToString() {
             return Calculator.DebugStringify(this);
         }
+
+        
 
         // TODO: find a better place for following method(s)
         public static bool TryGetMetamethodOfOperand(in GlosValue v, string name, out GlosValue fun) {

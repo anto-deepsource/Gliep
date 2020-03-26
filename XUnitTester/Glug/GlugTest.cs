@@ -225,6 +225,29 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertEnd();
         }
 
+        public void TableHash() {
+            var code = @"
+                mt = { .__hash: v -> v.x, .__equ: [x, y] -> x.x == y.x };
+
+                fn ntb[x] (
+                    rv = { .x: x };
+                    `rv = mt;
+                    rv;
+                );
+
+                k = {};
+                k@[ntb[0]] = 0;
+                k@[ntb[1]] = 1;
+
+                [k @ (ntb 1), k @ (ntb 0)]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(1)
+                .MoveNext().AssertInteger(0)
+                .MoveNext().AssertEnd();
+        }
+
         private static ulong reverseBit(ulong x) {
             ulong rv = 0;
             for (int i = 0; i < 64; ++i) {
