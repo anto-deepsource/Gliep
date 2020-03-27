@@ -225,6 +225,7 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertEnd();
         }
 
+        [Fact]
         public void TableHash() {
             var code = @"
                 mt = { .__hash: v -> v.x, .__equ: [x, y] -> x.x == y.x };
