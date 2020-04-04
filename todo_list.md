@@ -31,3 +31,5 @@ REFACTOR!!!!
   a@[b]; # lddel and shprv.1 can be removed safely here
   x = [1, 2]; # and here
   ```
+
+- make parser match with grammar strictly.

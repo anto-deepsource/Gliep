@@ -45,11 +45,11 @@ ExprItem    : literal
 QualifiedIdentifer  : ("!" | "!!")? identifier ("." identifier)*
                     ;
 
-TableDef    : "{" (TableDef ("," TableDef)*)? "}"
+TableDef    : "{" (TableDefItem ","?)* "}"
             ;
 
-TableDef    : (("@"? Expr ) | ("." identifier)) ":" Expr
-            ;
+TableDefItem    : (("@"? Expr ) | ("." identifier)) ":" Expr
+                ;
 
 BlockInParen    : "(" Block ")"
                 ;
@@ -66,17 +66,14 @@ Return      : "return" Expr
 Break       : "break" Expr
             ;
 
-Function    : "fn" identifier? OptionalParamList OptionalRightArrow Expr
+Function    : "fn" identifier? ParamList? "->"? Expr
             ;
 
-OptionalParamList   : ( "[" (identifier ("," identifier)* ","?)? "]" )?
-                    ;
-
-OptionalRightArrow  : "->"?
-                    ;
-
-Lambda      : (OnStackList | identifier ) "->" expr
+ParamList   : "[" (identifier ("," identifier)*)? "]"
             ;
 
-OnStackList : "[" (Expr ("," Expr)* ","?)? "]"
+Lambda      : (ParamList | identifier) "->" expr
+            ;
+
+OnStackList : "[" (Expr ","?)* "]"
             ;
