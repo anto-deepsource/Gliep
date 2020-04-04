@@ -117,7 +117,7 @@ namespace XUnitTester.Glug {
         public void LoopGcd(uint x, uint y, uint expected) {
             var code = @$"
                 !gcd = [a, b] -> (while (b > 0) [a, b] = [b, a % b]; a);
-                fn gcd_long[a, b] while (true) ( if (b == 0) break a; [a, b] = [b, a % b]; a);
+                fn gcd_long[a, b] while (true) ( if (b == 0) break a; [a, b] = [b, a % b]);
                 [gcd[{x}, {y}], gcd_long[{x}, {y}]]
             ";
 
@@ -395,7 +395,7 @@ namespace XUnitTester.Glug {
                 [a, b, c] = [{a}, {b}, {c}];
                 f = x -> a * x * x + b * x + c;
                 eps = {epsilon:F20};
-                [l, r] = [{l}, {r}];
+                [l, r] = [{l:F20}, {r:F20}];
 
                 rising = (f r) > 0;
 
