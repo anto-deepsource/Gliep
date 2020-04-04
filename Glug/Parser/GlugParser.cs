@@ -331,12 +331,17 @@ namespace GeminiLab.Glug.Parser {
 
         private static Break ReadBreak(LookAheadTokenStream stream) {
             Consume(stream, GlugTokenType.KeywordBreak);
-            return new Break(ReadExprGreedily(stream));
+            return new Break(ReadOptionalExpr(stream) ?? new OnStackList(new List<Expr>()));
         }
 
         private static Return ReadReturn(LookAheadTokenStream stream) {
             Consume(stream, GlugTokenType.KeywordReturn);
-            return new Return(ReadExprGreedily(stream));
+            return new Return(ReadOptionalExpr(stream) ?? new OnStackList(new List<Expr>()));
+        }
+
+        private static Expr? ReadOptionalExpr(LookAheadTokenStream stream) {
+            if (!stream.NextEof() && LikelyExpr(stream.PeekToken().Type)) return ReadExprGreedily(stream);
+            return null;
         }
 
         private static Function ReadFunction(LookAheadTokenStream stream) {

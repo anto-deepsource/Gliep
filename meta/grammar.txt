@@ -60,10 +60,10 @@ If          : "if" BlockInParen Expr ( "elif" BlockInParen Expr )* ( "else" Expr
 While       : "while" BlockInParen Expr
             ;
 
-Return      : "return" Expr
+Return      : "return" Expr?
             ;
 
-Break       : "break" Expr
+Break       : "break" Expr?
             ;
 
 Function    : "fn" identifier? ParamList? "->"? Expr

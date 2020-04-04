@@ -18,7 +18,15 @@ REFACTOR!!!!
 ## Glug
 
 - add locally ren and uen operators.
-- allow empty expr `;`. e.g. `while (sth) ;`. a possible method is making `;` termination marks of expr, instead of seperators in blocks.
+- ~~allow empty expr `;`. e.g. `while (sth) ;`. a possible method is making `;` termination marks of expr, instead of seperators in blocks.~~
+  - done, in another way.
+  - making `;` termination marks of expr instead of seperators in blocks is possibly a bad idea, for it could introduce new ambiguity.
+  - maybe I should reconsider it later.
+
+  ```gl
+  if (a) b; # should `;` terminate if here? It's context-dependent
+  ```
+
 - add short-circuit operators.
 - add null check operator `?` and `??`.
 - add compound assignment operator.

@@ -14,6 +14,12 @@ namespace XUnitTester.Glug {
         }
 
         [Fact]
+        public void ReturnEmpty() {
+            GlosValueArrayChecker.Create(Execute("return"))
+                .FirstOne().AssertEnd();
+        }
+
+        [Fact]
         public void Evaluation() {
             var code = @"
                 return [1, -2, 2--2, nil == (), nil ~= `{}, -(1 + 2), 3.14159,]
@@ -81,7 +87,7 @@ namespace XUnitTester.Glug {
                 !b = while (i > 0) ( if (i == 5) break [i, i]; i = i - 1 );
                 while (i < 10) i = i + 1;
                 !c = i;
-                while (i > 0) ( if (i == 5) break(); i = i - 1 );
+                while (i > 0) ( if (i == 5) break; i = i - 1 );
                 !d = i;
                 [a, b, c, d]
             ";
