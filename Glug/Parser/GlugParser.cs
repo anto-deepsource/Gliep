@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using GeminiLab.Core2;
 using GeminiLab.Glug.AST;
 using GeminiLab.Glug.Tokenizer;
@@ -118,7 +119,8 @@ namespace GeminiLab.Glug.Parser {
         };
 
         private static void Consume(LookAheadTokenStream stream, GlugTokenType expected) {
-            if (expected != stream.GetToken().Type) throw new ArgumentOutOfRangeException();
+            var tok = stream.GetToken();
+            if (expected != tok.Type) throw new GlugParserUnexpectedTokenException(tok, expected);
         }
 
 
