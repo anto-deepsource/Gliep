@@ -1,4 +1,4 @@
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public class GlosFunction {
         public GlosFunction(GlosFunctionPrototype prototype, GlosContext parentContext) {
             Prototype = prototype;

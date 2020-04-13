@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public partial struct GlosValue {
         public class EqualityComparer : IEqualityComparer<GlosValue> {
             private readonly GlosViMa _vm;

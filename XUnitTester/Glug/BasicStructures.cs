@@ -1,6 +1,5 @@
 using GeminiLab.Core2.Text;
-using GeminiLab.Glos.ViMa;
-
+using GeminiLab.Glos;
 using Xunit;
 using XUnitTester.Misc;
 

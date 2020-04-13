@@ -1,6 +1,4 @@
-using System;
-
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public partial struct GlosValue {
         private bool _hashCodeCalculated;
         private long _hashCode;

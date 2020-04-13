@@ -1,6 +1,5 @@
 using System;
 using GeminiLab.Glos;
-using GeminiLab.Glos.ViMa;
 using Xunit;
 
 namespace XUnitTester.Glos {

@@ -5,8 +5,6 @@ using GeminiLab.Core2.Random;
 using GeminiLab.Core2.Random.RNG;
 using GeminiLab.Core2.Yielder;
 using GeminiLab.Glos;
-using GeminiLab.Glos.ViMa;
-
 using Xunit;
 using Xunit.Abstractions;
 using XUnitTester.Misc;

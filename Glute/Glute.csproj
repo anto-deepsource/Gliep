@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Processor\" />
+    <PackageReference Include="GeminiLab.Core2.CommandLineParser" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

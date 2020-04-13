@@ -5,9 +5,8 @@ using System.Globalization;
 using GeminiLab.Core2;
 using GeminiLab.Core2.Random;
 using GeminiLab.Core2.Random.RNG;
+using GeminiLab.Glos;
 using GeminiLab.Glos.CodeGenerator;
-using GeminiLab.Glos.ViMa;
-
 using Xunit;
 using XUnitTester.Misc;
 

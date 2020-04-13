@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public static class GlosValueExtensions {
         public static ref GlosValue SetNil(this ref GlosValue v) {
             v.ValueNumber.Integer = 0;

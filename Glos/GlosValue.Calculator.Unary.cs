@@ -1,6 +1,6 @@
 using System;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public partial struct GlosValue {
         public partial class Calculator {
             public void Not(ref GlosValue dest, in GlosValue v) {

@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public partial struct GlosValue {
         public static bool BothNil(in GlosValue x, in GlosValue y) {
             return x.Type == GlosValueType.Nil && y.Type == GlosValueType.Nil;

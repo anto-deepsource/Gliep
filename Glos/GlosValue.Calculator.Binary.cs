@@ -1,6 +1,6 @@
 using System;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     // Contracts here:
     //   - op equ and neq never throws itself (but metamethods may)
     //   - metatables of left operands are checked first

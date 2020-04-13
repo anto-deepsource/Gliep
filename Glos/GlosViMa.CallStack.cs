@@ -1,6 +1,6 @@
 using System;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public struct GlosStackFrame {
         public int StackBase;
         public int ArgumentsBase;

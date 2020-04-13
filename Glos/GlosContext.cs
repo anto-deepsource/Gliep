@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public class GlosContext {
         protected class GlosValueReferenceWrapper {
             private GlosValue _value;

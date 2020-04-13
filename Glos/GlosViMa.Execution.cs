@@ -1,6 +1,6 @@
 using System;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public partial class GlosViMa {
         public static bool ReadInstructionAndImmediate(ReadOnlySpan<byte> code, ref int ip, out GlosOp op, out long imm, out bool immOnStack) {
             var len = code.Length;

@@ -1,4 +1,4 @@
-using GeminiLab.Glos.ViMa;
+using GeminiLab.Glos;
 using GeminiLab.Glug;
 
 namespace XUnitTester.Glug {

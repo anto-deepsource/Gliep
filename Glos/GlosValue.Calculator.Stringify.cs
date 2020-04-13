@@ -2,10 +2,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-
 using GeminiLab.Core2.Text;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public partial struct GlosValue {
         public partial class Calculator {
             [ExcludeFromCodeCoverage]

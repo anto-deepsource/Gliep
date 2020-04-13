@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using GeminiLab.Glos.ViMa;
-
 namespace GeminiLab.Glos.CodeGenerator {
     internal static class ListExtensions {
         internal static void AddOp(this IList<byte> list, GlosOp op) => list.Add((byte)op);

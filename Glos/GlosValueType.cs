@@ -1,6 +1,6 @@
 using System;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public enum GlosValueType : byte {
         Nil = 0x00,
         Integer = 0x01,

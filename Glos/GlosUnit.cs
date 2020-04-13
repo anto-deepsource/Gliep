@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public class GlosUnit {
         public IReadOnlyList<GlosFunctionPrototype> FunctionTable { get; }
         public int Entry { get; }

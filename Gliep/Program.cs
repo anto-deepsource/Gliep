@@ -7,7 +7,6 @@ using System.Linq;
 using GeminiLab.Core2;
 using GeminiLab.Core2.Collections;
 using GeminiLab.Glos;
-using GeminiLab.Glos.ViMa;
 using GeminiLab.Glug;
 
 namespace GeminiLab.Gliep {

@@ -1,6 +1,6 @@
 using System;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     // todo: add delimiter to its params
     public delegate void GlosSyscall(GlosStack<GlosValue> stack, GlosStack<GlosStackFrame> callStack, GlosStack<int> delStack);
 
