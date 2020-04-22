@@ -14,10 +14,10 @@ namespace GeminiLab.Glos {
         private readonly Dictionary<string, GlosValueReferenceWrapper> _variables = new Dictionary<string, GlosValueReferenceWrapper>();
         private readonly Dictionary<string, GlosContext> _location = new Dictionary<string, GlosContext>();
 
-        public GlosContext(GlosContext? parent) => Root = (Parent = parent)?.Root ?? this;
+        public GlosContext(GlosContext? parent) => Global = (Parent = parent)?.Global ?? this;
 
         public virtual GlosContext? Parent { get; }
-        public virtual GlosContext Root { get; }
+        public virtual GlosContext Global { get; }
         
         protected GlosValueReferenceWrapper GetWrapper(string name) => GetWrapper(name, out _);
 
