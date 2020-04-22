@@ -1,7 +1,5 @@
 using System;
 
-using GeminiLab.Glos.ViMa;
-
 namespace GeminiLab.Glos {
     public class GlosException : Exception {
         // public GlosException() : base() { }

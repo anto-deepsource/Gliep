@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public class GlosContext {
-        private class GlosValueReferenceWrapper {
+        protected class GlosValueReferenceWrapper {
             private GlosValue _value;
 
             public GlosValueReferenceWrapper() => _value.SetNil();
@@ -16,30 +16,30 @@ namespace GeminiLab.Glos.ViMa {
 
         public GlosContext(GlosContext? parent) => Root = (Parent = parent)?.Root ?? this;
 
-        public GlosContext? Parent { get; }
-        public GlosContext Root { get; }
+        public virtual GlosContext? Parent { get; }
+        public virtual GlosContext Root { get; }
+        
+        protected GlosValueReferenceWrapper GetWrapper(string name) => GetWrapper(name, out _);
 
-        private GlosValueReferenceWrapper getWrapper(string name) => getWrapper(name, out _);
-
-        private GlosValueReferenceWrapper getWrapper(string name, out GlosContext location) {
+        protected virtual GlosValueReferenceWrapper GetWrapper(string name, out GlosContext location) {
             if (_variables.TryGetValue(name, out var wrapper)) {
                 location = this;
                 return wrapper;
             }
 
-            if (_location.TryGetValue(name, out location)) return location.getWrapper(name);
+            if (_location.TryGetValue(name, out location)) return location.GetWrapper(name);
 
             if (Parent == null) {
                 location = this;
                 return _variables[name] = new GlosValueReferenceWrapper();
             }
 
-            var rv = Parent.getWrapper(name, out location);
+            var rv = Parent.GetWrapper(name, out location);
             _location[name] = location;
             return rv;
         }
 
-        public ref GlosValue GetVariableReference(string name) => ref getWrapper(name).GetReference();
+        public ref GlosValue GetVariableReference(string name) => ref GetWrapper(name).GetReference();
 
         public void CreateVariable(string name) => _variables[name] = new GlosValueReferenceWrapper();
         public void CreateVariable(string name, in GlosValue value) => _variables[name] = new GlosValueReferenceWrapper(value);

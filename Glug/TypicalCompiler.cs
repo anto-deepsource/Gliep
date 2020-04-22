@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-
-using GeminiLab.Glos.ViMa;
+using GeminiLab.Glos;
 using GeminiLab.Glug.AST;
 using GeminiLab.Glug.Parser;
 using GeminiLab.Glug.PostProcess;

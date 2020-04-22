@@ -1,4 +1,4 @@
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public partial class GlosViMa {
         private readonly GlosStack<GlosValue> _stack = new GlosStack<GlosValue>();
         private int _sptr => _stack.Count;

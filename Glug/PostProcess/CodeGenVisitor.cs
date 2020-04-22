@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using GeminiLab.Glos;
 using GeminiLab.Glos.CodeGenerator;
-using GeminiLab.Glos.ViMa;
 using GeminiLab.Glug.AST;
 
 namespace GeminiLab.Glug.PostProcess {

@@ -1,5 +1,5 @@
+using GeminiLab.Glos;
 using GeminiLab.Glos.CodeGenerator;
-using GeminiLab.Glos.ViMa;
 
 namespace XUnitTester.Glos {
     public abstract class GlosTestBase {

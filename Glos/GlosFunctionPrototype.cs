@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public class GlosFunctionPrototype {
         // making this ctor internal here is not quite a good choice. TODO: reconsider it 
         internal GlosFunctionPrototype(string name, ReadOnlySpan<byte> code, int localVariableSize, IReadOnlyCollection<string> variableInContext) {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     public class GlosTable {
         private readonly GlosViMa _vm;
         private readonly Dictionary<GlosValue, GlosValue> _values;

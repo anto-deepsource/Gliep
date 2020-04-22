@@ -12,6 +12,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gliep", "Gliep\Gliep.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GliepDumper", "GliepDumper\GliepDumper.csproj", "{85B9BFD9-F3FB-4649-9C23-8C857EC34724}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Glute", "Glute\Glute.csproj", "{53E2E693-37D5-4B78-8F2C-611657F338E9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Develop|Any CPU = Develop|Any CPU
@@ -49,6 +51,12 @@ Global
 		{85B9BFD9-F3FB-4649-9C23-8C857EC34724}.Preview|Any CPU.Build.0 = Preview|Any CPU
 		{85B9BFD9-F3FB-4649-9C23-8C857EC34724}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{85B9BFD9-F3FB-4649-9C23-8C857EC34724}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53E2E693-37D5-4B78-8F2C-611657F338E9}.Develop|Any CPU.ActiveCfg = Develop|Any CPU
+		{53E2E693-37D5-4B78-8F2C-611657F338E9}.Develop|Any CPU.Build.0 = Develop|Any CPU
+		{53E2E693-37D5-4B78-8F2C-611657F338E9}.Preview|Any CPU.ActiveCfg = Preview|Any CPU
+		{53E2E693-37D5-4B78-8F2C-611657F338E9}.Preview|Any CPU.Build.0 = Preview|Any CPU
+		{53E2E693-37D5-4B78-8F2C-611657F338E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53E2E693-37D5-4B78-8F2C-611657F338E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -8,8 +8,7 @@ using GeminiLab.Core2;
 using GeminiLab.Core2.CommandLineParser;
 using GeminiLab.Core2.IO;
 using GeminiLab.Core2.Text;
-
-using GeminiLab.Glos.ViMa;
+using GeminiLab.Glos;
 using GeminiLab.Glug;
 using GeminiLab.Glug.AST;
 using GeminiLab.Glug.Parser;

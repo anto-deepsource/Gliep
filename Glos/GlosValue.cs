@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace GeminiLab.Glos.ViMa {
+namespace GeminiLab.Glos {
     [StructLayout(LayoutKind.Explicit, Size = 8)]
     public struct IntegerFloatUnion {
         [FieldOffset(0)]

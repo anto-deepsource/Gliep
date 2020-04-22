@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using GeminiLab.Glos.ViMa;
-
 namespace GeminiLab.Glos.CodeGenerator {
     public class GlosFunctionBuilder {
         internal GlosFunctionBuilder(GlosUnitBuilder parent, int id) {
