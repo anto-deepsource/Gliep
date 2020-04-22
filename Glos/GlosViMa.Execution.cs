@@ -87,7 +87,7 @@ namespace GeminiLab.Glos {
             ctx.Length = ctx.Code.Length;
             ctx.Unit = ctx.Prototype.Unit;
             ctx.Context = frame.Context;
-            ctx.Global = ctx.Context.Root;
+            ctx.Global = ctx.Context.Global;
         }
 
         void storeStatus(ref ExecutorContext ctx) {
@@ -133,95 +133,116 @@ namespace GeminiLab.Glos {
                     // the implicit return at the end of function
                     var cat = GlosOpInfo.Categories[(int)op];
 
+                    GlosValue temp = default;
                     // execution
-                    if (cat == GlosOpCategory.BinaryOperator) {
+                    switch (cat) {
+                    case GlosOpCategory.BinaryOperator:
                         Calculator.ExecuteBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
                         popStack();
-                    } else if (op == GlosOp.Smt) {
+                        break;
+                    case GlosOpCategory.TableOperator when op == GlosOp.Smt:
                         stackTop().AssertTable().Metatable = stackTop(1).AssertTable();
                         popStack(2);
-                    } else if (op == GlosOp.Gmt) {
-                        if (stackTop().AssertTable().Metatable is {} mt) {
+                        break;
+                    case GlosOpCategory.TableOperator when op == GlosOp.Gmt:
+                        if (stackTop().AssertTable().Metatable is { } mt) {
                             stackTop().SetTable(mt);
                         } else {
                             stackTop().SetNil();
                         }
-                    } else if (op == GlosOp.Ren) {
-                        if (stackTop(1).AssertTable().TryReadEntry(stackTop(), out var result)) {
-                            stackTop(1) = result;
+                        break;
+                    case GlosOpCategory.TableOperator when op == GlosOp.Ren:
+                        if (stackTop(1).AssertTable().TryReadEntry(stackTop(), out temp)) {
+                            stackTop(1) = temp;
                         } else {
                             stackTop(1).SetNil();
                         }
-
                         popStack();
-                    } else if (op == GlosOp.Uen) {
+                        break;
+                    case GlosOpCategory.TableOperator when op == GlosOp.Uen:
                         stackTop(1).AssertTable().UpdateEntry(stackTop(), stackTop(2));
-
                         popStack(3);
-                    } else if (op == GlosOp.RenL) {
-                        if (stackTop(1).AssertTable().TryReadEntryLocally(stackTop(), out var result)) {
-                            stackTop(1) = result;
+                        break;
+                    case GlosOpCategory.TableOperator when op == GlosOp.RenL:
+                        if (stackTop(1).AssertTable().TryReadEntryLocally(stackTop(), out temp)) {
+                            stackTop(1) = temp;
                         } else {
                             stackTop(1).SetNil();
                         }
-
                         popStack();
-                    } else if (op == GlosOp.UenL) {
+                        break;
+                    case GlosOpCategory.TableOperator when op == GlosOp.UenL:
                         stackTop(1).AssertTable().UpdateEntryLocally(stackTop(), stackTop(2));
-
                         popStack(3);
-                    } else if (op == GlosOp.Ien) {
+                        break;
+                    case GlosOpCategory.TableOperator when op == GlosOp.Ien:
                         stackTop(2).AssertTable().UpdateEntryLocally(stackTop(1), stackTop());
-
                         popStack(2);
-                    } else if (cat == GlosOpCategory.UnaryOperator) {
+                        break;
+                    case GlosOpCategory.UnaryOperator:
                         Calculator.ExecuteUnaryOperation(ref stackTop(), in stackTop(), op);
-                    } else if (op == GlosOp.Rvc) {
+                        break;
+                    case GlosOpCategory.ContextOperator when op == GlosOp.Rvc:
                         stackTop() = ctx.GetVariableReference(stackTop().AssertString());
-                    } else if (op == GlosOp.Uvc) {
+                        break;
+                    case GlosOpCategory.ContextOperator when op == GlosOp.Uvc:
                         ctx.GetVariableReference(stackTop().AssertString()) = stackTop(1);
                         popStack(2);
-                    } else if (op == GlosOp.Rvg) {
+                        break;
+                    case GlosOpCategory.ContextOperator when op == GlosOp.Rvg:
                         stackTop() = global.GetVariableReference(stackTop().AssertString());
-                    } else if (op == GlosOp.Uvg) {
+                        break;
+                    case GlosOpCategory.ContextOperator when op == GlosOp.Uvg:
                         global.GetVariableReference(stackTop().AssertString()) = stackTop(1);
                         popStack(2);
-                    } else if (op == GlosOp.LdFun || op == GlosOp.LdFunS) {
-                        if (imms > unit.FunctionTable.Count || imms < 0) throw new ArgumentOutOfRangeException();
-                        int index = (int)imms;
-                        pushStack().SetFunction(new GlosFunction(unit.FunctionTable[index]!, null!));
-                    } else if (op == GlosOp.LdStr || op == GlosOp.LdStrS) {
-                        if (imms > unit.StringTable.Count || imms < 0) throw new ArgumentOutOfRangeException();
-                        int index = (int)imms;
-                        pushStack().SetString(unit.StringTable[index]);
-                    } else if (cat == GlosOpCategory.LoadInteger) {
+                        break;
+                    case GlosOpCategory.LoadFunction when imms > unit.FunctionTable.Count || imms < 0:
+                        throw new ArgumentOutOfRangeException();
+                    case GlosOpCategory.LoadFunction:
+                        pushStack().SetFunction(new GlosFunction(unit.FunctionTable[(int)imms]!, null!));
+                        break;
+                    case GlosOpCategory.LoadString when imms > unit.StringTable.Count || imms < 0:
+                        throw new ArgumentOutOfRangeException();
+                    case GlosOpCategory.LoadString:
+                        pushStack().SetString(unit.StringTable[(int)imms]);
+                        break;
+                    case GlosOpCategory.LoadInteger:
                         pushStack().SetInteger(op == GlosOp.LdNeg1 ? -1 : imms);
-                    } else if (op == GlosOp.LdNTbl) {
+                        break;
+                    case GlosOpCategory.LoadMisc when op == GlosOp.LdNTbl:
                         pushStack().SetTable(new GlosTable(this));
-                    } else if (op == GlosOp.LdNil) {
+                        break;
+                    case GlosOpCategory.LoadMisc when op == GlosOp.LdNil:
                         pushNil();
-                    } else if (op == GlosOp.LdFlt) {
+                        break;
+                    case GlosOpCategory.LoadMisc when op == GlosOp.LdFlt:
                         pushStack().SetFloatByBinaryPresentation(unchecked((ulong)imms));
-                    } else if (op == GlosOp.LdTrue) {
+                        break;
+                    case GlosOpCategory.LoadMisc when op == GlosOp.LdTrue:
                         pushStack().SetBoolean(true);
-                    } else if (op == GlosOp.LdFalse) {
+                        break;
+                    case GlosOpCategory.LoadMisc when op == GlosOp.LdFalse:
                         pushStack().SetBoolean(false);
-                    } else if (cat == GlosOpCategory.LoadLocalVariable) {
-                        if (imms >= proto.LocalVariableSize || imms < 0)
-                            throw new GlosLocalVariableIndexOutOfRangeException((int)imms);
+                        break;
+                    case GlosOpCategory.LoadMisc when op == GlosOp.LdArgc:
+                        pushStack().SetInteger(callStackTop().ArgumentsCount);
+                        break;
+                    case GlosOpCategory.LoadLocalVariable when imms >= proto.LocalVariableSize || imms < 0:
+                        throw new GlosLocalVariableIndexOutOfRangeException((int)imms);
+                    case GlosOpCategory.LoadLocalVariable:
                         pushStack() = _stack[callStackTop().LocalVariablesBase + (int)imms]; // !!!!!
-                    } else if (cat == GlosOpCategory.StoreLocalVariable) {
-                        if (imms >= proto.LocalVariableSize || imms < 0)
-                            throw new GlosLocalVariableIndexOutOfRangeException((int)imms);
+                        break;
+                    case GlosOpCategory.StoreLocalVariable when imms >= proto.LocalVariableSize || imms < 0:
+                        throw new GlosLocalVariableIndexOutOfRangeException((int)imms);
+                    case GlosOpCategory.StoreLocalVariable:
                         _stack[callStackTop().LocalVariablesBase + (int)imms] = stackTop();
                         popStack();
-                    } else if (cat == GlosOpCategory.LoadArgument) {
+                        break;
+                    case GlosOpCategory.LoadArgument:
                         pushNil();
-                        if (imms < callStackTop().ArgumentsCount && imms >= 0)
-                            stackTop() = _stack[callStackTop().ArgumentsBase + (int)imms];
-                    } else if (op == GlosOp.LdArgc) {
-                        pushStack().SetInteger(callStackTop().ArgumentsCount);
-                    } else if (cat == GlosOpCategory.Branch) {
+                        if (imms < callStackTop().ArgumentsCount && imms >= 0) stackTop() = _stack[callStackTop().ArgumentsBase + (int)imms];
+                        break;
+                    case GlosOpCategory.Branch:
                         var dest = ip + (int)imms;
                         var jump = op switch {
                             GlosOp.B => true,
@@ -240,14 +261,36 @@ namespace GeminiLab.Glos {
                         if (jump) ip = dest;
 
                         if (op != GlosOp.B && op != GlosOp.BS) popStack();
-                    } else if (op == GlosOp.Dup) {
+                        break;
+                    case GlosOpCategory.ShpRv: {
+                        var count = _sptr - popDelimiter();
+
+                        while (count > imms && count > 0) {
+                            popStack();
+                            --count;
+                        }
+
+                        while (count < imms) {
+                            pushNil();
+                            ++count;
+                        }
+
+                        break;
+                    }
+                    case GlosOpCategory.Syscall:
+                        _syscalls[(int)imms]?.Invoke(_stack, _callStack, _delStack);
+                        break;
+                    case GlosOpCategory.Others when op == GlosOp.Dup:
                         pushStack();
                         stackTop() = stackTop(1);
-                    } else if (op == GlosOp.Pop) {
+                        break;
+                    case GlosOpCategory.Others when op == GlosOp.Pop:
                         popStack();
-                    } else if (op == GlosOp.LdDel) {
+                        break;
+                    case GlosOpCategory.Others when op == GlosOp.LdDel:
                         pushDelimiter();
-                    } else if (op == GlosOp.Call) {
+                        break;
+                    case GlosOpCategory.Others when op == GlosOp.Call: {
                         var funv = stackTop();
                         popStack();
 
@@ -272,7 +315,10 @@ namespace GeminiLab.Glos {
                         } else {
                             throw new GlosValueNotCallableException(funv);
                         }
-                    } else if (op == GlosOp.Ret) {
+
+                        break;
+                    }
+                    case GlosOpCategory.Others when op == GlosOp.Ret: {
                         // clean up
                         var rtb = popDelimiter();
                         var retc = _sptr - rtb;
@@ -282,23 +328,15 @@ namespace GeminiLab.Glos {
                         popCurrentFrameDelimiter();
                         popCallStackFrame();
                         restoreStatus(ref execCtx);
-                    } else if (op == GlosOp.Bind) {
+                        break;
+                    }
+                    case GlosOpCategory.Others when op == GlosOp.Bind:
                         stackTop().AssertFunction().ParentContext = ctx;
-                    } else if (cat == GlosOpCategory.ShpRv) {
-                        var count = _sptr - popDelimiter();
-
-                        while (count > imms && count > 0) {
-                            popStack();
-                            --count;
-                        }
-
-                        while (count < imms) {
-                            pushNil();
-                            ++count;
-                        }
-                    } else if (op == GlosOp.PopDel) {
+                        break;
+                    case GlosOpCategory.Others when op == GlosOp.PopDel:
                         popDelimiter();
-                    } else if (op == GlosOp.DupList) {
+                        break;
+                    case GlosOpCategory.Others when op == GlosOp.DupList: {
                         var del = peekDelimiter();
                         var count = _sptr - del;
 
@@ -306,11 +344,12 @@ namespace GeminiLab.Glos {
 
                         _stack.PreparePush(count);
                         _stack.AsSpan(del).CopyTo(_stack.AsSpan(_sptr, count));
-                    } else if (op == GlosOp.Nop) {
+                        break;
+                    }
+                    case GlosOpCategory.Others when op == GlosOp.Nop:
                         // nop;
-                    } else if (cat == GlosOpCategory.Syscall) {
-                        _syscalls[(int)imms]?.Invoke(_stack, _callStack, _delStack);
-                    } else {
+                        break;
+                    default:
                         throw new GlosUnknownOpException((byte)op);
                     }
                 }
