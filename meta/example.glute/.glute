@@ -1,0 +1,4 @@
+<~!
+a = persist["a", 0];
+b = persist["b", 1];
+~~>
