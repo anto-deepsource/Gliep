@@ -1,5 +1,6 @@
 using GeminiLab.Core2.Text;
 using GeminiLab.Glos;
+using GeminiLab.Glug;
 using Xunit;
 using XUnitTester.Misc;
 
@@ -222,6 +223,22 @@ namespace XUnitTester.Glug {
                 .MoveNext().AssertInteger(4)
                 .MoveNext().AssertInteger(5)
                 .MoveNext().AssertInteger(6)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void ProvidedEnv() {
+            var code = @"
+                !a = 1;
+                foo = [] -> a; # make sure a is in context; 
+                !!a = 2;
+                [a, foo[]]
+            ";
+
+            GlosValueArrayChecker
+                .Create(ViMa.ExecuteUnitWithProvidedContextForRootFunction(TypicalCompiler.Compile(code), new GlosContext(null)))
+                .FirstOne().AssertInteger(2)
+                .MoveNext().AssertInteger(2)
                 .MoveNext().AssertEnd();
         }
     }

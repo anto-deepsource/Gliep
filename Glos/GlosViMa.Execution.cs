@@ -19,37 +19,37 @@ namespace GeminiLab.Glos {
 
             unchecked {
                 switch (immt) {
-                    case GlosOpImmediate.Embedded:
-                        imm = opb & 0x07;
-                        break;
-                    case GlosOpImmediate.Byte:
-                        if (ip + 1 > len) return false;
-                        imm = (sbyte)code[ip++];
-                        break;
-                    case GlosOpImmediate.Dword:
-                        if (ip + 4 > len) return false;
-                        imm = unchecked((int)(uint)((ulong)code[ip] | ((ulong)code[ip + 1] << 8) | ((ulong)code[ip + 2] << 16) | ((ulong)code[ip + 3] << 24)));
-                        ip += 4;
-                        break;
-                    case GlosOpImmediate.Qword:
-                        if (ip + 8 > len) return false;
-                        imm = unchecked((long)((ulong)code[ip] | ((ulong)code[ip + 1] << 8) | ((ulong)code[ip + 2] << 16) | ((ulong)code[ip + 3] << 24) | ((ulong)code[ip + 4] << 32) | ((ulong)code[ip + 5] << 40) | ((ulong)code[ip + 6] << 48) | ((ulong)code[ip + 7] << 56)));
-                        ip += 8;
-                        break;
-                    case GlosOpImmediate.OnStack:
-                        immOnStack = true;
-                        break;
+                case GlosOpImmediate.Embedded:
+                    imm = opb & 0x07;
+                    break;
+                case GlosOpImmediate.Byte:
+                    if (ip + 1 > len) return false;
+                    imm = (sbyte)code[ip++];
+                    break;
+                case GlosOpImmediate.Dword:
+                    if (ip + 4 > len) return false;
+                    imm = unchecked((int)(uint)((ulong)code[ip] | ((ulong)code[ip + 1] << 8) | ((ulong)code[ip + 2] << 16) | ((ulong)code[ip + 3] << 24)));
+                    ip += 4;
+                    break;
+                case GlosOpImmediate.Qword:
+                    if (ip + 8 > len) return false;
+                    imm = unchecked((long)((ulong)code[ip] | ((ulong)code[ip + 1] << 8) | ((ulong)code[ip + 2] << 16) | ((ulong)code[ip + 3] << 24) | ((ulong)code[ip + 4] << 32) | ((ulong)code[ip + 5] << 40) | ((ulong)code[ip + 6] << 48) | ((ulong)code[ip + 7] << 56)));
+                    ip += 8;
+                    break;
+                case GlosOpImmediate.OnStack:
+                    immOnStack = true;
+                    break;
                 }
             }
 
             return true;
         }
 
-        private void pushNewCallFrame(int bptr, GlosFunction function, int argc) {
+        private void pushNewCallFrame(int bptr, GlosFunction function, int argc, GlosContext? context) {
             ref var frame = ref pushCallStackFrame();
 
             frame.Function = function;
-            frame.Context = new GlosContext(function.ParentContext);
+            frame.Context = context ?? new GlosContext(function.ParentContext);
 
             frame.StackBase = bptr;
             frame.ArgumentsBase = bptr;
@@ -96,7 +96,7 @@ namespace GeminiLab.Glos {
             frame.InstructionPointer = ctx.InstructionPointer;
         }
 
-        public GlosValue[] ExecuteFunction(GlosFunction function, GlosValue[]? args = null) {
+        private GlosValue[] execute(GlosFunction function, GlosValue[]? args = null, GlosContext? thisContext = null) {
             var callStackBase = _cptr;
             var bptr = _sptr;
 
@@ -115,7 +115,7 @@ namespace GeminiLab.Glos {
                 var firstArgc = args?.Length ?? 0;
                 args?.AsSpan().CopyTo(_stack.AsSpan(bptr, firstArgc));
 
-                pushNewCallFrame(bptr, function, firstArgc);
+                pushNewCallFrame(bptr, function, firstArgc, thisContext);
                 restoreStatus(ref execCtx);
                 pushUntil(callStackTop().PrivateStackBase);
 
@@ -309,7 +309,7 @@ namespace GeminiLab.Glos {
                         } else if (funv.Type == GlosValueType.Function) {
                             var fun = funv.AssertFunction();
                             storeStatus(ref execCtx);
-                            pushNewCallFrame(ptr, fun, nextArgc);
+                            pushNewCallFrame(ptr, fun, nextArgc, null);
                             restoreStatus(ref execCtx);
                             pushUntil(callStackTop().PrivateStackBase);
                         } else {
@@ -367,9 +367,21 @@ namespace GeminiLab.Glos {
             }
         }
 
+        public GlosValue[] ExecuteFunctionWithProvidedContext(GlosFunction function, GlosContext context, GlosValue[]? args = null) {
+            return execute(function, args, context);
+        }
+
+        public GlosValue[] ExecuteFunction(GlosFunction function, GlosValue[]? args = null) {
+            return execute(function, args);
+        }
+
         // though ViMa shouldn't manage units, this function is necessary
         public GlosValue[] ExecuteUnit(GlosUnit unit, GlosValue[]? args = null, GlosContext? parentContext = null) {
             return ExecuteFunction(new GlosFunction(unit.FunctionTable[unit.Entry], parentContext ?? new GlosContext(null)), args);
+        }
+
+        public GlosValue[] ExecuteUnitWithProvidedContextForRootFunction(GlosUnit unit, GlosContext context, GlosValue[]? args = null) {
+            return ExecuteFunctionWithProvidedContext(new GlosFunction(unit.FunctionTable[unit.Entry], context.Parent!), context, args);
         }
     }
 }

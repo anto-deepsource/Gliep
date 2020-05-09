@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace GeminiLab.Glos {
     public class GlosContext {
-        protected class GlosValueReferenceWrapper {
+        public class GlosValueReferenceWrapper {
             private GlosValue _value;
 
             public GlosValueReferenceWrapper() => _value.SetNil();
@@ -14,32 +14,40 @@ namespace GeminiLab.Glos {
         private readonly Dictionary<string, GlosValueReferenceWrapper> _variables = new Dictionary<string, GlosValueReferenceWrapper>();
         private readonly Dictionary<string, GlosContext> _location = new Dictionary<string, GlosContext>();
 
-        public GlosContext(GlosContext? parent) => Root = (Parent = parent)?.Root ?? this;
+        private GlosContext(GlosContext? parent, GlosContext? global) {
+            Parent = parent;
+            Global = global ?? this;
+        }
 
-        public virtual GlosContext? Parent { get; }
-        public virtual GlosContext Root { get; }
+        public GlosContext(GlosContext? parent) 
+            : this(parent, parent?.Global) { }
         
-        protected GlosValueReferenceWrapper GetWrapper(string name) => GetWrapper(name, out _);
+        public GlosContext? Parent { get; }
+        public GlosContext Global { get; }
+        
+        public IReadOnlyDictionary<string, GlosValueReferenceWrapper> Variables => _variables;
 
-        protected virtual GlosValueReferenceWrapper GetWrapper(string name, out GlosContext location) {
+        private GlosValueReferenceWrapper getWrapper(string name) => getWrapper(name, out _);
+
+        private GlosValueReferenceWrapper getWrapper(string name, out GlosContext location) {
             if (_variables.TryGetValue(name, out var wrapper)) {
                 location = this;
                 return wrapper;
             }
 
-            if (_location.TryGetValue(name, out location)) return location.GetWrapper(name);
+            if (_location.TryGetValue(name, out location)) return location.getWrapper(name);
 
             if (Parent == null) {
                 location = this;
                 return _variables[name] = new GlosValueReferenceWrapper();
+            } else {
+                var rv = Parent.getWrapper(name, out location);
+                _location[name] = location;
+                return rv;
             }
-
-            var rv = Parent.GetWrapper(name, out location);
-            _location[name] = location;
-            return rv;
         }
 
-        public ref GlosValue GetVariableReference(string name) => ref GetWrapper(name).GetReference();
+        public ref GlosValue GetVariableReference(string name) => ref getWrapper(name).GetReference();
 
         public void CreateVariable(string name) => _variables[name] = new GlosValueReferenceWrapper();
         public void CreateVariable(string name, in GlosValue value) => _variables[name] = new GlosValueReferenceWrapper(value);
