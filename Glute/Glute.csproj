@@ -10,6 +10,15 @@
 
   <ItemGroup>
     <PackageReference Include="GeminiLab.Core2.CommandLineParser" Version="1.0.0" />
+    <PackageReference Include="GeminiLab.Core2.Logger" Version="1.0.0" />
+    <PackageReference Include="GeminiLab.Core2.Yielder" Version="1.0.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="10.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GliepDumper\GliepDumper.csproj" />
+    <ProjectReference Include="..\Glos\Glos.csproj" />
+    <ProjectReference Include="..\Glug\Glug.csproj" />
   </ItemGroup>
 
 </Project>

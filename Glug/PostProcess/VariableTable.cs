@@ -40,7 +40,7 @@ namespace GeminiLab.Glug.PostProcess {
 
         public LocalVariable? LocalVariable { get; set; }
 
-        public VariablePlace Place { get; private set; }
+        public VariablePlace Place { get; set; }
 
         public void DeterminePlace() {
             if (Table.IsRoot) {

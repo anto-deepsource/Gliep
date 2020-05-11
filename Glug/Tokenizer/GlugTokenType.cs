@@ -5,6 +5,9 @@ namespace GeminiLab.Glug.Tokenizer {
         Pseudo      = 0x002,
         Keyword     = 0x003,
         Identifier  = 0x004,
+
+        PrivateUseHead  = 0x100,
+        PrivateUseTail  = 0x1ff,    
     }
 
     // 12-bit category id + 12-bit S/N in category + 8-bit flags
