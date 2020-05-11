@@ -13,7 +13,7 @@ namespace GeminiLab.Glug {
         public static IGlugTokenStream Tokenize(TextReader input, string? sourceName = null) => new GlugTokenizer(input, sourceName);
         public static IGlugTokenStream Tokenize(string value, string? sourceName = null) => new GlugTokenizer(new StringReader(value), sourceName);
 
-        public static Expr Parse(IGlugTokenStream stream) => GlugParser.Parse(stream);
+        public static Expr Parse(IGlugTokenStream stream) => new GlugParser(stream).Parse();
         
         public static GlosUnit PostProcessAndCodeGen(Expr root) {
             root = new Function("<root>", false, new List<string>(), root);
