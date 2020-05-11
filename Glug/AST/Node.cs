@@ -212,6 +212,30 @@ namespace GeminiLab.Glug.AST {
             Table = table;
         }
 
-        public Expr Table;
+        public Expr Table { get; }
+    }
+
+    // A basic principle of Glug is "NOTHING BUT EXPRESSIONS" but syscalls somehow break this rule.
+    // Stack operations of all types of instructions (except for SysCall instructions) are DEFINITE, which means
+    // they eats and then puts a DEFINITE number of values or OSLs on stack. However, stack operations of SysCall
+    // instructions are INDEFINITE. So class SysCall requires extra information.
+    public class SysCall : Expr {
+        public SysCall(int id, IList<Expr> inputs, ResultType rt) {
+            Id = id;
+            Inputs = inputs;
+            Result = rt;
+        }
+
+        public int Id { get; }
+
+        public IList<Expr> Inputs { get; }
+
+        public enum ResultType {
+            Value,
+            Osl,
+            None,
+        }
+
+        public ResultType Result { get; }
     }
 }

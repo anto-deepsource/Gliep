@@ -52,5 +52,11 @@ namespace GeminiLab.Glug.PostProcess {
                 val.Op == GlugBiOpType.Concat ||
                 (val.Op == GlugBiOpType.Assign && val.ExprL is OnStackList);
         }
+
+        public override void VisitSysCall(SysCall val) {
+            base.VisitSysCall(val);
+
+            _info.IsOnStackList[val] = val.Result == SysCall.ResultType.Osl || val.Result == SysCall.ResultType.None;
+        }
     }
 }

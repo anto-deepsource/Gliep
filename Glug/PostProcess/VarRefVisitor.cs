@@ -68,5 +68,9 @@ namespace GeminiLab.Glug.PostProcess {
 
             _info.Variable[val].HintUsedIn(scope);
         }
+
+        public override void VisitMetatable(Metatable val, VarRefVisitorContext arg) {
+            base.VisitMetatable(val, new VarRefVisitorContext(arg.CurrentScope, false));
+        }
     }
 }

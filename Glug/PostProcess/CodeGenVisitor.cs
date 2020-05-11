@@ -354,5 +354,19 @@ namespace GeminiLab.Glug.PostProcess {
             parent.AppendGmt();
             if (!ru) parent.AppendPop();
         }
+
+        public override void VisitSysCall(SysCall val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+
+            foreach (var input in val.Inputs) {
+                Visit(input, new CodeGenContext(parent, true));
+            }
+
+            parent.AppendSyscall(val.Id);
+
+            if (val.Result == SysCall.ResultType.Value && !ru) parent.AppendPop();
+            if (val.Result == SysCall.ResultType.Osl && !ru) parent.AppendShpRv(0);
+            if (val.Result == SysCall.ResultType.None && ru) parent.AppendLdDel();
+        }
     }
 }

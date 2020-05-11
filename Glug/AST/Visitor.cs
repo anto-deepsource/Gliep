@@ -28,6 +28,8 @@ namespace GeminiLab.Glug.AST {
 
         public abstract void VisitMetatable(Metatable val);
 
+        public abstract void VisitSysCall(SysCall val);
+
         protected virtual void PreVisit(Node node) { }
 
         protected virtual void PostVisit(Node node) { }
@@ -36,59 +38,62 @@ namespace GeminiLab.Glug.AST {
             PreVisit(node);
 
             switch (node) {
-                case LiteralInteger li:
-                    VisitLiteralInteger(li);
-                    break;
-                case LiteralFloat lf:
-                    VisitLiteralFloat(lf);
-                    break;
-                case LiteralBool lb:
-                    VisitLiteralBool(lb);
-                    break;
-                case LiteralString ls:
-                    VisitLiteralString(ls);
-                    break;
-                case LiteralNil ln:
-                    VisitLiteralNil(ln);
-                    break;
-                case VarRef vr:
-                    VisitVarRef(vr);
-                    break;
-                case If i:
-                    VisitIf(i);
-                    break;
-                case While w:
-                    VisitWhile(w);
-                    break;
-                case Return ret:
-                    VisitReturn(ret);
-                    break;
-                case Break b:
-                    VisitBreak(b);
-                    break;
-                case Function fun:
-                    VisitFunction(fun);
-                    break;
-                case OnStackList osl:
-                    VisitOnStackList(osl);
-                    break;
-                case Block blk:
-                    VisitBlock(blk);
-                    break;
-                case UnOp uop:
-                    VisitUnOp(uop);
-                    break;
-                case BiOp bop:
-                    VisitBiOp(bop);
-                    break;
-                case TableDef tdef:
-                    VisitTableDef(tdef);
-                    break;
-                case Metatable mt:
-                    VisitMetatable(mt);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+            case LiteralInteger li:
+                VisitLiteralInteger(li);
+                break;
+            case LiteralFloat lf:
+                VisitLiteralFloat(lf);
+                break;
+            case LiteralBool lb:
+                VisitLiteralBool(lb);
+                break;
+            case LiteralString ls:
+                VisitLiteralString(ls);
+                break;
+            case LiteralNil ln:
+                VisitLiteralNil(ln);
+                break;
+            case VarRef vr:
+                VisitVarRef(vr);
+                break;
+            case If i:
+                VisitIf(i);
+                break;
+            case While w:
+                VisitWhile(w);
+                break;
+            case Return ret:
+                VisitReturn(ret);
+                break;
+            case Break b:
+                VisitBreak(b);
+                break;
+            case Function fun:
+                VisitFunction(fun);
+                break;
+            case OnStackList osl:
+                VisitOnStackList(osl);
+                break;
+            case Block blk:
+                VisitBlock(blk);
+                break;
+            case UnOp uop:
+                VisitUnOp(uop);
+                break;
+            case BiOp bop:
+                VisitBiOp(bop);
+                break;
+            case TableDef tdef:
+                VisitTableDef(tdef);
+                break;
+            case Metatable mt:
+                VisitMetatable(mt);
+                break;
+            case SysCall sc:
+                VisitSysCall(sc);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
             }
 
             PostVisit(node);
@@ -160,6 +165,10 @@ namespace GeminiLab.Glug.AST {
         public override void VisitMetatable(Metatable val) {
             Visit(val.Table);
         }
+
+        public override void VisitSysCall(SysCall val) {
+            val.Inputs.ForEach(Visit);
+        }
     }
 
 
@@ -189,6 +198,8 @@ namespace GeminiLab.Glug.AST {
 
         public abstract void VisitMetatable(Metatable val, TParameter arg);
 
+        public abstract void VisitSysCall(SysCall val, TParameter arg);
+
         protected virtual void PreVisit(Node node) { }
 
         protected virtual void PostVisit(Node node) { }
@@ -197,59 +208,62 @@ namespace GeminiLab.Glug.AST {
             PreVisit(node);
 
             switch (node) {
-                case LiteralInteger li:
-                    VisitLiteralInteger(li, arg);
-                    break;
-                case LiteralFloat lf:
-                    VisitLiteralFloat(lf, arg);
-                    break;
-                case LiteralBool lb:
-                    VisitLiteralBool(lb, arg);
-                    break;
-                case LiteralString ls:
-                    VisitLiteralString(ls, arg);
-                    break;
-                case LiteralNil ln:
-                    VisitLiteralNil(ln, arg);
-                    break;
-                case VarRef vr:
-                    VisitVarRef(vr, arg);
-                    break;
-                case If i:
-                    VisitIf(i, arg);
-                    break;
-                case While w:
-                    VisitWhile(w, arg);
-                    break;
-                case Return ret:
-                    VisitReturn(ret, arg);
-                    break;
-                case Break b:
-                    VisitBreak(b, arg);
-                    break;
-                case Function fun:
-                    VisitFunction(fun, arg);
-                    break;
-                case OnStackList osl:
-                    VisitOnStackList(osl, arg);
-                    break;
-                case Block blk:
-                    VisitBlock(blk, arg);
-                    break;
-                case UnOp uop:
-                    VisitUnOp(uop, arg);
-                    break;
-                case BiOp bop:
-                    VisitBiOp(bop, arg);
-                    break;
-                case TableDef tdef:
-                    VisitTableDef(tdef, arg);
-                    break;
-                case Metatable mt:
-                    VisitMetatable(mt, arg);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+            case LiteralInteger li:
+                VisitLiteralInteger(li, arg);
+                break;
+            case LiteralFloat lf:
+                VisitLiteralFloat(lf, arg);
+                break;
+            case LiteralBool lb:
+                VisitLiteralBool(lb, arg);
+                break;
+            case LiteralString ls:
+                VisitLiteralString(ls, arg);
+                break;
+            case LiteralNil ln:
+                VisitLiteralNil(ln, arg);
+                break;
+            case VarRef vr:
+                VisitVarRef(vr, arg);
+                break;
+            case If i:
+                VisitIf(i, arg);
+                break;
+            case While w:
+                VisitWhile(w, arg);
+                break;
+            case Return ret:
+                VisitReturn(ret, arg);
+                break;
+            case Break b:
+                VisitBreak(b, arg);
+                break;
+            case Function fun:
+                VisitFunction(fun, arg);
+                break;
+            case OnStackList osl:
+                VisitOnStackList(osl, arg);
+                break;
+            case Block blk:
+                VisitBlock(blk, arg);
+                break;
+            case UnOp uop:
+                VisitUnOp(uop, arg);
+                break;
+            case BiOp bop:
+                VisitBiOp(bop, arg);
+                break;
+            case TableDef tdef:
+                VisitTableDef(tdef, arg);
+                break;
+            case Metatable mt:
+                VisitMetatable(mt, arg);
+                break;
+            case SysCall sc:
+                VisitSysCall(sc, arg);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
             }
 
             PostVisit(node);
@@ -325,6 +339,12 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitMetatable(Metatable val, TParameter arg) {
             Visit(val.Table, arg);
+        }
+
+        public override void VisitSysCall(SysCall val, TParameter arg) {
+            foreach (var input in val.Inputs) {
+                Visit(input, arg);
+            }
         }
     }
 

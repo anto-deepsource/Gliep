@@ -179,5 +179,12 @@ namespace GeminiLab.Glug.AST {
             Visit(val.Table);
             Writer.DecreaseIndent();
         }
+
+        public override void VisitSysCall(SysCall val) {
+            Writer.WriteLine($"<syscall 0x{val.Id:x} result: {val.Result}>");
+            Writer.IncreaseIndent();
+            val.Inputs.ForEach(Visit);
+            Writer.DecreaseIndent();
+        }
     }
 }
