@@ -60,13 +60,14 @@ namespace GeminiLab.Glug.PostProcess {
             
             if (!_info.Variable.TryGetValue(val, out _)) {
                 if (!scope.TryLookupVariable(val.Id, out var v)) {
+                    // KEYPOINT HERE TODO
                     v = (id ? scope : RootTable).CreateVariable(val.Id);
                 }
 
                 _info.Variable[val] = v;
             }
 
-            _info.Variable[val].HintUsedIn(scope);
+            _info.Variable[val].MarkUsedIn(scope);
         }
 
         public override void VisitMetatable(Metatable val, VarRefVisitorContext arg) {
