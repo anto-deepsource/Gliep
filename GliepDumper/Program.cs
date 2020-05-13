@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-
 using GeminiLab.Core2;
 using GeminiLab.Core2.CommandLineParser;
 using GeminiLab.Core2.IO;
@@ -11,10 +9,9 @@ using GeminiLab.Core2.Text;
 using GeminiLab.Glos;
 using GeminiLab.Glug;
 using GeminiLab.Glug.AST;
-using GeminiLab.Glug.Parser;
 using GeminiLab.Glug.Tokenizer;
 
-namespace GeminiLab.Gliep {
+namespace GeminiLab.Gliep.Dumper {
     public static class Program {
         private static string ReadNextOp(in ReadOnlySpan<byte> ops, ref int ip) {
             var sb = new StringBuilder($"{ip:X6}: ");
@@ -137,7 +134,7 @@ namespace GeminiLab.Gliep {
                 var tok = stream.Next();
                 var output = string.Format($"{{0,-{tok.Source.Length + 10}}}", $"({tok.Source}:{tok.Row}:{tok.Column})");
 
-                output += tok.Type.ToString();
+                output += ((GlugTokenType[])typeof(GlugTokenType).GetEnumValues()).Contains(tok.Type) ? tok.Type.ToString() : $"0x{(uint)(tok.Type):x8}";
                 if (tok.Type.HasInteger()) output += $", {tok.ValueInt}(0x{tok.ValueInt:x16})";
                 if (tok.Type.HasString()) output += $", \"{EscapeSequenceConverter.Encode(tok.ValueString!)}\"";
                 Console.WriteLine(output);

@@ -95,7 +95,7 @@ namespace GeminiLab.Glug.PostProcess {
             }
         }
 
-        public void HintUsedIn(VariableTable scope) {
+        public void MarkUsedIn(VariableTable scope) {
             if (scope != Table) RefOutsideScope = true;
         }
 
@@ -127,7 +127,7 @@ namespace GeminiLab.Glug.PostProcess {
         public bool TryLookupVariable(string name, [NotNullWhen(true)] out Variable? variable) {
             if (TryLookupVariableLocally(name, out variable)) return true;
 
-            return Parent?.TryLookupVariable(name, out variable) ?? false;
+            return Parent != null && Parent.TryLookupVariable(name, out variable);
         }
 
         public Variable CreateVariable(string name) {
