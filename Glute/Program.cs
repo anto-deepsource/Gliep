@@ -18,14 +18,15 @@ namespace GeminiLab.Glute {
         public static void Main(string[] args) {
             var options = CommandLineParser<CommandLineOptions>.Parse(args);
 
+            /*
             var tree = new GluteParser(new GluteTokenizer(Console.In)).Parse();
             new DumpVisitor(new IndentedWriter(Console.Out)).Visit(tree);
             var unit = GlutePostProcess.PostProcessAndCodeGen(tree);
 
             Gliep.Dumper.Program.DumpUnit(unit);
             return;
+            */
 
-            /*
             using var ctx = new LoggerContext();
             ctx.AddCategory("default");
             ctx.AddAppender("console", new ColoredConsoleAppender());
@@ -34,7 +35,6 @@ namespace GeminiLab.Glute {
             new Processor(new FileSystem(), ctx.GetLogger("default")!).ProcessDirectory(@"C:\Users\Gemini.APFEL\source\repos\Gliep\meta\example.glute\");
 
             return;
-            */
         }
     }
 }

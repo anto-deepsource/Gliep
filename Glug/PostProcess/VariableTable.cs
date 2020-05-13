@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 
 using GeminiLab.Glos.CodeGenerator;
@@ -10,40 +11,43 @@ namespace GeminiLab.Glug.PostProcess {
         Argument,
         LocalVariable,
         Context,
+        DynamicScope,
         Global,
     }
 
     public class Variable {
-        internal Variable(VariableTable table, string name) {
+        private Variable(VariableTable table, string name, int argumentId = -1, bool isDynamic = false) {
             Table = table;
             Name = name;
-            ArgumentId = -1;
+            ArgumentId = argumentId;
+            Dynamic = isDynamic;
         }
-
-        internal Variable(VariableTable table, string name, int argId) {
-            Table = table;
-            Name = name;
-            ArgumentId = argId;
-        }
-
+        
+        public static Variable Create(VariableTable table, string name) => new Variable(table, name);
+        public static Variable CreateArgument(VariableTable table, string name, int argumentId) => new Variable(table, name, argumentId: argumentId);
+        public static Variable CreateDynamic(VariableTable table, string name) => new Variable(table, name, isDynamic: true);
+        
         public VariableTable Table { get; }
 
         public string Name { get; }
 
+        public bool IsArgument => ArgumentId >= 0;
+        public int ArgumentId { get; }
+        
+        public bool Dynamic { get; }
+        
         public bool RefOutsideScope { get; private set; } = false;
 
         public bool Assigned { get; private set; } = false;
-
-        public bool IsArgument => ArgumentId >= 0;
-
-        public int ArgumentId { get; }
-
+        
         public LocalVariable? LocalVariable { get; set; }
 
         public VariablePlace Place { get; set; }
 
         public void DeterminePlace() {
-            if (Table.IsRoot) {
+            if (Dynamic) {
+                Place = VariablePlace.DynamicScope;
+            } else if (Table.IsRoot) {
                 Place = VariablePlace.Global;
             } else if (RefOutsideScope) {
                 Place = VariablePlace.Context;
@@ -68,6 +72,10 @@ namespace GeminiLab.Glug.PostProcess {
                 fgen.AppendLdStr(Name);
                 fgen.AppendRvc();
                 break;
+            case VariablePlace.DynamicScope:
+                fgen.AppendLdStr(Name);
+                fgen.AppendRvc();
+                break;
             case VariablePlace.Global:
                 fgen.AppendLdStr(Name);
                 fgen.AppendRvg();
@@ -83,6 +91,10 @@ namespace GeminiLab.Glug.PostProcess {
                 fgen.AppendStLoc(LocalVariable!);
                 break;
             case VariablePlace.Context:
+                fgen.AppendLdStr(Name);
+                fgen.AppendUvc();
+                break;
+            case VariablePlace.DynamicScope:
                 fgen.AppendLdStr(Name);
                 fgen.AppendUvc();
                 break;
@@ -132,14 +144,19 @@ namespace GeminiLab.Glug.PostProcess {
 
         public Variable CreateVariable(string name) {
             if (_variables.TryGetValue(name, out var rv)) return rv;
-            return _variables[name] = new Variable(this, name);
+            return _variables[name] = Variable.Create(this, name);
         }
 
         public Variable CreateVariable(string name, int argId) {
             if (_variables.TryGetValue(name, out var rv)) return rv;
-            return _variables[name] = new Variable(this, name, argId);
+            return _variables[name] = Variable.CreateArgument(this, name, argId);
         }
 
+        public Variable CreateDynamicVariable(string name) {
+            if (_variables.TryGetValue(name, out var rv)) return rv;
+            return _variables[name] = Variable.CreateDynamic(this, name);
+        }
+        
         public void DetermineVariablePlace() {
             foreach (var variable in _variables.Values) variable.DeterminePlace();
         }

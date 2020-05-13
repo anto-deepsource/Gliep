@@ -13,11 +13,12 @@ namespace GeminiLab.Glug.PostProcess {
         }
 
 
-        public void Deconstruct(out VariableTable currentScope, out bool implicitDeclaration) => (currentScope, implicitDeclaration) = (CurrentScope, AllowImplicitDeclaration);
+        public void Deconstruct(out VariableTable currentScope, out bool implicitDeclaration) =>
+            (currentScope, implicitDeclaration) = (CurrentScope, AllowImplicitDeclaration);
     }
 
     public class VarRefVisitor : RecursiveInVisitor<VarRefVisitorContext> {
-        private readonly NodeInformation _info;
+        protected readonly NodeInformation _info;
 
         public VarRefVisitor(VariableTable root, NodeInformation info) {
             _info = info;
@@ -28,7 +29,7 @@ namespace GeminiLab.Glug.PostProcess {
 
         public override void VisitFunction(Function val, VarRefVisitorContext ctx) {
             _info.Variable[val]?.MarkAssigned();
-            
+
             base.VisitFunction(val, new VarRefVisitorContext(_info.VariableTable[val], false));
         }
 
@@ -53,10 +54,9 @@ namespace GeminiLab.Glug.PostProcess {
 
         public override void VisitVarRef(VarRef val, VarRefVisitorContext ctx) {
             var (scope, aid) = ctx;
-            
+
             if (!_info.Variable.TryGetValue(val, out _)) {
                 if (!scope.TryLookupVariable(val.Id, out var v)) {
-                    // KEYPOINT HERE TODO
                     v = (aid ? scope : RootTable).CreateVariable(val.Id);
                 }
 

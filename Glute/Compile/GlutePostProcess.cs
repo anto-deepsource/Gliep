@@ -16,7 +16,9 @@ namespace GeminiLab.Glute.Compile {
 
         public override void VisitFunction(Function val) {
             var table = _info.VariableTable[val];
-            table.Variables.Values.ForEach(v => v.Place = VariablePlace.Context);
+            table.Variables.Values.ForEach(v => {
+                if (v.Place != VariablePlace.DynamicScope) v.Place = VariablePlace.Context;
+            });
 
             base.VisitFunction(val);
         }
@@ -35,7 +37,7 @@ namespace GeminiLab.Glute.Compile {
             var vdv = new VarDefVisitor(it);
             vdv.Visit(root, vdv.RootTable);
 
-            var vcv = new VarRefVisitor(vdv.RootTable, it);
+            var vcv = new GluteVarRefVisitor(vdv.RootTable, it);
             vcv.Visit(root, new VarRefVisitorContext(vdv.RootTable, false));
 
             vdv.DetermineVariablePlace();
