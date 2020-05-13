@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO.Abstractions;
 using GeminiLab.Core2.CommandLineParser;
 using GeminiLab.Core2.IO;

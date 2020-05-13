@@ -1,4 +1,5 @@
-﻿using System.Linq;
+using System;
+using System.Linq;
 
 using GeminiLab.Glug.AST;
 
@@ -29,6 +30,10 @@ namespace GeminiLab.Glug.PostProcess {
         public override void VisitBiOp(BiOp val) {
             base.VisitBiOp(val);
 
+            if (val.Op == GlugBiOpType.Assign && !_info.IsAssignable[val.ExprL]) {
+                throw new ArgumentOutOfRangeException();
+            }
+            
             _info.IsAssignable[val] = val.Op == GlugBiOpType.Index;
         }
 

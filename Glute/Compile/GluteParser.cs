@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using GeminiLab.Glug.AST;
 using GeminiLab.Glug.Parser;
 using GeminiLab.Glug.Tokenizer;

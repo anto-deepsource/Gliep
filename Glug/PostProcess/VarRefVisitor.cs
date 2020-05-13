@@ -5,15 +5,15 @@ using GeminiLab.Glug.AST;
 namespace GeminiLab.Glug.PostProcess {
     public struct VarRefVisitorContext {
         public readonly VariableTable CurrentScope;
-        public readonly bool ImplicitDeclaration;
+        public readonly bool AllowImplicitDeclaration;
 
-        public VarRefVisitorContext(VariableTable currentScope, bool implicitDeclaration) {
+        public VarRefVisitorContext(VariableTable currentScope, bool allowImplicitDeclaration) {
             CurrentScope = currentScope;
-            ImplicitDeclaration = implicitDeclaration;
+            AllowImplicitDeclaration = allowImplicitDeclaration;
         }
 
 
-        public void Deconstruct(out VariableTable currentScope, out bool implicitDeclaration) => (currentScope, implicitDeclaration) = (CurrentScope, ImplicitDeclaration);
+        public void Deconstruct(out VariableTable currentScope, out bool implicitDeclaration) => (currentScope, implicitDeclaration) = (CurrentScope, AllowImplicitDeclaration);
     }
 
     public class VarRefVisitor : RecursiveInVisitor<VarRefVisitorContext> {
@@ -36,10 +36,6 @@ namespace GeminiLab.Glug.PostProcess {
             var (scope, _) = ctx;
 
             if (val.Op == GlugBiOpType.Assign) {
-                if (!_info.IsAssignable[val.ExprL]) {
-                    throw new ArgumentOutOfRangeException();
-                }
-                
                 Visit(val.ExprL, new VarRefVisitorContext(scope, true));
                 Visit(val.ExprR, new VarRefVisitorContext(scope, false));
 
@@ -56,12 +52,12 @@ namespace GeminiLab.Glug.PostProcess {
         }
 
         public override void VisitVarRef(VarRef val, VarRefVisitorContext ctx) {
-            var (scope, id) = ctx;
+            var (scope, aid) = ctx;
             
             if (!_info.Variable.TryGetValue(val, out _)) {
                 if (!scope.TryLookupVariable(val.Id, out var v)) {
                     // KEYPOINT HERE TODO
-                    v = (id ? scope : RootTable).CreateVariable(val.Id);
+                    v = (aid ? scope : RootTable).CreateVariable(val.Id);
                 }
 
                 _info.Variable[val] = v;
