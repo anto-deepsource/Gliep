@@ -12,7 +12,8 @@
     <PackageReference Include="GeminiLab.Core2.CommandLineParser" Version="1.0.0" />
     <PackageReference Include="GeminiLab.Core2.Logger" Version="1.0.0" />
     <PackageReference Include="GeminiLab.Core2.Yielder" Version="1.0.0" />
-    <PackageReference Include="System.IO.Abstractions" Version="10.0.8" />
+    <PackageReference Include="System.IO.Abstractions" Version="11.0.6" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="11.0.6" />
   </ItemGroup>
 
   <ItemGroup>

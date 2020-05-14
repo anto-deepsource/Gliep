@@ -56,7 +56,7 @@ namespace GeminiLab.Glute.Compile {
                             if (line[idx + 2] == '#') {
                                 newCC = true;
                                 newPtr = idx + 3;
-                            } else if (line[idx + 2] == '!') {
+                            } else if (line[idx + 2] == '~') {
                                 newCS = true;
                                 newPtr = idx + 3;
                             }

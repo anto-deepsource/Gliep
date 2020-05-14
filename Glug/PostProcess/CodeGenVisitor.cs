@@ -359,7 +359,9 @@ namespace GeminiLab.Glug.PostProcess {
             var (parent, ru) = ctx;
 
             foreach (var input in val.Inputs) {
-                Visit(input, new CodeGenContext(parent, true));
+                visitForValue(input, parent);
+                // Visit(input, new CodeGenContext(parent, true));
+                // TODO bugfix: REMOVE THIS WORKAROUND
             }
 
             parent.AppendSyscall(val.Id);

@@ -1,5 +1,8 @@
 using System;
 using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
+using System.Text;
+using GeminiLab.Core2;
 using GeminiLab.Core2.CommandLineParser;
 using GeminiLab.Core2.IO;
 using GeminiLab.Core2.Logger;
@@ -26,14 +29,25 @@ namespace GeminiLab.Glute {
             Gliep.Dumper.Program.DumpUnit(unit);
             return;
             */
-
+            
             using var ctx = new LoggerContext();
             ctx.AddCategory("default");
+            ctx.AddCategory("virtual");
             ctx.AddAppender("console", new ColoredConsoleAppender());
             ctx.Connect("default", "console", Filters.Threshold(Logger.LevelDebug));
+            ctx.Connect("virtual", "console", Filters.Threshold(Logger.LevelDebug));
 
-            new Processor(new FileSystem(), ctx.GetLogger("default")!).ProcessDirectory(@"C:\Users\Gemini.APFEL\source\repos\Gliep\meta\example.glute\");
+            new Processor(new FileSystem(), ctx.GetLogger("default")!).ProcessDirectory(@"C:\Users\Gemini.APFEL\source\repos\Gliep\meta\example.sln\");
 
+            var mfs = new MockFileSystem();
+            mfs.AddDirectory("/");
+            mfs.AddFile("/.glute", new MockFileData("<~~ !x = 1; ~~>"));
+            mfs.AddFile("/a.glute", new MockFileData("<~ x ~>"));
+            
+            new Processor(mfs, ctx.GetLogger("virtual")!).ProcessDirectory("/");
+            
+            Console.WriteLine(mfs.GetFile("/a").Contents.Decode(Encoding.UTF8));
+            
             return;
         }
     }

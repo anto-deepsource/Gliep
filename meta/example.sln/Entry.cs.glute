@@ -1,0 +1,10 @@
+using System;
+
+namespace GeminiLab.TeFi.GluteExample {
+    public static class Entry {
+        public static void Main() {
+            Console.WriteLine($"File generated at <~ now[] ~>.");
+            Console.WriteLine("Template Engine Checked.");
+        }
+    }
+}

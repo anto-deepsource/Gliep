@@ -1,0 +1,5 @@
+<~~
+add_project["example", "example.csproj"];
+
+print_content[];
+~~>

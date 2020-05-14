@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Text;
 using GeminiLab.Core2.IO;
 using GeminiLab.Core2.Logger;
@@ -11,12 +12,12 @@ using GeminiLab.Glute.Compile;
 
 namespace GeminiLab.Glute {
     public class Processor {
-        public Processor(FileSystem fs, Logger logger) {
+        public Processor(IFileSystem fs, Logger logger) {
             FileSystem = fs;
             Logger = logger;
         }
 
-        public FileSystem FileSystem { get; }
+        public IFileSystem FileSystem { get; }
         public Logger Logger { get; }
 
         private GlosViMa _viMa = new GlosViMa();
@@ -53,8 +54,6 @@ namespace GeminiLab.Glute {
                 thisCtx.CreateVariable("input_name", f.Name);
             }
 
-            thisCtx.CreateVariable("directory", f.DirectoryName);
-
             ProcessText(input, output, thisCtx);
 
             Logger.Debug($"Processed {f.FullName}.");
@@ -70,6 +69,7 @@ namespace GeminiLab.Glute {
                 }
 
                 var thisCtx = new GlosContext(parentContext);
+                thisCtx.CreateVariable("directory", d.FullName);
 
                 var dirFile = FileSystem.Path.Combine(d.FullName, ".glute");
                 if (FileSystem.File.Exists(dirFile)) {
@@ -79,6 +79,10 @@ namespace GeminiLab.Glute {
                 foreach (var file in d.EnumerateFiles("*.glute", SearchOption.TopDirectoryOnly)) {
                     if (file.Name != ".glute") ProcessFile(file, thisCtx);
                 }
+
+                foreach (var dir in d.EnumerateDirectories()) {
+                    ProcessDirectory(dir, thisCtx);
+                }
             } catch (IOException ex) {
                 Logger.Error($"{ex.GetType().FullName}: {ex.Message}");
             }
@@ -86,6 +90,39 @@ namespace GeminiLab.Glute {
             Logger.Debug($"Exit {d.FullName}.");
         }
 
-        public void ProcessDirectory(string path) => ProcessDirectory(FileSystem.DirectoryInfo.FromDirectoryName(path), new GlosContext(null));
+        public void ProcessDirectory(string path) => ProcessDirectory(FileSystem.DirectoryInfo.FromDirectoryName(path), GetRootContext());
+
+        protected virtual GlosContext GetRootContext() {
+            var rv = new GlosContext(null);
+            
+            rv.CreateVariable("create_guid", GlosValue.NewExternalFunction(param => {
+                return new GlosValue[] { Guid.NewGuid().ToString().ToUpper() };
+            }));
+            rv.CreateVariable("format", GlosValue.NewExternalFunction(param => {
+                if (param.Length <= 0) return new GlosValue[] { "" };
+
+                var format = param[0].AssertString();
+                var args = param[1..].Select(x => x.Type switch {
+                    GlosValueType.Nil => "nil",
+                    GlosValueType.Integer => x.AssumeInteger(),
+                    GlosValueType.Float => x.AssumeFloat(),
+                    GlosValueType.Boolean => x.AssumeBoolean(),
+                    _ => x.ValueObject,
+                }).ToArray();
+
+                return new GlosValue[] { string.Format(format, args: args) };
+            }));
+            rv.CreateVariable("now", GlosValue.NewExternalFunction(param => {
+                string format = @"yyyy/MM/dd HH:mm:ss";
+                
+                if (param.Length > 0 && param[0].Type == GlosValueType.String) {
+                    format = param[0].AssumeString();
+                }
+                
+                return new GlosValue[] { DateTime.Now.ToString(format) };
+            }));
+            
+            return rv;
+        } 
     }
 }

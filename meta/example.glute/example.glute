@@ -1,0 +1,9 @@
+Input:
+  Path: <~ input_path ~>
+  Name: <~ input_name ~>
+
+Output:
+  Path: <~ output_path ~>
+  Name: <~ output_name ~>
+
+Directory: <~ directory ~>

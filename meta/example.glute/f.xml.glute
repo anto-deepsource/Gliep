@@ -1,18 +1,18 @@
-<~! 
+<~~
 fn say_hello[name, is_kimoi_otaku] ( 
     if (is_kimoi_otaku) (
 ~~>
     <~ name ~>にぃちゃん☆ダイスキ～
-<~!
+<~~
     ) else (
 ~~>
     Hello, <~ name ~>!
-<~!
+<~~
     );
 );
 ~~>
 <root>
-<~! 
+<~~ 
 say_hello["naginikaido", true];
 say_hello["aarkegz"];
 ~~>

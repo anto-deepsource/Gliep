@@ -286,5 +286,7 @@ nuget.config
 # **/i18n/*.Designer.cs
 
 # glute example
-meta/example.glute/
-!meta/example.glute/*.glute
+/meta/example.glute/*
+!/meta/example.glute/*.glute
+/meta/example.sln/*
+!/meta/example.sln/*.glute
