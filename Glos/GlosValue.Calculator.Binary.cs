@@ -178,28 +178,59 @@ namespace GeminiLab.Glos {
             }
 #pragma warning restore CS0642
 
-            protected delegate void GlosBinaryOperationHandler(ref GlosValue dest, in GlosValue x, in GlosValue y);
-
             public void ExecuteBinaryOperation(ref GlosValue dest, in GlosValue x, in GlosValue y, GlosOp op) {
-                (op switch {
-                    GlosOp.Add => (GlosBinaryOperationHandler)Add,
-                    GlosOp.Sub => Sub,
-                    GlosOp.Mul => Mul,
-                    GlosOp.Div => Div,
-                    GlosOp.Mod => Mod,
-                    GlosOp.Lsh => Lsh,
-                    GlosOp.Rsh => Rsh,
-                    GlosOp.And => And,
-                    GlosOp.Orr => Orr,
-                    GlosOp.Xor => Xor,
-                    GlosOp.Gtr => Gtr,
-                    GlosOp.Lss => Lss,
-                    GlosOp.Geq => Geq,
-                    GlosOp.Leq => Leq,
-                    GlosOp.Equ => Equ,
-                    GlosOp.Neq => Neq,
-                    _ => throw new ArgumentOutOfRangeException(nameof(GlosOp))
-                })(ref dest, x, y);
+                switch (op) {
+                case GlosOp.Add:
+                    Add(ref dest, in x, in y);
+                    break;
+                case GlosOp.Sub:
+                    Sub(ref dest, in x, in y);
+                    break;
+                case GlosOp.Mul:
+                    Mul(ref dest, in x, in y);
+                    break;
+                case GlosOp.Div:
+                    Div(ref dest, in x, in y);
+                    break;
+                case GlosOp.Mod:
+                    Mod(ref dest, in x, in y);
+                    break;
+                case GlosOp.Lsh:
+                    Lsh(ref dest, in x, in y);
+                    break;
+                case GlosOp.Rsh:
+                    Rsh(ref dest, in x, in y);
+                    break;
+                case GlosOp.And:
+                    And(ref dest, in x, in y);
+                    break;
+                case GlosOp.Orr:
+                    Orr(ref dest, in x, in y);
+                    break;
+                case GlosOp.Xor:
+                    Xor(ref dest, in x, in y);
+                    break;
+                case GlosOp.Gtr:
+                    Gtr(ref dest, in x, in y);
+                    break;
+                case GlosOp.Lss:
+                    Lss(ref dest, in x, in y);
+                    break;
+                case GlosOp.Geq:
+                    Geq(ref dest, in x, in y);
+                    break;
+                case GlosOp.Leq:
+                    Leq(ref dest, in x, in y);
+                    break;
+                case GlosOp.Equ:
+                    Equ(ref dest, in x, in y);
+                    break;
+                case GlosOp.Neq:
+                    Neq(ref dest, in x, in y);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(op));
+                }
             }
         }
     }

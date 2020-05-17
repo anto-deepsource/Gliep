@@ -25,16 +25,23 @@ namespace GeminiLab.Glos {
                 dest.SetBoolean(v.IsNil());
             }
 
-            protected delegate void GlosUnaryOperationHandler(ref GlosValue dest, in GlosValue v);
-
             public void ExecuteUnaryOperation(ref GlosValue dest, in GlosValue v, GlosOp op) {
-                (op switch {
-                    GlosOp.Not => (GlosUnaryOperationHandler)Not,
-                    GlosOp.Neg => Neg,
-                    GlosOp.Typeof => Typeof,
-                    GlosOp.IsNil => IsNil,
-                    _ => throw new ArgumentOutOfRangeException(nameof(GlosOp))
-                })(ref dest, v);
+                switch (op) {
+                case GlosOp.Not:
+                    Not(ref dest, in v);
+                    break;
+                case GlosOp.Neg:
+                    Neg(ref dest, in v);
+                    break;
+                case GlosOp.Typeof:
+                    Typeof(ref dest, in v);
+                    break;
+                case GlosOp.IsNil:
+                    IsNil(ref dest, in v);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(op));
+                }
             }
         }
     }
