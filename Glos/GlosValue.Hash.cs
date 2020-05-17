@@ -1,8 +1,5 @@
 namespace GeminiLab.Glos {
     public partial struct GlosValue {
-        private bool _hashCodeCalculated;
-        private long _hashCode;
-
         private long getHash(GlosViMa viMa) {
             if (_hashCodeCalculated) return _hashCode;
 
