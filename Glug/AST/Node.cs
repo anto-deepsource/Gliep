@@ -140,6 +140,7 @@ namespace GeminiLab.Glug.AST {
         Not,
         Neg,
         Typeof,
+        IsNil,
     }
 
     public class UnOp : Expr {
@@ -173,6 +174,9 @@ namespace GeminiLab.Glug.AST {
         Assign,
         Index,
         Concat,
+        ShortCircuitAnd,
+        ShortCircuitOrr,
+        NullCoalescing,
     }
 
     public class BiOp : Expr {
@@ -185,6 +189,12 @@ namespace GeminiLab.Glug.AST {
         public GlugBiOpType Op { get; }
         public Expr ExprL { get; }
         public Expr ExprR { get; }
+
+        public static bool IsShortCircuitOp(GlugBiOpType type) {
+            return type == GlugBiOpType.ShortCircuitAnd || 
+                type == GlugBiOpType.ShortCircuitOrr ||
+                type == GlugBiOpType.NullCoalescing;
+        }
     }
 
     public struct TableDefPair {

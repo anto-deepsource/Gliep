@@ -21,6 +21,10 @@ namespace GeminiLab.Glos {
                 dest.SetString(v.Type.GetName());
             }
 
+            public void IsNil(ref GlosValue dest, in GlosValue v) {
+                dest.SetBoolean(v.IsNil());
+            }
+
             protected delegate void GlosUnaryOperationHandler(ref GlosValue dest, in GlosValue v);
 
             public void ExecuteUnaryOperation(ref GlosValue dest, in GlosValue v, GlosOp op) {
@@ -28,6 +32,7 @@ namespace GeminiLab.Glos {
                     GlosOp.Not => (GlosUnaryOperationHandler)Not,
                     GlosOp.Neg => Neg,
                     GlosOp.Typeof => Typeof,
+                    GlosOp.IsNil => IsNil,
                     _ => throw new ArgumentOutOfRangeException(nameof(GlosOp))
                 })(ref dest, v);
             }

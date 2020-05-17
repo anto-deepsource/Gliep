@@ -61,7 +61,7 @@ namespace GeminiLab.Glos {
             GlosOpCategory.UnaryOperator,
             GlosOpCategory.UnaryOperator,
             GlosOpCategory.UnaryOperator, 
-            GlosOpCategory.NotUsed,
+            GlosOpCategory.UnaryOperator,
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,

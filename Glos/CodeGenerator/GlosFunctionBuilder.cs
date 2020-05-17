@@ -94,6 +94,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendNot() => AppendInstruction(GlosOp.Not);
         public void AppendNeg() => AppendInstruction(GlosOp.Neg);
         public void AppendTypeof() => AppendInstruction(GlosOp.Typeof);
+        public void AppendIsNil() => AppendInstruction(GlosOp.IsNil);
 
         // 
         public void AppendRvc() => AppendInstruction(GlosOp.Rvc);

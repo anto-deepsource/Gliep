@@ -33,6 +33,7 @@ namespace GeminiLab.Glos {
         Not     = 0x18,
         Neg     = 0x19,
         Typeof  = 0x1a,
+        IsNil   = 0x1b,
 
         // Uvc/Uvg:
         // push value

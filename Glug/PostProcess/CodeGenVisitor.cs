@@ -218,6 +218,9 @@ namespace GeminiLab.Glug.PostProcess {
                 case GlugUnOpType.Typeof:
                     parent.AppendTypeof();
                     break;
+                case GlugUnOpType.IsNil:
+                    parent.AppendIsNil();
+                    break;
             }
 
             if (!ru) parent.AppendPop();
@@ -274,6 +277,31 @@ namespace GeminiLab.Glug.PostProcess {
                     visitForDiscard(val.ExprL, parent);
                     visitForDiscard(val.ExprR, parent);
                 }
+            }  else if (BiOp.IsShortCircuitOp(val.Op)) {
+                visitForValue(val.ExprL, parent);
+                
+                parent.AppendDup();
+
+                var labelAnother = parent.AllocateLabel();
+                var labelEnd = parent.AllocateLabel();
+
+                if (val.Op == GlugBiOpType.ShortCircuitAnd) {
+                    parent.AppendBt(labelAnother);
+                    parent.AppendB(labelEnd);
+                } else if (val.Op == GlugBiOpType.ShortCircuitOrr) {
+                    parent.AppendBf(labelAnother);
+                    parent.AppendB(labelEnd);
+                } else if (val.Op == GlugBiOpType.NullCoalescing) {
+                    parent.AppendBn(labelAnother);
+                    parent.AppendB(labelEnd);
+                }
+                
+                parent.InsertLabel(labelAnother);
+                
+                parent.AppendPop();
+                visitForValue(val.ExprR, parent);
+                
+                parent.InsertLabel(labelEnd);
             } else {
                 visitForValue(val.ExprL, parent);
                 visitForValue(val.ExprR, parent);

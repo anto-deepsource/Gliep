@@ -29,6 +29,9 @@ namespace GeminiLab.Glug.Parser {
 
         protected virtual GlugBiOpType BiOpFromTokenType(GlugTokenType op) => op switch {
             GlugTokenType.SymbolAssign => GlugBiOpType.Assign,
+            GlugTokenType.SymbolQueryQuery => GlugBiOpType.NullCoalescing,
+            GlugTokenType.SymbolOrrOrr => GlugBiOpType.ShortCircuitOrr,
+            GlugTokenType.SymbolAndAnd => GlugBiOpType.ShortCircuitAnd,
             GlugTokenType.SymbolOrr => GlugBiOpType.Orr,
             GlugTokenType.SymbolXor => GlugBiOpType.Xor,
             GlugTokenType.SymbolAnd => GlugBiOpType.And,
@@ -54,7 +57,10 @@ namespace GeminiLab.Glug.Parser {
         };
 
         protected virtual int BiOpPrecedence(GlugTokenType op) => op switch {
-            GlugTokenType.SymbolAssign => 0x05,
+            GlugTokenType.SymbolAssign => 0x08,
+            GlugTokenType.SymbolQueryQuery => 0x0a,
+            GlugTokenType.SymbolOrrOrr => 0x0c,
+            GlugTokenType.SymbolAndAnd => 0x0e,
             GlugTokenType.SymbolOrr => 0x10,
             GlugTokenType.SymbolXor => 0x20,
             GlugTokenType.SymbolAnd => 0x30,
@@ -71,7 +77,7 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.SymbolMul => 0x80,
             GlugTokenType.SymbolDiv => 0x80,
             GlugTokenType.SymbolMod => 0x80,
-            GlugTokenType.SymbolDotDot => 0x85,
+            GlugTokenType.SymbolDotDot => 0x88,
             GlugTokenType.SymbolDollar => 0x90,
             GlugTokenType.OpCall => 0xa0,
             GlugTokenType.SymbolAt => 0xb0,
@@ -82,6 +88,9 @@ namespace GeminiLab.Glug.Parser {
         // contract: all operators with same precedence have same associativity
         protected virtual bool BiOpLeftAssociativity(GlugTokenType op) => op switch {
             GlugTokenType.SymbolAssign => false,
+            GlugTokenType.SymbolQueryQuery => false,
+            GlugTokenType.SymbolOrrOrr => true,
+            GlugTokenType.SymbolAndAnd => true,
             GlugTokenType.SymbolOrr => true,
             GlugTokenType.SymbolXor => true,
             GlugTokenType.SymbolAnd => true,
@@ -109,12 +118,14 @@ namespace GeminiLab.Glug.Parser {
         protected virtual bool IsUnOp(GlugTokenType op) => 
             op == GlugTokenType.SymbolSub ||
             op == GlugTokenType.SymbolNot ||
-            op == GlugTokenType.SymbolQuote;
+            op == GlugTokenType.SymbolQuote ||
+            op == GlugTokenType.SymbolQuery;
 
         protected virtual GlugUnOpType UnOpFromToken(GlugTokenType op) => op switch {
             GlugTokenType.SymbolSub => GlugUnOpType.Neg,
             GlugTokenType.SymbolNot => GlugUnOpType.Not,
             GlugTokenType.SymbolQuote => GlugUnOpType.Typeof,
+            GlugTokenType.SymbolQuery => GlugUnOpType.IsNil,
             _ => throw new ArgumentOutOfRangeException(),
         };
 

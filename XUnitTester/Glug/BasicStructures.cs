@@ -56,7 +56,7 @@ namespace XUnitTester.Glug {
             var code = $@"
                 !a = if (true) 1;
                 !b = if (false) 2;
-                [!c, !d] = if (a == nil) [3, 3, 3] elif (b == nil) [4, 5, 6] else 5;
+                [!c, !d] = if (?a) [3, 3, 3] elif (?b) [4, 5, 6] else 5;
                 !e;
                 if (c == d) (
                     e = false;
@@ -231,7 +231,7 @@ namespace XUnitTester.Glug {
             var code = @"
                 !a = 1;
                 foo = [] -> a; # make sure a is in context; 
-                !!a = 2;
+                !!a = 2; # it should refer to the same variable
                 [a, foo[]]
             ";
 
@@ -239,6 +239,33 @@ namespace XUnitTester.Glug {
                 .Create(ViMa.ExecuteUnitWithProvidedContextForRootFunction(TypicalCompiler.Compile(code), new GlosContext(null)))
                 .FirstOne().AssertInteger(2)
                 .MoveNext().AssertInteger(2)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void ShortCircuitOperators() {
+            var code = @"
+                !failed = false;
+
+                fn evil_function[] (
+                    failed = true;
+                    nil
+                );
+
+                [
+                    false && evil_function[],
+                    true || evil_function[],
+                    1 ?? evil_function[],
+                ] .. [
+                    failed
+                ]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertFalse()
+                .MoveNext().AssertTrue()
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertFalse()
                 .MoveNext().AssertEnd();
         }
     }

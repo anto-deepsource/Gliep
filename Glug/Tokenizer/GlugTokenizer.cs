@@ -199,6 +199,11 @@ namespace GeminiLab.Glug.Tokenizer {
                 ["@"] = GlugTokenType.SymbolAt,
                 ["'"] = GlugTokenType.SymbolQuote,
                 [".."] = GlugTokenType.SymbolDotDot,
+                ["?"] = GlugTokenType.SymbolQuery,
+                
+                ["&&"] = GlugTokenType.SymbolAndAnd,
+                ["||"] = GlugTokenType.SymbolOrrOrr,
+                ["??"] = GlugTokenType.SymbolQueryQuery,
             });
         }
 

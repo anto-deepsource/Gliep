@@ -123,6 +123,7 @@ namespace GeminiLab.Glug.AST {
                 GlugUnOpType.Not => "not",
                 GlugUnOpType.Neg => "neg",
                 GlugUnOpType.Typeof => "typeof",
+                GlugUnOpType.IsNil => "isnil",
                 _ => throw new ArgumentOutOfRangeException(),
             });
             Writer.IncreaseIndent();
@@ -152,6 +153,9 @@ namespace GeminiLab.Glug.AST {
                 GlugBiOpType.Assign => "assign",
                 GlugBiOpType.Index => "index",
                 GlugBiOpType.Concat => "concat",
+                GlugBiOpType.ShortCircuitAnd => "short-circuit and",
+                GlugBiOpType.ShortCircuitOrr => "short-circuit orr",
+                GlugBiOpType.NullCoalescing => "coalescing",
                 _ => throw new ArgumentOutOfRangeException(),
             });
             Writer.IncreaseIndent();
