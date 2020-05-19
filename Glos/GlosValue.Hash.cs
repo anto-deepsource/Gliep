@@ -4,12 +4,9 @@ namespace GeminiLab.Glos {
             if (_hashCodeCalculated) return _hashCode;
 
             GlosValue v = default;
-            if (TryInvokeMetamethod(ref v, this, viMa, GlosMetamethodNames.Hash)) {
-                return v.getHash(viMa);
-            }
-
-            // this branch should never be reached
-            preEvalHash();
+            _hashCode = TryInvokeMetamethod(ref v, this, viMa, GlosMetamethodNames.Hash) ? v.getHash(viMa) : ValueObject!.GetHashCode();
+            
+            _hashCodeCalculated = true;
             return _hashCode;
         }
         
