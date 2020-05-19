@@ -26,6 +26,8 @@
   - `>=`: greater than or equal to
 - `=`: assign
   - `==`: equal to
+- `?`: is nil
+  - `??`: nil coalescing
 - `@`: index by variable
 - `[` `]`: on stack list
 - `^`: xor
@@ -37,5 +39,4 @@
 
 ## Not used yet
 
-- `?`
 - `\`

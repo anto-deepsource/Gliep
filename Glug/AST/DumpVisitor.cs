@@ -10,7 +10,7 @@ using GeminiLab.Core2.Text;
 namespace GeminiLab.Glug.AST {
     // we do not test this class
     [ExcludeFromCodeCoverage]
-    public class DumpVisitor : RecursiveVisitor {
+    public class DumpVisitor : Visitor {
         public DumpVisitor(IndentedWriter writer) {
             Writer = writer;
         }
@@ -188,6 +188,13 @@ namespace GeminiLab.Glug.AST {
             Writer.WriteLine($"<syscall 0x{val.Id:x} result: {val.Result}>");
             Writer.IncreaseIndent();
             val.Inputs.ForEach(Visit);
+            Writer.DecreaseIndent();
+        }
+
+        public override void VisitToValue(ToValue val) {
+            Writer.WriteLine("to-value");
+            Writer.IncreaseIndent();
+            Visit(val.Child);
             Writer.DecreaseIndent();
         }
     }

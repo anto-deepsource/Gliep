@@ -29,6 +29,7 @@ namespace GeminiLab.Glug.AST {
         public abstract void VisitMetatable(Metatable val);
 
         public abstract void VisitSysCall(SysCall val);
+        public abstract void VisitToValue(ToValue val);
 
         protected virtual void PreVisit(Node node) { }
 
@@ -91,6 +92,9 @@ namespace GeminiLab.Glug.AST {
                 break;
             case SysCall sc:
                 VisitSysCall(sc);
+                break;
+            case ToValue tv:
+                VisitToValue(tv);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -169,6 +173,10 @@ namespace GeminiLab.Glug.AST {
         public override void VisitSysCall(SysCall val) {
             val.Inputs.ForEach(Visit);
         }
+
+        public override void VisitToValue(ToValue val) {
+            Visit(val.Child);
+        }
     }
 
 
@@ -199,6 +207,7 @@ namespace GeminiLab.Glug.AST {
         public abstract void VisitMetatable(Metatable val, TParameter arg);
 
         public abstract void VisitSysCall(SysCall val, TParameter arg);
+        public abstract void VisitToValue(ToValue val, TParameter arg);
 
         protected virtual void PreVisit(Node node) { }
 
@@ -261,6 +270,9 @@ namespace GeminiLab.Glug.AST {
                 break;
             case SysCall sc:
                 VisitSysCall(sc, arg);
+                break;
+            case ToValue tv:
+                VisitToValue(tv, arg);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -345,6 +357,10 @@ namespace GeminiLab.Glug.AST {
             foreach (var input in val.Inputs) {
                 Visit(input, arg);
             }
+        }
+
+        public override void VisitToValue(ToValue val, TParameter arg) {
+            Visit(val.Child, arg);
         }
     }
 

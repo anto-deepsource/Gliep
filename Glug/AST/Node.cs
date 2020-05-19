@@ -225,6 +225,8 @@ namespace GeminiLab.Glug.AST {
         public Expr Table { get; }
     }
 
+    // Following are node types which are not used directly by Glug itself but critical for tools based on Glug.
+
     // A basic principle of Glug is "NOTHING BUT EXPRESSIONS" but syscalls somehow break this rule.
     // Stack operations of all types of instructions (except for SysCall instructions) are DEFINITE, which means
     // they eats and then puts a DEFINITE number of values or OSLs on stack. However, stack operations of SysCall
@@ -247,5 +249,14 @@ namespace GeminiLab.Glug.AST {
         }
 
         public ResultType Result { get; }
+    }
+
+    // explicitly convert Child to value
+    public class ToValue : Expr {
+        public ToValue(Expr child) {
+            Child = child;
+        }
+        
+        public Expr Child { get; }
     }
 }

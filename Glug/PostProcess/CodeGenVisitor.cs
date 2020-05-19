@@ -19,7 +19,7 @@ namespace GeminiLab.Glug.PostProcess {
         public void Deconstruct(out GlosFunctionBuilder currentFunction, out bool resultUsed) => (currentFunction, resultUsed) = (CurrentFunction, ResultUsed);
     }
 
-    public class CodeGenVisitor : RecursiveInVisitor<CodeGenContext> {
+    public class CodeGenVisitor : InVisitor<CodeGenContext> {
         private readonly NodeInformation _info;
         private readonly Dictionary<While, Label> _whileEndLabel = new Dictionary<While, Label>();
         private readonly Dictionary<While, bool> _whileResultUsed = new Dictionary<While, bool>();
@@ -387,9 +387,7 @@ namespace GeminiLab.Glug.PostProcess {
             var (parent, ru) = ctx;
 
             foreach (var input in val.Inputs) {
-                visitForValue(input, parent);
-                // Visit(input, new CodeGenContext(parent, true));
-                // TODO bugfix: REMOVE THIS WORKAROUND
+                visitForAny(input, parent);
             }
 
             parent.AppendSyscall(val.Id);
@@ -397,6 +395,10 @@ namespace GeminiLab.Glug.PostProcess {
             if (val.Result == SysCall.ResultType.Value && !ru) parent.AppendPop();
             if (val.Result == SysCall.ResultType.Osl && !ru) parent.AppendShpRv(0);
             if (val.Result == SysCall.ResultType.None && ru) parent.AppendLdDel();
+        }
+
+        public override void VisitToValue(ToValue val, CodeGenContext arg) {
+            visitForValue(val.Child, arg.CurrentFunction);
         }
     }
 }

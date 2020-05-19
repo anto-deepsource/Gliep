@@ -17,7 +17,7 @@ namespace GeminiLab.Glute.Compile {
 
             if (type == GlugTokenTypeGluteExtension.GlutePlainText) {
                 var tok = Stream.GetToken();
-                return new SysCall(0, new List<Expr> { new LiteralString(tok.ValueString!) }, SysCall.ResultType.None );
+                return new SysCall(0, new List<Expr> { new ToValue(new LiteralString(tok.ValueString!)) }, SysCall.ResultType.None );
             }
 
             if (type == GlugTokenTypeGluteExtension.GluteInterpolationBegin) {
@@ -25,7 +25,7 @@ namespace GeminiLab.Glute.Compile {
                 var expr = ReadExprGreedily();
                 Consume((GlugTokenType)GlugTokenTypeGluteExtension.GluteInterpolationEnd);
 
-                return new SysCall(0, new List<Expr> { expr }, SysCall.ResultType.None);
+                return new SysCall(0, new List<Expr> { new ToValue(expr) }, SysCall.ResultType.None);
 
             }
 

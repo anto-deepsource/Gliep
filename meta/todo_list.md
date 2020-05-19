@@ -30,4 +30,4 @@
 
 ### Misc
 
-- Add a new ast node type who converts osls to values. (required by Glute)
+- ~~Add a new ast node type who converts osls to values. (required by Glute)~~
