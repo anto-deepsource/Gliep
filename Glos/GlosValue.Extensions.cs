@@ -74,6 +74,14 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        public static ref GlosValue SetVector(this ref GlosValue v, GlosVector value) {
+            v.ValueNumber.Integer = 0;
+            v.ValueObject = value;
+            v.Type = GlosValueType.Vector;
+
+            return ref v;
+        }
+
 
         public static void AssertNil(this in GlosValue v) {
             if (v.Type != GlosValueType.Nil) throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Nil);
@@ -114,6 +122,10 @@ namespace GeminiLab.Glos {
             throw new GlosValueTypeAssertionFailedException(v, GlosValueType.ExternalFunction);
         }
 
+        public static GlosVector AssertVector(this in GlosValue v) {
+            if (v.Type == GlosValueType.Vector) return v.AssumeVector();
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Vector);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long AssumeInteger(this in GlosValue v) => v.ValueNumber.Integer;
@@ -129,6 +141,8 @@ namespace GeminiLab.Glos {
         public static GlosFunction AssumeFunction(this in GlosValue v) => (GlosFunction)v.ValueObject!;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GlosExternalFunction AssumeExternalFunction(this in GlosValue v) => (GlosExternalFunction)v.ValueObject!;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GlosVector AssumeVector(this in GlosValue v) => (GlosVector)v.ValueObject!;
 
 
         public static bool Truthy(this in GlosValue v) {

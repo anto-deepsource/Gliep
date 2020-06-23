@@ -52,7 +52,7 @@ namespace GeminiLab.Glos {
         public bool TryGetMetamethod(string name, out GlosValue fun) {
             fun = default;
             ref var rf = ref fun;
-            
+
             if (Metatable != null && Metatable.TryReadEntryLocally(name, out fun))
                 return fun.Type == GlosValueType.Function || fun.Type == GlosValueType.ExternalFunction;
 

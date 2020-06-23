@@ -24,6 +24,7 @@ namespace GeminiLab.Glos {
                 GlosValueType.String => StringHash((string)ValueObject!),
                 GlosValueType.Function => FunctionHash((GlosFunction)ValueObject!),
                 GlosValueType.ExternalFunction => ValueObject!.GetHashCode(),
+                GlosValueType.Vector => ValueObject!.GetHashCode(),
                 _ => 0,
             };
 

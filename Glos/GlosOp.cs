@@ -30,10 +30,13 @@ namespace GeminiLab.Glos {
         UenL    = 0x15,
         Ien     = 0x16,
 
-        Not     = 0x18,
-        Neg     = 0x19,
-        Typeof  = 0x1a,
-        IsNil   = 0x1b,
+        PshV    = 0x18,
+        PopV    = 0x19,
+        
+        Not     = 0x1c,
+        Neg     = 0x1d,
+        Typeof  = 0x1e,
+        IsNil   = 0x1f,
 
         // Uvc/Uvg:
         // push value
@@ -62,6 +65,7 @@ namespace GeminiLab.Glos {
         LdNTbl  = 0x38,
         LdNil   = 0x39,
         LdFlt   = 0x3a,
+        LdNVec  = 0x3b,
 
         LdTrue  = 0x3c,
         LdFalse = 0x3d,
@@ -121,6 +125,8 @@ namespace GeminiLab.Glos {
         Bind    = 0xab,
         PopDel  = 0xac,
         DupList = 0xad,
+        Pkv     = 0xae,
+        Upv     = 0xaf,
 
         ShpRv0  = 0xb0,
         ShpRv1  = 0xb1,

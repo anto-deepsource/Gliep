@@ -140,18 +140,18 @@ namespace GeminiLab.Glos {
                         Calculator.ExecuteBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
                         popStack();
                         break;
-                    case GlosOpCategory.TableOperator when op == GlosOp.Smt:
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Smt:
                         stackTop().AssertTable().Metatable = stackTop(1).AssertTable();
                         popStack(2);
                         break;
-                    case GlosOpCategory.TableOperator when op == GlosOp.Gmt:
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Gmt:
                         if (stackTop().AssertTable().Metatable is { } mt) {
                             stackTop().SetTable(mt);
                         } else {
                             stackTop().SetNil();
                         }
                         break;
-                    case GlosOpCategory.TableOperator when op == GlosOp.Ren:
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Ren:
                         if (stackTop(1).AssertTable().TryReadEntry(stackTop(), out temp)) {
                             stackTop(1) = temp;
                         } else {
@@ -159,11 +159,11 @@ namespace GeminiLab.Glos {
                         }
                         popStack();
                         break;
-                    case GlosOpCategory.TableOperator when op == GlosOp.Uen:
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Uen:
                         stackTop(1).AssertTable().UpdateEntry(stackTop(), stackTop(2));
                         popStack(3);
                         break;
-                    case GlosOpCategory.TableOperator when op == GlosOp.RenL:
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.RenL:
                         if (stackTop(1).AssertTable().TryReadEntryLocally(stackTop(), out temp)) {
                             stackTop(1) = temp;
                         } else {
@@ -171,13 +171,21 @@ namespace GeminiLab.Glos {
                         }
                         popStack();
                         break;
-                    case GlosOpCategory.TableOperator when op == GlosOp.UenL:
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.UenL:
                         stackTop(1).AssertTable().UpdateEntryLocally(stackTop(), stackTop(2));
                         popStack(3);
                         break;
-                    case GlosOpCategory.TableOperator when op == GlosOp.Ien:
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Ien:
                         stackTop(2).AssertTable().UpdateEntryLocally(stackTop(1), stackTop());
                         popStack(2);
+                        break;
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.PshV:
+                        stackTop(1).AssertVector().Push(in stackTop());
+                        popStack(2);
+                        break;
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.PopV:
+                        stackTop().AssertVector().Pop();
+                        popStack();
                         break;
                     case GlosOpCategory.UnaryOperator:
                         Calculator.ExecuteUnaryOperation(ref stackTop(), in stackTop(), op);
@@ -217,6 +225,9 @@ namespace GeminiLab.Glos {
                         break;
                     case GlosOpCategory.LoadMisc when op == GlosOp.LdFlt:
                         pushStack().SetFloatByBinaryPresentation(unchecked((ulong)imms));
+                        break;
+                    case GlosOpCategory.LoadMisc when op == GlosOp.LdNVec:
+                        pushStack().SetVector(new GlosVector());
                         break;
                     case GlosOpCategory.LoadMisc when op == GlosOp.LdTrue:
                         pushStack().SetBoolean(true);
@@ -344,6 +355,24 @@ namespace GeminiLab.Glos {
 
                         _stack.PreparePush(count);
                         _stack.AsSpan(del).CopyTo(_stack.AsSpan(_sptr, count));
+                        break;
+                    }
+                    case GlosOpCategory.Others when op == GlosOp.Pkv: {
+                        var del = peekDelimiter();
+                        var count = _sptr - del;
+                        
+                        var vec = new GlosVector();
+                        
+                        vec.Container().EnsureCapacity(count);
+                        _stack.AsSpan(del, count).CopyTo(vec.Container().AsSpan());
+                        break;
+                    }
+                    case GlosOpCategory.Others when op == GlosOp.Upv: {
+                        var vec = stackTop().AssertVector();
+                        popStack();
+                        
+                        pushDelimiter();
+                        vec.Container().AsSpan().CopyTo(_stack.AsSpan(_stack.Count, vec.Container().Count));
                         break;
                     }
                     case GlosOpCategory.Others when op == GlosOp.Nop:

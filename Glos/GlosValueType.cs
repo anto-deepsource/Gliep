@@ -13,6 +13,7 @@ namespace GeminiLab.Glos {
         Function = 0x82,
         // Userdata = 0x83,
         ExternalFunction = 0x84,
+        Vector = 0x85,
     }
 
     public static class GlosValueTypeExtensions {
@@ -25,6 +26,7 @@ namespace GeminiLab.Glos {
             GlosValueType.String => "string",
             GlosValueType.Function => "function",
             GlosValueType.ExternalFunction => "function",
+            GlosValueType.Vector => "vector",
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

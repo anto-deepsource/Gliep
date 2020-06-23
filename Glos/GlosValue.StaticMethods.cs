@@ -7,6 +7,7 @@ namespace GeminiLab.Glos {
         public static implicit operator GlosValue(GlosTable v) => NewTable(v);
         public static implicit operator GlosValue(string v) => NewString(v);
         public static implicit operator GlosValue(GlosFunction v) => NewFunction(v);
+        public static implicit operator GlosValue(GlosVector v) => NewVector(v);
 
         public static GlosValue NewNil() {
             var rv = new GlosValue();
@@ -53,6 +54,12 @@ namespace GeminiLab.Glos {
         public static GlosValue NewFunction(GlosFunction value) {
             var rv = new GlosValue();
             rv.SetFunction(value);
+            return rv;
+        }
+
+        public static GlosValue NewVector(GlosVector value) {
+            var rv = new GlosValue();
+            rv.SetVector(value);
             return rv;
         }
     }
