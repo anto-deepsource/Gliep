@@ -179,11 +179,11 @@ namespace GeminiLab.Glos {
                         stackTop(2).AssertTable().UpdateEntryLocally(stackTop(1), stackTop());
                         popStack(2);
                         break;
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.PshV:
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Pshv:
                         stackTop(1).AssertVector().Push(in stackTop());
                         popStack(2);
                         break;
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.PopV:
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Popv:
                         stackTop().AssertVector().Pop();
                         popStack();
                         break;
@@ -364,7 +364,10 @@ namespace GeminiLab.Glos {
                         var vec = new GlosVector();
                         
                         vec.Container().EnsureCapacity(count);
-                        _stack.AsSpan(del, count).CopyTo(vec.Container().AsSpan());
+                        _stack.AsSpan(del, count).CopyTo(vec.Container().AsSpan(0, count));
+                        
+                        while (_sptr > del) popStack();
+                        pushStack(vec);
                         break;
                     }
                     case GlosOpCategory.Others when op == GlosOp.Upv: {

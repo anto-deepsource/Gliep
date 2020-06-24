@@ -91,6 +91,8 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendRenL() => AppendInstruction(GlosOp.RenL);
         public void AppendUenL() => AppendInstruction(GlosOp.UenL);
         public void AppendIen() => AppendInstruction(GlosOp.Ien);
+        public void AppendPshv() => AppendInstruction(GlosOp.Pshv);
+        public void AppendPopv() => AppendInstruction(GlosOp.Popv);
         public void AppendNot() => AppendInstruction(GlosOp.Not);
         public void AppendNeg() => AppendInstruction(GlosOp.Neg);
         public void AppendTypeof() => AppendInstruction(GlosOp.Typeof);
@@ -106,6 +108,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendLdNeg1() => AppendInstruction(GlosOp.LdNeg1);
         public void AppendLdNTbl() => AppendInstruction(GlosOp.LdNTbl);
         public void AppendLdNil() => AppendInstruction(GlosOp.LdNil);
+        public void AppendLdNVec() => AppendInstruction(GlosOp.LdNVec);
         public void AppendLdTrue() => AppendInstruction(GlosOp.LdTrue);
         public void AppendLdFalse() => AppendInstruction(GlosOp.LdFalse);
 
@@ -159,6 +162,8 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendBind() => AppendInstruction(GlosOp.Bind);
         public void AppendPopDel() => AppendInstruction(GlosOp.PopDel);
         public void AppendDupList() => AppendInstruction(GlosOp.DupList);
+        public void AppendPkv() => AppendInstruction(GlosOp.Pkv);
+        public void AppendUpv() => AppendInstruction(GlosOp.Upv);
 
         // shape return values
         public void AppendShpRv(int imm) => AppendInstruction(GlosOp.ShpRv, immediate: imm);

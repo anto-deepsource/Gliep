@@ -30,8 +30,8 @@ namespace GeminiLab.Glos {
         UenL    = 0x15,
         Ien     = 0x16,
 
-        PshV    = 0x18,
-        PopV    = 0x19,
+        Pshv    = 0x18,
+        Popv    = 0x19,
         
         Not     = 0x1c,
         Neg     = 0x1d,
