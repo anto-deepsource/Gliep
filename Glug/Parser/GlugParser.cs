@@ -52,7 +52,9 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.SymbolDollar => GlugBiOpType.Call,
             GlugTokenType.OpCall => GlugBiOpType.Call,
             GlugTokenType.SymbolAt => GlugBiOpType.Index,
+            GlugTokenType.SymbolAtBang => GlugBiOpType.IndexLocal,
             GlugTokenType.SymbolDot => GlugBiOpType.Index,
+            GlugTokenType.SymbolDotBang => GlugBiOpType.IndexLocal,
             _ => throw new ArgumentOutOfRangeException(),
         };
 
@@ -81,7 +83,9 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.SymbolDollar => 0x90,
             GlugTokenType.OpCall => 0xa0,
             GlugTokenType.SymbolAt => 0xb0,
+            GlugTokenType.SymbolAtBang => 0xb0,
             GlugTokenType.SymbolDot => 0xc0,
+            GlugTokenType.SymbolDotBang => 0xc0,
             _ => -1,
         };
 
@@ -111,7 +115,9 @@ namespace GeminiLab.Glug.Parser {
             GlugTokenType.SymbolDollar => false,
             GlugTokenType.OpCall => true,
             GlugTokenType.SymbolAt => true,
+            GlugTokenType.SymbolAtBang => true,
             GlugTokenType.SymbolDot => true,
+            GlugTokenType.SymbolDotBang => true,
             _ => throw new ArgumentOutOfRangeException(),
         };
 
@@ -201,7 +207,7 @@ namespace GeminiLab.Glug.Parser {
                 }
 
                 lastP = p;
-                lastDot = op == GlugTokenType.SymbolDot;
+                lastDot = op == GlugTokenType.SymbolDot || op == GlugTokenType.SymbolDotBang;
                 s.Add((expr, op));
             }
 

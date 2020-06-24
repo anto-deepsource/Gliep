@@ -7,6 +7,7 @@
 - `$`: function call
 - `%`: modulus
 - `&`: and
+  - `&&`: short-circuit and
 - `'`: typeof
 - `(` `)`: block
 - `*`: multiplication
@@ -15,6 +16,7 @@
 - `-`: subtraction
   - `->`: right arrow in lambdas and function definitions
 - `.`: index by name
+  - `.!`: index locally by name
 - `/`: division
 - `:`: separator between key and value in table literals
 - `;`: statements separator
@@ -29,11 +31,13 @@
 - `?`: is nil
   - `??`: nil coalescing
 - `@`: index by variable
+  - `@!`: index locally by variable
 - `[` `]`: on stack list
 - `^`: xor
 - `` ` ``: metatable
 - `{` `}`: table literal
 - `|`: or
+  - `||`: short-circuit or
 - `~`: not
   - `~=`: not equal to
 

@@ -241,6 +241,11 @@ namespace GeminiLab.Glug.PostProcess {
                     visitForValue(index, parent);
                     parent.AppendUen();
                     break;
+                case BiOp { Op: GlugBiOpType.IndexLocal, ExprL: var table, ExprR: var index }:
+                    visitForValue(table, parent);
+                    visitForValue(index, parent);
+                    parent.AppendUenL();
+                    break;
                 case Metatable { Table: var table }:
                     visitForValue(table, parent);
                     parent.AppendSmt();
@@ -324,6 +329,7 @@ namespace GeminiLab.Glug.PostProcess {
                     GlugBiOpType.Equ => GlosOp.Equ,
                     GlugBiOpType.Neq => GlosOp.Neq,
                     GlugBiOpType.Index => GlosOp.Ren,
+                    GlugBiOpType.IndexLocal => GlosOp.RenL,
                     _ => GlosOp.Nop, // Add a exception here
                 });
 

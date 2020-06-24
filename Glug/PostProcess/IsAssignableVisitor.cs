@@ -33,8 +33,8 @@ namespace GeminiLab.Glug.PostProcess {
             if (val.Op == GlugBiOpType.Assign && !_info.IsAssignable[val.ExprL]) {
                 throw new ArgumentOutOfRangeException();
             }
-            
-            _info.IsAssignable[val] = val.Op == GlugBiOpType.Index;
+
+            _info.IsAssignable[val] = val.Op == GlugBiOpType.Index || val.Op == GlugBiOpType.IndexLocal;
         }
 
         public override void VisitMetatable(Metatable val) {

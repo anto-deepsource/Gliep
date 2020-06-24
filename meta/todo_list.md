@@ -19,7 +19,7 @@
 
 ### A set of useful operators
 
-- Locally ren and uen operators.
+- ~~Locally ren and uen operators.~~
 - ~~Short-circuit operators.~~
 - ~~Is-nil and nil-coalescing operators.~~
 - Compound-assignment operators.

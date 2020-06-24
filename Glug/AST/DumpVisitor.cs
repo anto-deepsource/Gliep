@@ -152,6 +152,7 @@ namespace GeminiLab.Glug.AST {
                 GlugBiOpType.Call => "call",
                 GlugBiOpType.Assign => "assign",
                 GlugBiOpType.Index => "index",
+                GlugBiOpType.IndexLocal => "index-local",
                 GlugBiOpType.Concat => "concat",
                 GlugBiOpType.ShortCircuitAnd => "short-circuit and",
                 GlugBiOpType.ShortCircuitOrr => "short-circuit orr",

@@ -64,6 +64,8 @@ namespace GeminiLab.Glug.Tokenizer {
         SymbolAndAnd        = 0x001_026_00,
         SymbolOrrOrr        = 0x001_027_00,
         SymbolQueryQuery    = 0x001_028_00,
+        SymbolDotBang       = 0x001_029_00,
+        SymbolAtBang        = 0x001_02a_00,
         
         OpCall              = 0x002_000_04,
         

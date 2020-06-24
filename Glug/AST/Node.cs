@@ -173,6 +173,7 @@ namespace GeminiLab.Glug.AST {
         Call,
         Assign,
         Index,
+        IndexLocal,
         Concat,
         ShortCircuitAnd,
         ShortCircuitOrr,
