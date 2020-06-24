@@ -1,3 +1,4 @@
+using System.Linq;
 using GeminiLab.Glos;
 using Xunit;
 using XUnitTester.Misc;
@@ -7,6 +8,7 @@ namespace XUnitTester.Glos {
         [Fact]
         public void Return0() {
             var fid = Builder.AddFunctionRaw(new[] {
+                (byte)GlosOp.Nop,
                 (byte)GlosOp.Ld0,
                 // (byte)GlosOp.Ret, // Test default return statement
             }, 0);
@@ -223,6 +225,77 @@ namespace XUnitTester.Glos {
             GlosValueArrayChecker.Create(res)
                 .FirstOne().AssertInteger(0)
                 .MoveNext().AssertInteger(2)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void VectorBuild() {
+            var fid = Builder.AddFunctionRaw(new[] {
+                (byte)GlosOp.LdNVec,
+                (byte)GlosOp.Dup,
+                (byte)GlosOp.StLoc0,
+                (byte)GlosOp.Dup,
+                (byte)GlosOp.LdNeg1,
+                (byte)GlosOp.Pshv,
+                (byte)GlosOp.Ld0,
+                (byte)GlosOp.Pshv,
+                (byte)GlosOp.LdDel,
+                (byte)GlosOp.Ld1,
+                (byte)GlosOp.Ld2,
+                (byte)GlosOp.Ld3,
+                (byte)GlosOp.LdS,
+                (byte)0x04,
+                (byte)GlosOp.Pkv,
+                (byte)GlosOp.Dup,
+                (byte)GlosOp.StLoc1,
+                (byte)GlosOp.Popv,
+                (byte)GlosOp.LdDel,
+                (byte)GlosOp.LdLoc0,
+                (byte)GlosOp.LdLoc1,
+                (byte)GlosOp.Ret,
+            }, 2);
+
+            Builder.Entry = fid;
+
+            var res = Execute();
+
+            GlosValueArrayChecker.Create(res)
+                .FirstOne().AssertVector()
+                .MoveNext().AssertVector()
+                .MoveNext().AssertEnd();
+        }
+        
+        [Fact]
+        public void VectorUnpack() {
+            var fid = Builder.AddFunctionRaw(new[] {
+                (byte)GlosOp.LdNVec,
+                (byte)GlosOp.Dup,
+                (byte)GlosOp.Ld0,
+                (byte)GlosOp.Pshv,
+                (byte)GlosOp.Dup,
+                (byte)GlosOp.Ld1,
+                (byte)GlosOp.Pshv,
+                (byte)GlosOp.Dup,
+                (byte)GlosOp.Ld3,
+                (byte)GlosOp.Pshv,
+                (byte)GlosOp.Dup,
+                (byte)GlosOp.LdS,
+                (byte)0x77,
+                (byte)GlosOp.Pshv,
+                (byte)GlosOp.Upv,
+                (byte)GlosOp.LdArg0,
+                (byte)GlosOp.Call,
+                (byte)GlosOp.Ret,
+            }, 0);
+
+            Builder.Entry = fid;
+
+            var res = Execute(new[] { GlosValue.NewExternalFunction(x => {
+                return new GlosValue[] { x.Select(v => v.AssertInteger()).Sum() };
+            }) });
+
+            GlosValueArrayChecker.Create(res)
+                .FirstOne().AssertInteger(0 + 1 + 3 + 0x77)
                 .MoveNext().AssertEnd();
         }
     }
