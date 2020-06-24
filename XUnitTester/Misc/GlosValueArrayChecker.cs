@@ -7,7 +7,7 @@ namespace XUnitTester.Misc {
     public class GlosValueArrayItemChecker {
         public GlosValueArrayChecker Checker { get; }
         public int Position { get; private set; }
-        private ref GlosValue Current => ref Checker.Target[Position];
+        private ref GlosValue Current => ref Checker.Target.Span[Position];
 
         public GlosValueArrayItemChecker(GlosValueArrayChecker checker, int position) {
             Checker = checker;
@@ -192,15 +192,36 @@ namespace XUnitTester.Misc {
             Assert.True(predicate(Current.AssertTable()));
             return this;
         }
+
+        public GlosValueArrayItemChecker AssertVector() {
+            AssertPositionInRange();
+            Current.AssertVector();
+            return this;
+        }
+
+        public GlosValueArrayItemChecker AssertVector(Action<GlosVector> checker) {
+            AssertPositionInRange();
+            checker(Current.AssertVector());
+            return this;
+        }
+
+        public GlosValueArrayItemChecker AssertVector(Predicate<GlosVector> predicate) {
+            AssertPositionInRange();
+            Assert.True(predicate(Current.AssertVector()));
+            return this;
+        }
     }
 
     public class GlosValueArrayChecker {
-        public GlosValue[] Target { get; }
-        public int Length { get; }
+        public Memory<GlosValue> Target { get; }
+        public int Length => Target.Length;
 
         public GlosValueArrayChecker(GlosValue[] target) {
             Target = target;
-            Length = target.Length;
+        }
+
+        public GlosValueArrayChecker(Memory<GlosValue> target) {
+            Target = target;
         }
 
         public static GlosValueArrayChecker Create(GlosValue[] target) => new GlosValueArrayChecker(target);
