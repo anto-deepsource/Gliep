@@ -32,11 +32,17 @@ namespace GeminiLab.Glos {
 
         public Span<T> AsSpan(Index startIndex) => _items.AsSpan(startIndex..Count);
 
-        public Span<T> AsSpan(int start) => _items.AsSpan(start, Count - start);
+        public Span<T> AsSpan(int start) => _items.AsSpan(start..Count);
 
         public Span<T> AsSpan(Range range) {
-            if (!range.End.IsFromEnd && range.End.Value > Capacity) {
-                EnsureCapacity(range.End.Value);
+            if (!range.End.IsFromEnd) {
+                if (range.End.Value > Capacity) {
+                    EnsureCapacity(range.End.Value);
+                }
+
+                if (range.End.Value > Count) {
+                    Count = range.End.Value;
+                }
             }
 
             return _items.AsSpan(range);
