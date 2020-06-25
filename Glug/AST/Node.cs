@@ -121,11 +121,11 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class OnStackList : Expr {
-        public OnStackList(List<Expr> list) {
+        public OnStackList(IList<Expr> list) {
             List = list;
         }
 
-        public List<Expr> List { get; }
+        public IList<Expr> List { get; }
     }
 
     public class Block : Expr {
