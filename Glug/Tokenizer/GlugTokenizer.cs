@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 
 using GeminiLab.Core2;
-using GeminiLab.Core2.Collections;
 using GeminiLab.Core2.Text;
 using GeminiLab.Glos;
 

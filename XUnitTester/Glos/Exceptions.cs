@@ -1,5 +1,3 @@
-using System;
-
 using GeminiLab.Glos;
 using Xunit;
 using XUnitTester.Misc;

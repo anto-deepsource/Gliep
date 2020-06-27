@@ -195,8 +195,6 @@ namespace GeminiLab.Glute.Compile {
             }
 
             public T Next() {
-                T rv;
-
                 if (_moved) {
                     _moved = false;
                     return _en.Current;

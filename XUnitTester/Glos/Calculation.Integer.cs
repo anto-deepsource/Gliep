@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-
 using GeminiLab.Core2.Random;
 using GeminiLab.Core2.Random.RNG;
 using GeminiLab.Glos;
 using Xunit;
 using XUnitTester.Misc;
-
 
 namespace XUnitTester.Glos {
     public partial class Calculation : GlosTestBase {

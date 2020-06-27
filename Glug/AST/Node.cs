@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using GeminiLab.Glos.CodeGenerator;
 
 namespace GeminiLab.Glug.AST {
     public abstract class Node { }

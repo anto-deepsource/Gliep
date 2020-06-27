@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-
 using GeminiLab.Core2;
-using GeminiLab.Core2.Random;
-using GeminiLab.Core2.Random.RNG;
 using GeminiLab.Glos;
 using GeminiLab.Glos.CodeGenerator;
 using Xunit;
@@ -12,11 +9,6 @@ using XUnitTester.Misc;
 
 namespace XUnitTester.Glos {
     public class CodeGeneratorAndExecution : GlosTestBase {
-
-
-
-
-
         [Fact]
         public void NumericArithmeticOp() {
             var fgen = Builder.AddFunction();

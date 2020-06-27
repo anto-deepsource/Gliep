@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using GeminiLab.Core2.Random;
 using GeminiLab.Core2.Random.RNG;
 using GeminiLab.Core2.Yielder;
 using GeminiLab.Glos;
 using Xunit;
-using Xunit.Abstractions;
 using XUnitTester.Misc;
 
 namespace XUnitTester.Glug {
@@ -412,8 +410,6 @@ namespace XUnitTester.Glug {
 
         [Fact]
         public void TableIndex() {
-            const double epsilon = 1e-6;
-
             var code = @"
                 # Evil metatable
                 mt = {

@@ -1,5 +1,3 @@
-﻿using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using GeminiLab.Glos;
 using GeminiLab.Glug;
 using GeminiLab.Glug.AST;
@@ -26,14 +24,13 @@ namespace XUnitTester.Glug {
                     ),
                     new ToValue(new OnStackList(new Expr[] {
                         new LiteralInteger(0x55),
-                        new LiteralInteger(0x44), 
+                        new LiteralInteger(0x44),
                     }))
                 ) 
             });
             
             ViMa.SetSyscall(2, (stack, callStack, delStack) => {
                 var del = delStack[^1];
-                var cnt = stack.Count - del;
 
                 var h = del;
                 var t = stack.Count;

@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using GeminiLab.Core2.CommandLineParser;
 
-namespace GeminiLab.Gliep {
-    // ReSharper disable UnassignedGetOnlyAutoProperty UnusedAutoPropertyAccessor.Local
+namespace GeminiLab.Gliep.Dumper {
+    // ReSharper disable UnassignedGetOnlyAutoProperty UnusedAutoPropertyAccessor.Local ClassNeverInstantiated.Global
     public class CommandLineOptions {
         [Option(Option = 'k', LongOption = "dump-token-stream-and-exit")]
         public bool DumpTokenStreamAndExit { get; private set; }
@@ -27,5 +24,5 @@ namespace GeminiLab.Gliep {
         [Option(Option = 'c', LongOption = "code")]
         public string? Code { get; private set; } = null;
     }
-    // ReSharper restore UnassignedGetOnlyAutoProperty UnusedAutoPropertyAccessor.Local
+    // ReSharper restore UnassignedGetOnlyAutoProperty UnusedAutoPropertyAccessor.Local ClassNeverInstantiated.Global
 }

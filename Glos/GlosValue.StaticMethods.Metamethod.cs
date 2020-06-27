@@ -1,4 +1,4 @@
-﻿namespace GeminiLab.Glos {
+namespace GeminiLab.Glos {
     public partial struct GlosValue {
         public static bool TryGetMetamethodOfOperand(in GlosValue v, string name, out GlosValue fun) {
             fun = default;

@@ -1,4 +1,4 @@
-﻿namespace GeminiLab.Glos {
+namespace GeminiLab.Glos {
     public class GlosVector {
         private readonly GlosStack<GlosValue> _list;
 

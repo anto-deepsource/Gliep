@@ -21,7 +21,6 @@ namespace XUnitTester.Glos {
                 .FirstOne().AssertInteger(0)
                 .MoveNext().AssertEnd();
         }
-
         
         [Fact]
         public void IntegerLoadings() {

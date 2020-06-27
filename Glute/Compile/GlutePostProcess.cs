@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Text;
 using GeminiLab.Core2.Collections;
 using GeminiLab.Glos;
 using GeminiLab.Glug.AST;
