@@ -1,7 +1,14 @@
+using System;
 using System.Collections.Generic;
 
 namespace GeminiLab.Glos {
-    public class GlosUnit {
+    public interface IGlosUnit : IDisposable {
+        public IReadOnlyList<GlosFunctionPrototype> FunctionTable { get; }
+        public int Entry { get; }
+        public IReadOnlyList<string> StringTable { get; }
+    }
+    
+    public class GlosUnit : IGlosUnit {
         public IReadOnlyList<GlosFunctionPrototype> FunctionTable { get; }
         public int Entry { get; }
         public IReadOnlyList<string> StringTable { get; }
@@ -15,5 +22,15 @@ namespace GeminiLab.Glos {
                 prototype.Unit = this;
             }
         }
+
+        protected virtual void Dispose(bool disposing) {
+            if (disposing) { }
+        }
+
+        public void Dispose() {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }
+ 

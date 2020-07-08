@@ -29,7 +29,7 @@ namespace GeminiLab.Glute {
             Gliep.Dumper.Program.DumpUnit(unit);
             return;
             */
-            
+
             using var ctx = new LoggerContext();
             ctx.AddCategory("default");
             ctx.AddCategory("virtual");
@@ -37,7 +37,7 @@ namespace GeminiLab.Glute {
             ctx.Connect("default", "console", Filters.Threshold(Logger.LevelDebug));
             ctx.Connect("virtual", "console", Filters.Threshold(Logger.LevelDebug));
 
-            new Processor(new FileSystem(), ctx.GetLogger("default")!).ProcessDirectory(@"C:\Users\Gemini.APFEL\source\repos\Gliep\meta\example.sln\");
+            new Processor(new FileSystem(), ctx.GetLogger("default")!).ProcessDirectory(options.Path);
 
             var mfs = new MockFileSystem();
             mfs.AddDirectory("/");

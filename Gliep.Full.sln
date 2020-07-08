@@ -14,6 +14,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GliepDumper", "GliepDumper\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Glute", "Glute\Glute.csproj", "{53E2E693-37D5-4B78-8F2C-611657F338E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glos.Serialization", "Glos.Serialization\Glos.Serialization.csproj", "{30E53732-16C2-40E6-BC14-99D4BCDE9552}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Develop|Any CPU = Develop|Any CPU
@@ -57,6 +59,12 @@ Global
 		{53E2E693-37D5-4B78-8F2C-611657F338E9}.Preview|Any CPU.Build.0 = Preview|Any CPU
 		{53E2E693-37D5-4B78-8F2C-611657F338E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53E2E693-37D5-4B78-8F2C-611657F338E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30E53732-16C2-40E6-BC14-99D4BCDE9552}.Develop|Any CPU.ActiveCfg = Debug|Any CPU
+		{30E53732-16C2-40E6-BC14-99D4BCDE9552}.Develop|Any CPU.Build.0 = Debug|Any CPU
+		{30E53732-16C2-40E6-BC14-99D4BCDE9552}.Preview|Any CPU.ActiveCfg = Debug|Any CPU
+		{30E53732-16C2-40E6-BC14-99D4BCDE9552}.Preview|Any CPU.Build.0 = Debug|Any CPU
+		{30E53732-16C2-40E6-BC14-99D4BCDE9552}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30E53732-16C2-40E6-BC14-99D4BCDE9552}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

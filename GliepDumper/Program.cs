@@ -5,8 +5,10 @@ using System.Text;
 using GeminiLab.Core2;
 using GeminiLab.Core2.CommandLineParser;
 using GeminiLab.Core2.IO;
+using GeminiLab.Core2.Markup.Json;
 using GeminiLab.Core2.Text;
 using GeminiLab.Glos;
+using GeminiLab.Glos.Serialization;
 using GeminiLab.Glug;
 using GeminiLab.Glug.AST;
 using GeminiLab.Glug.Tokenizer;
@@ -205,6 +207,10 @@ namespace GeminiLab.Gliep.Dumper {
             }));
 
             try {
+                var j1 = GlosUnitJsonSerializer.ToJson(unit);
+                
+                Console.WriteLine(j1.ToString(JsonStringifyOption.Inline | JsonStringifyOption.Compact | JsonStringifyOption.AsciiOnly));
+                
                 vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);
             } catch (Exception ex) {
                 Console.WriteLine($@"{ex.GetType().Name}: {ex.Message}");
