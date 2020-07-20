@@ -198,5 +198,9 @@ namespace GeminiLab.Glug.AST {
             Visit(val.Child);
             Writer.DecreaseIndent();
         }
+
+        public override void VisitPseudoIndex(PseudoIndex val) {
+            Writer.WriteLine($"<pseudo-index-{(val.IsTail ? "tail" : "head")}>");
+        }
     }
 }

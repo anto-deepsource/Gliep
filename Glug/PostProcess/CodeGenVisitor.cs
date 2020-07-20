@@ -406,5 +406,9 @@ namespace GeminiLab.Glug.PostProcess {
         public override void VisitToValue(ToValue val, CodeGenContext arg) {
             visitForValue(val.Child, arg.CurrentFunction);
         }
+
+        public override void VisitPseudoIndex(PseudoIndex val, CodeGenContext arg) {
+            throw new InvalidOperationException();
+        }
     }
 }

@@ -23,6 +23,8 @@ namespace GeminiLab.Glug.Parser {
                    || type == GlugTokenType.SymbolBang
                    || type == GlugTokenType.SymbolBangBang
                    || type == GlugTokenType.SymbolBackquote
+                   || type == GlugTokenType.SymbolBra
+                   || type == GlugTokenType.SymbolKet
                 ;
         }
 
@@ -291,6 +293,11 @@ namespace GeminiLab.Glug.Parser {
                 return rv;
             }
 
+            if (tok.Type == GlugTokenType.SymbolBra || tok.Type == GlugTokenType.SymbolKet) {
+                Stream.GetToken();
+                return new PseudoIndex(tok.Type == GlugTokenType.SymbolKet);
+            }
+            
             return tok.Type switch {
                 GlugTokenType.SymbolLParen => (Expr)ReadBlockInParen(),
                 GlugTokenType.KeywordIf => ReadIf(),

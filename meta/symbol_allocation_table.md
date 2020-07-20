@@ -23,6 +23,7 @@
 - `<`: less than
   - `<<`: left shift
   - `<=`: less than or equal to
+  - `<|`: pseudo-index head
 - `>`: greater than
   - `>>`: right shift
   - `>=`: greater than or equal to
@@ -37,6 +38,7 @@
 - `` ` ``: metatable
 - `{` `}`: table literal
 - `|`: or
+  - `|>`: pseudo-index tail
   - `||`: short-circuit or
 - `~`: not
   - `~=`: not equal to

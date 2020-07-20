@@ -205,6 +205,9 @@ namespace GeminiLab.Glug.Tokenizer {
                 
                 [".!"] = GlugTokenType.SymbolDotBang,
                 ["@!"] = GlugTokenType.SymbolAtBang,
+                
+                ["<|"] = GlugTokenType.SymbolBra,
+                ["|>"] = GlugTokenType.SymbolKet,
             });
         }
 

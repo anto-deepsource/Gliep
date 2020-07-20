@@ -257,4 +257,11 @@ namespace GeminiLab.Glug.AST {
         
         public Expr Child { get; }
     }
+
+    public class PseudoIndex : Expr {
+        public PseudoIndex(bool isTail) {
+            IsTail = isTail;
+        }
+        public bool IsTail { get; }
+    }
 }

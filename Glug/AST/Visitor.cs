@@ -31,6 +31,8 @@ namespace GeminiLab.Glug.AST {
         public abstract void VisitSysCall(SysCall val);
         public abstract void VisitToValue(ToValue val);
 
+        public abstract void VisitPseudoIndex(PseudoIndex val);
+
         protected virtual void PreVisit(Node node) { }
 
         protected virtual void PostVisit(Node node) { }
@@ -96,6 +98,9 @@ namespace GeminiLab.Glug.AST {
             case ToValue tv:
                 VisitToValue(tv);
                 break;
+            case PseudoIndex pi:
+                VisitPseudoIndex(pi);
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
             }
@@ -115,6 +120,8 @@ namespace GeminiLab.Glug.AST {
         public override void VisitLiteralNil(LiteralNil val) { }
 
         public override void VisitVarRef(VarRef val) { }
+
+        public override void VisitPseudoIndex(PseudoIndex val) { }
 
         public override void VisitIf(If val) {
             foreach (var (cond, expr) in val.Branches) {
@@ -208,6 +215,8 @@ namespace GeminiLab.Glug.AST {
 
         public abstract void VisitSysCall(SysCall val, TParameter arg);
         public abstract void VisitToValue(ToValue val, TParameter arg);
+        
+        public abstract void VisitPseudoIndex(PseudoIndex val, TParameter arg);
 
         protected virtual void PreVisit(Node node) { }
 
@@ -274,6 +283,9 @@ namespace GeminiLab.Glug.AST {
             case ToValue tv:
                 VisitToValue(tv, arg);
                 break;
+            case PseudoIndex pi:
+                VisitPseudoIndex(pi, arg);
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
             }
@@ -294,6 +306,8 @@ namespace GeminiLab.Glug.AST {
         public override void VisitLiteralNil(LiteralNil val, TParameter arg) { }
 
         public override void VisitVarRef(VarRef val, TParameter arg) { }
+
+        public override void VisitPseudoIndex(PseudoIndex val, TParameter arg) { }
 
         public override void VisitIf(If val, TParameter arg) {
             foreach (var (cond, expr) in val.Branches) {
