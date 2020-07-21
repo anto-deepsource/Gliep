@@ -236,13 +236,17 @@ namespace GeminiLab.Glug.PostProcess {
                 case VarRef vr:
                     _info.Variable[vr].CreateStoreInstr(parent);
                     break;
-                case BiOp { Op: GlugBiOpType.Index, ExprL: var table, ExprR: var index }:
-                    visitForValue(table, parent);
+                case BiOp { Op: GlugBiOpType.Index, ExprL: var indexee, ExprR: PseudoIndex { IsTail: var isTail } }:
+                    visitForValue(indexee, parent);
+                    parent.AppendPshv();
+                    break;
+                case BiOp { Op: GlugBiOpType.Index, ExprL: var indexee, ExprR: var index }:
+                    visitForValue(indexee, parent);
                     visitForValue(index, parent);
                     parent.AppendUen();
                     break;
-                case BiOp { Op: GlugBiOpType.IndexLocal, ExprL: var table, ExprR: var index }:
-                    visitForValue(table, parent);
+                case BiOp { Op: GlugBiOpType.IndexLocal, ExprL: var indexee, ExprR: var index }:
+                    visitForValue(indexee, parent);
                     visitForValue(index, parent);
                     parent.AppendUenL();
                     break;
@@ -307,6 +311,17 @@ namespace GeminiLab.Glug.PostProcess {
                 visitForValue(val.ExprR, parent);
                 
                 parent.InsertLabel(labelEnd);
+
+                if (!ru) parent.AppendPop();
+            } else if (val.Op == GlugBiOpType.Index && val.ExprR is PseudoIndex { IsTail: var isTail }) {
+                visitForValue(val.ExprL, parent);
+                if (isTail) {
+                    parent.AppendPopv();
+                } else {
+                    throw new NotImplementedException();
+                }
+                
+                if (!ru) parent.AppendPop();
             } else {
                 visitForValue(val.ExprL, parent);
                 visitForValue(val.ExprR, parent);
