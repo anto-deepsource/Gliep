@@ -93,6 +93,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendIen() => AppendInstruction(GlosOp.Ien);
         public void AppendPshv() => AppendInstruction(GlosOp.Pshv);
         public void AppendPopv() => AppendInstruction(GlosOp.Popv);
+        public void AppendIniv() => AppendInstruction(GlosOp.Iniv);
         public void AppendNot() => AppendInstruction(GlosOp.Not);
         public void AppendNeg() => AppendInstruction(GlosOp.Neg);
         public void AppendTypeof() => AppendInstruction(GlosOp.Typeof);

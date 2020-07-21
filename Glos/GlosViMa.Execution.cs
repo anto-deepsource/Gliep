@@ -180,11 +180,17 @@ namespace GeminiLab.Glos {
                         popStack(2);
                         break;
                     case GlosOpCategory.TableVectorOperator when op == GlosOp.Pshv:
-                        stackTop(1).AssertVector().Push(in stackTop());
+                        stackTop().AssertVector().Push(in stackTop(1));
                         popStack(2);
                         break;
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Popv:
-                        stackTop().AssertVector().Pop();
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Popv: {
+                        ref var tail = ref stackTop().AssertVector().PopRef();
+                        stackTop() = tail;
+                        tail.SetNil();
+                        break;
+                    }
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Iniv:
+                        stackTop(1).AssertVector().Push(in stackTop());
                         popStack();
                         break;
                     case GlosOpCategory.UnaryOperator:

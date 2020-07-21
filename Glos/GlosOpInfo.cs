@@ -60,7 +60,7 @@ namespace GeminiLab.Glos {
             // 0x18
             GlosOpCategory.TableVectorOperator,
             GlosOpCategory.TableVectorOperator,
-            GlosOpCategory.NotUsed,
+            GlosOpCategory.TableVectorOperator,
             GlosOpCategory.NotUsed,
             GlosOpCategory.UnaryOperator,
             GlosOpCategory.UnaryOperator,

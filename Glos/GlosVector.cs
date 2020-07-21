@@ -22,6 +22,10 @@ namespace GeminiLab.Glos {
             _list.PopStack().SetNil();
         }
 
+        public ref GlosValue PopRef() {
+            return ref _list.PopStack();
+        }
+
         internal GlosStack<GlosValue> Container() => _list;
     }
 }
