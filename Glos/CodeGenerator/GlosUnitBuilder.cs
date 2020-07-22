@@ -14,6 +14,8 @@ namespace GeminiLab.Glos.CodeGenerator {
             _stringList.Add(str);
             return _stringTable[str] = _stringTable.Count;
         }
+
+        public int StringCount => _stringTable.Count;
         #endregion
 
         #region function table
@@ -34,6 +36,8 @@ namespace GeminiLab.Glos.CodeGenerator {
         }
 
         public int Entry { get; set; }
+
+        public int FunctionCount => _func;
         #endregion
         
         public GlosUnit GetResult() {

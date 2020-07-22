@@ -227,6 +227,33 @@ namespace XUnitTester.Glug {
         }
 
         [Fact]
+        public void VectorBase() {
+            var code = @"
+                a = {| 1, 1, 2, 3, 5, 8, 13 |};
+                a @ |> = 21;
+                a @ |> = 34;
+                b = a @ |>;
+                [a, b]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertVector(vec => {
+                    GlosValueArrayChecker.Create(vec.AsMemory())
+                        .FirstOne().AssertInteger(1)
+                        .MoveNext().AssertInteger(1)
+                        .MoveNext().AssertInteger(2)
+                        .MoveNext().AssertInteger(3)
+                        .MoveNext().AssertInteger(5)
+                        .MoveNext().AssertInteger(8)
+                        .MoveNext().AssertInteger(13)
+                        .MoveNext().AssertInteger(21)
+                        .MoveNext().AssertEnd();
+                })
+                .MoveNext().AssertInteger(34)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
         public void ProvidedEnv() {
             var code = @"
                 !a = 1;

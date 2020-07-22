@@ -6,7 +6,7 @@ namespace XUnitTester.Glug {
         internal GlosViMa ViMa { get; } = new GlosViMa();
 
         public GlosValue[] Execute(string source, GlosContext? context = null) {
-            var unit = TypicalCompiler.Compile(source);
+            using var unit = TypicalCompiler.Compile(source);
 
             return ViMa.ExecuteUnit(unit, null, context ?? new GlosContext(null!));
         }

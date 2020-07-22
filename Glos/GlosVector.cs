@@ -1,3 +1,5 @@
+using System;
+
 namespace GeminiLab.Glos {
     public class GlosVector {
         private readonly GlosStack<GlosValue> _list;
@@ -27,5 +29,7 @@ namespace GeminiLab.Glos {
         }
 
         internal GlosStack<GlosValue> Container() => _list;
+
+        public Memory<GlosValue> AsMemory() => _list.AsMemory();
     }
 }

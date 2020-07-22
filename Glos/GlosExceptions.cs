@@ -53,6 +53,24 @@ namespace GeminiLab.Glos {
         public int Index { get; }
     }
 
+    public class GlosStringIndexOutOfRangeException : GlosException {
+        public GlosStringIndexOutOfRangeException(int index, string? message = null)
+            : base(message ?? "") { // TODO: add exception message here
+            Index = index;
+        }
+        
+        public int Index { get; }
+    }
+    
+    public class GlosFunctionIndexOutOfRangeException : GlosException {
+        public GlosFunctionIndexOutOfRangeException(int index, string? message = null)
+            : base(message ?? "") { // TODO: add exception message here
+            Index = index;
+        }
+        
+        public int Index { get; }
+    }
+
     public class GlosInvalidInstructionPointerException : GlosException {
         public GlosInvalidInstructionPointerException(string? message = null)
             : base(message ?? string.Format(i18n.Strings.DefaultMessageGlosInvalidInstructionPointerException)) {

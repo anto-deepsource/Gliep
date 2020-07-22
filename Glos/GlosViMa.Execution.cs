@@ -211,12 +211,12 @@ namespace GeminiLab.Glos {
                         popStack(2);
                         break;
                     case GlosOpCategory.LoadFunction when imms > unit.FunctionTable.Count || imms < 0:
-                        throw new ArgumentOutOfRangeException();
+                        throw new GlosFunctionIndexOutOfRangeException((int)imms);
                     case GlosOpCategory.LoadFunction:
                         pushStack().SetFunction(new GlosFunction(unit.FunctionTable[(int)imms]!, null!));
                         break;
                     case GlosOpCategory.LoadString when imms > unit.StringTable.Count || imms < 0:
-                        throw new ArgumentOutOfRangeException();
+                        throw new GlosStringIndexOutOfRangeException((int)imms);
                     case GlosOpCategory.LoadString:
                         pushStack().SetString(unit.StringTable[(int)imms]);
                         break;

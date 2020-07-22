@@ -150,5 +150,39 @@ namespace XUnitTester.Glos {
             Assert.Equal(GlosValueType.String, exception.Operand.Type);
             Assert.Equal("", exception.Operand.AssumeString());
         }
+
+        [Fact]
+        public void IllLdStr() {
+            var fgen = Builder.AddFunction();
+
+            var invalidIndex = Builder.StringCount + 100;
+            fgen.AppendLdStr(invalidIndex);
+            fgen.AppendRet();
+
+            fgen.SetEntry();
+
+            var exception = GlosRuntimeExceptionCatcher.Catch<GlosStringIndexOutOfRangeException>(() => {
+                Execute();
+            });
+            
+            Assert.Equal(invalidIndex, exception.Index);
+        }
+        
+        [Fact]
+        public void IllLdFun() {
+            var fgen = Builder.AddFunction();
+
+            var invalidIndex = Builder.FunctionCount + 100;
+            fgen.AppendLdFun(invalidIndex);
+            fgen.AppendRet();
+
+            fgen.SetEntry();
+
+            var exception = GlosRuntimeExceptionCatcher.Catch<GlosFunctionIndexOutOfRangeException>(() => {
+                Execute();
+            });
+            
+            Assert.Equal(invalidIndex, exception.Index);
+        }
     }
 }

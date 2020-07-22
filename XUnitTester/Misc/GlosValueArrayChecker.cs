@@ -226,6 +226,8 @@ namespace XUnitTester.Misc {
 
         public static GlosValueArrayChecker Create(GlosValue[] target) => new GlosValueArrayChecker(target);
 
+        public static GlosValueArrayChecker Create(Memory<GlosValue> target) => new GlosValueArrayChecker(target);
+        
         public GlosValueArrayItemChecker FirstOne() => new GlosValueArrayItemChecker(this, 0);
     }
 

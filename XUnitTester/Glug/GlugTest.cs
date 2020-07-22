@@ -159,7 +159,7 @@ namespace XUnitTester.Glug {
         }
 
         [Fact]
-        public void Vector() { 
+        public void Vector2D() { 
             var code = @"
                 fn is_numeric[x] 'x == ""integer"" | 'x == ""float"";
 

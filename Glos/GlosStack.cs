@@ -28,6 +28,8 @@ namespace GeminiLab.Glos {
 
         protected T[] _items;
 
+        public Memory<T> AsMemory() => _items.AsMemory(0, Count);
+        
         public Span<T> AsSpan() => _items.AsSpan(0, Count);
 
         public Span<T> AsSpan(Index startIndex) => _items.AsSpan(startIndex..Count);
