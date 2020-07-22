@@ -178,6 +178,19 @@ namespace GeminiLab.Glug.AST {
             Writer.DecreaseIndent();
         }
 
+        public override void VisitVectorDef(VectorDef val) {
+            Writer.WriteLine("<vector-def>");
+            Writer.IncreaseIndent();
+            foreach (var item in val.Items) {
+                Visit(item);
+            }
+            Writer.DecreaseIndent();
+        }
+
+        public override void VisitPseudoIndex(PseudoIndex val) {
+            Writer.WriteLine($"<pseudo-index-{(val.IsTail ? "tail" : "head")}>");
+        }
+
         public override void VisitMetatable(Metatable val) {
             Writer.WriteLine("<metatable>");
             Writer.IncreaseIndent();
@@ -197,10 +210,6 @@ namespace GeminiLab.Glug.AST {
             Writer.IncreaseIndent();
             Visit(val.Child);
             Writer.DecreaseIndent();
-        }
-
-        public override void VisitPseudoIndex(PseudoIndex val) {
-            Writer.WriteLine($"<pseudo-index-{(val.IsTail ? "tail" : "head")}>");
         }
     }
 }

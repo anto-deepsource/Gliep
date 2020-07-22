@@ -208,6 +208,8 @@ namespace GeminiLab.Glug.Tokenizer {
                 
                 ["<|"] = GlugTokenType.SymbolBra,
                 ["|>"] = GlugTokenType.SymbolKet,
+                ["{|"] = GlugTokenType.SymbolVecBegin,
+                ["|}"] = GlugTokenType.SymbolVecEnd,
             });
         }
 

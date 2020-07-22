@@ -215,12 +215,28 @@ namespace GeminiLab.Glug.AST {
         public IList<TableDefPair> Pairs { get; }
     }
 
+    public class VectorDef : Expr {
+        public VectorDef(IList<Expr> items) {
+            Items = items;
+        }
+        
+        public IList<Expr> Items { get; }
+    }
+
     public class Metatable : Expr {
         public Metatable(Expr table) {
             Table = table;
         }
 
         public Expr Table { get; }
+    }
+
+    public class PseudoIndex : Expr {
+        public PseudoIndex(bool isTail) {
+            IsTail = isTail;
+        }
+        
+        public bool IsTail { get; }
     }
 
     // Following are node types which are not used directly by Glug itself but critical for tools based on Glug.
@@ -256,12 +272,5 @@ namespace GeminiLab.Glug.AST {
         }
         
         public Expr Child { get; }
-    }
-
-    public class PseudoIndex : Expr {
-        public PseudoIndex(bool isTail) {
-            IsTail = isTail;
-        }
-        public bool IsTail { get; }
     }
 }

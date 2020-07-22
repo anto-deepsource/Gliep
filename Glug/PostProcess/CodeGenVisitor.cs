@@ -397,13 +397,30 @@ namespace GeminiLab.Glug.PostProcess {
             if (!ru) parent.AppendPop();
         }
 
+        public override void VisitVectorDef(VectorDef val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            
+            parent.AppendLdNVec();
+
+            foreach (var item in val.Items) {
+                visitForValue(item, parent);
+                parent.AppendIniv();
+            }
+            
+            if (!ru) parent.AppendPop();
+        }
+        
         public override void VisitMetatable(Metatable val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
             visitForValue(val.Table, parent);
             parent.AppendGmt();
             if (!ru) parent.AppendPop();
         }
-
+        
+        public override void VisitPseudoIndex(PseudoIndex val, CodeGenContext arg) {
+            throw new InvalidOperationException();
+        }
+        
         public override void VisitSysCall(SysCall val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
 
@@ -420,10 +437,6 @@ namespace GeminiLab.Glug.PostProcess {
 
         public override void VisitToValue(ToValue val, CodeGenContext arg) {
             visitForValue(val.Child, arg.CurrentFunction);
-        }
-
-        public override void VisitPseudoIndex(PseudoIndex val, CodeGenContext arg) {
-            throw new InvalidOperationException();
         }
     }
 }

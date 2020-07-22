@@ -307,6 +307,7 @@ namespace GeminiLab.Glug.Parser {
                 GlugTokenType.KeywordFn => ReadFunction(),
                 GlugTokenType.SymbolLBracket => ReadOnStackList(),
                 GlugTokenType.SymbolLBrace => ReadTableDef(),
+                GlugTokenType.SymbolVecBegin => ReadVectorDef(),
                 _ => throw new ArgumentOutOfRangeException(),
             };
         }
@@ -426,17 +427,13 @@ namespace GeminiLab.Glug.Parser {
             var rv = new List<Expr>();
 
             Consume(GlugTokenType.SymbolLBracket);
-            for (;;) {
-                var tok = Stream.PeekToken();
-                if (tok.Type == GlugTokenType.SymbolRBracket) break;
+            
+            while (true) {
+                if (Stream.PeekToken().Type == GlugTokenType.SymbolRBracket) break;
+                
                 rv.Add(ReadExprGreedily());
 
-                tok = Stream.PeekToken();
-                if (tok.Type != GlugTokenType.SymbolComma) {
-                    break;
-                }
-
-                Consume(GlugTokenType.SymbolComma);
+                if (Stream.PeekToken().Type == GlugTokenType.SymbolComma) Consume(GlugTokenType.SymbolComma);
             }
 
             Consume(GlugTokenType.SymbolRBracket);
@@ -466,13 +463,30 @@ namespace GeminiLab.Glug.Parser {
 
                 rv.Add(new TableDefPair(key, ReadExprGreedily()));
 
-                tok = Stream.PeekToken();
-                if (tok.Type == GlugTokenType.SymbolComma) Consume(GlugTokenType.SymbolComma);
+                if (Stream.PeekToken().Type == GlugTokenType.SymbolComma) Consume(GlugTokenType.SymbolComma);
             }
 
             Consume(GlugTokenType.SymbolRBrace);
 
             return new TableDef(rv);
+        }
+
+        protected virtual VectorDef ReadVectorDef() {
+            var list = new List<Expr>();
+            
+            Consume(GlugTokenType.SymbolVecBegin);
+
+            while (true) {
+                if (Stream.PeekToken().Type == GlugTokenType.SymbolVecEnd) break;
+
+                list.Add(ReadExprGreedily());
+                
+                if (Stream.PeekToken().Type == GlugTokenType.SymbolComma) Consume(GlugTokenType.SymbolComma);
+            }
+            
+            Consume(GlugTokenType.SymbolVecEnd);
+            
+            return new VectorDef(list);
         }
     }
 }

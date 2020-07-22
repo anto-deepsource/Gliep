@@ -25,13 +25,15 @@ namespace GeminiLab.Glug.AST {
         public abstract void VisitBiOp(BiOp val);
 
         public abstract void VisitTableDef(TableDef val);
+        public abstract void VisitVectorDef(VectorDef val);
 
         public abstract void VisitMetatable(Metatable val);
 
+        public abstract void VisitPseudoIndex(PseudoIndex val);
+        
         public abstract void VisitSysCall(SysCall val);
         public abstract void VisitToValue(ToValue val);
 
-        public abstract void VisitPseudoIndex(PseudoIndex val);
 
         protected virtual void PreVisit(Node node) { }
 
@@ -89,17 +91,20 @@ namespace GeminiLab.Glug.AST {
             case TableDef tdef:
                 VisitTableDef(tdef);
                 break;
+            case VectorDef vdef:
+                VisitVectorDef(vdef);
+                break;
             case Metatable mt:
                 VisitMetatable(mt);
+                break;
+            case PseudoIndex pi:
+                VisitPseudoIndex(pi);
                 break;
             case SysCall sc:
                 VisitSysCall(sc);
                 break;
             case ToValue tv:
                 VisitToValue(tv);
-                break;
-            case PseudoIndex pi:
-                VisitPseudoIndex(pi);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -173,6 +178,12 @@ namespace GeminiLab.Glug.AST {
             }
         }
 
+        public override void VisitVectorDef(VectorDef val) {
+            foreach (var item in val.Items) {
+                Visit(item);
+            }
+        }
+
         public override void VisitMetatable(Metatable val) {
             Visit(val.Table);
         }
@@ -210,13 +221,15 @@ namespace GeminiLab.Glug.AST {
         public abstract void VisitBiOp(BiOp val, TParameter arg);
 
         public abstract void VisitTableDef(TableDef val, TParameter arg);
-
+        public abstract void VisitVectorDef(VectorDef val, TParameter arg);
+        
         public abstract void VisitMetatable(Metatable val, TParameter arg);
 
+        public abstract void VisitPseudoIndex(PseudoIndex val, TParameter arg);
+        
         public abstract void VisitSysCall(SysCall val, TParameter arg);
         public abstract void VisitToValue(ToValue val, TParameter arg);
         
-        public abstract void VisitPseudoIndex(PseudoIndex val, TParameter arg);
 
         protected virtual void PreVisit(Node node) { }
 
@@ -274,17 +287,20 @@ namespace GeminiLab.Glug.AST {
             case TableDef tdef:
                 VisitTableDef(tdef, arg);
                 break;
+            case VectorDef vdef:
+                VisitVectorDef(vdef, arg);
+                break;
             case Metatable mt:
                 VisitMetatable(mt, arg);
+                break;
+            case PseudoIndex pi:
+                VisitPseudoIndex(pi, arg);
                 break;
             case SysCall sc:
                 VisitSysCall(sc, arg);
                 break;
             case ToValue tv:
                 VisitToValue(tv, arg);
-                break;
-            case PseudoIndex pi:
-                VisitPseudoIndex(pi, arg);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -360,6 +376,12 @@ namespace GeminiLab.Glug.AST {
             foreach (var (key, value) in val.Pairs) {
                 Visit(key, arg);
                 Visit(value, arg);
+            }
+        }
+
+        public override void VisitVectorDef(VectorDef val, TParameter arg) {
+            foreach (var item in val.Items) {
+                Visit(item, arg);
             }
         }
 

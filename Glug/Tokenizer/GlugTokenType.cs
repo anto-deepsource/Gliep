@@ -68,6 +68,8 @@ namespace GeminiLab.Glug.Tokenizer {
         SymbolAtBang        = 0x001_02a_00,
         SymbolBra           = 0x001_02b_00,
         SymbolKet           = 0x001_02c_00,
+        SymbolVecBegin      = 0x001_02d_00,
+        SymbolVecEnd        = 0x001_02e_00,
 
         OpCall              = 0x002_000_04,
         
