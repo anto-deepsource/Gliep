@@ -1,10 +1,8 @@
 using System;
-
 using GeminiLab.Glos;
-
 using Xunit;
 
-namespace XUnitTester.Misc {
+namespace GeminiLab.XUnitTester.Gliep.Misc {
     public static class GlosRuntimeExceptionCatcher {
         public static TInner Catch<TInner>(Action action) where TInner : GlosException {
             var exception = Assert.Throws<GlosRuntimeException>(action);

@@ -1,8 +1,8 @@
 using GeminiLab.Glos;
+using GeminiLab.XUnitTester.Gliep.Misc;
 using Xunit;
-using XUnitTester.Misc;
 
-namespace XUnitTester.Glos {
+namespace GeminiLab.XUnitTester.Gliep.Glos {
     public class Exceptions : GlosTestBase {
         [Fact]
         public void BadBranch() {

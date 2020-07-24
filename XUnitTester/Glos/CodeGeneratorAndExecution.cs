@@ -4,10 +4,10 @@ using System.Globalization;
 using GeminiLab.Core2;
 using GeminiLab.Glos;
 using GeminiLab.Glos.CodeGenerator;
+using GeminiLab.XUnitTester.Gliep.Misc;
 using Xunit;
-using XUnitTester.Misc;
 
-namespace XUnitTester.Glos {
+namespace GeminiLab.XUnitTester.Gliep.Glos {
     public class CodeGeneratorAndExecution : GlosTestBase {
         [Fact]
         public void NumericArithmeticOp() {

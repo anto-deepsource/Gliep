@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <Configurations>Develop;Preview;Release</Configurations>
+    <RootNamespace>GeminiLab.XUnitTester.Gliep</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

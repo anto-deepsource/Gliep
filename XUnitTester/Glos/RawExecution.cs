@@ -1,9 +1,9 @@
 using System.Linq;
 using GeminiLab.Glos;
+using GeminiLab.XUnitTester.Gliep.Misc;
 using Xunit;
-using XUnitTester.Misc;
 
-namespace XUnitTester.Glos {
+namespace GeminiLab.XUnitTester.Gliep.Glos {
     public class RawExecution : GlosTestBase {
         [Fact]
         public void Return0() {

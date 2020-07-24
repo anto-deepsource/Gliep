@@ -1,7 +1,7 @@
 using GeminiLab.Glos;
 using GeminiLab.Glug;
 
-namespace XUnitTester.Glug {
+namespace GeminiLab.XUnitTester.Gliep.Glug {
     public class GlugExecutionTestBase {
         internal GlosViMa ViMa { get; } = new GlosViMa();
 

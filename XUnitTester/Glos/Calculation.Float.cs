@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using GeminiLab.Core2.Random;
 using GeminiLab.Core2.Random.RNG;
 using GeminiLab.Glos;
+using GeminiLab.XUnitTester.Gliep.Misc;
 using Xunit;
-using XUnitTester.Misc;
 
-namespace XUnitTester.Glos {
+namespace GeminiLab.XUnitTester.Gliep.Glos {
     public partial class Calculation : GlosTestBase {
         private static GlosOp[] FloatBiOpList { get; } = new[] {
             GlosOp.Add, GlosOp.Sub, GlosOp.Mul, GlosOp.Div,

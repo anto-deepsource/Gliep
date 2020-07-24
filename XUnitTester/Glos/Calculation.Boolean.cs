@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using GeminiLab.Glos;
+using GeminiLab.XUnitTester.Gliep.Misc;
 using Xunit;
-using XUnitTester.Misc;
 
-namespace XUnitTester.Glos {
+namespace GeminiLab.XUnitTester.Gliep.Glos {
     public partial class Calculation {
         private static GlosOp[] BooleanBiOpList { get; } = new[] {
             GlosOp.And, GlosOp.Orr, GlosOp.Xor, GlosOp.Equ, GlosOp.Neq,

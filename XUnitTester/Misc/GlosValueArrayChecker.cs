@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 using GeminiLab.Glos;
 using Xunit;
 
-namespace XUnitTester.Misc {
+namespace GeminiLab.XUnitTester.Gliep.Misc {
     public class GlosValueArrayItemChecker {
         public GlosValueArrayChecker Checker { get; }
         public int Position { get; private set; }
@@ -30,6 +29,7 @@ namespace XUnitTester.Misc {
         }
 
         public GlosValueArrayItemChecker AssertNil() {
+            AssertPositionInRange();
             Current.AssertNil();
             return this;
         }
@@ -112,6 +112,12 @@ namespace XUnitTester.Misc {
             AssertPositionInRange();
             Current.AssertFloat();
             Assert.True(binaryRepresentationPredicate(unchecked((ulong)Current.ValueNumber.Integer)));
+            return this;
+        }
+
+        public GlosValueArrayItemChecker AssertFloatInRange(float lower, float upper) {
+            AssertPositionInRange();
+            Assert.InRange(Current.AssertFloat(), lower, upper);
             return this;
         }
 
@@ -216,63 +222,12 @@ namespace XUnitTester.Misc {
         public Memory<GlosValue> Target { get; }
         public int Length => Target.Length;
 
-        public GlosValueArrayChecker(GlosValue[] target) {
-            Target = target;
-        }
-
         public GlosValueArrayChecker(Memory<GlosValue> target) {
             Target = target;
         }
 
-        public static GlosValueArrayChecker Create(GlosValue[] target) => new GlosValueArrayChecker(target);
-
         public static GlosValueArrayChecker Create(Memory<GlosValue> target) => new GlosValueArrayChecker(target);
         
         public GlosValueArrayItemChecker FirstOne() => new GlosValueArrayItemChecker(this, 0);
-    }
-
-    public class GlosTableChecker {
-        public GlosTable Table { get; }
-
-        public GlosTableChecker(GlosTable table) {
-            Table = table;
-        }
-
-        public static GlosTableChecker Create(GlosTable table) => new GlosTableChecker(table);
-
-        public GlosTableChecker HasNot(GlosValue key) {
-            Assert.False(Table.TryReadEntryLocally(key, out _));
-            return this;
-        }
-
-        public GlosTableChecker Has(GlosValue key) {
-            _keysVisited.Add(key);
-            Assert.True(Table.TryReadEntryLocally(key, out _));
-            return this;
-        }
-
-        public GlosTableChecker Has(GlosValue key, Action<GlosValue> valueChecker) {
-            _keysVisited.Add(key);
-            Assert.True(Table.TryReadEntryLocally(key, out var value));
-            valueChecker(value);
-            return this;
-        }
-
-        public GlosTableChecker Has(GlosValue key, Predicate<GlosValue> valuePredicate) {
-            _keysVisited.Add(key);
-            Assert.True(Table.TryReadEntryLocally(key, out var value));
-            Assert.True(valuePredicate(value));
-            return this;
-        }
-
-        private HashSet<GlosValue> _keysVisited = new HashSet<GlosValue>();
-        public GlosTableChecker AssertAllKeyChecked() { 
-            Assert.Equal(Table.Count, _keysVisited.Count);
-            foreach (var key in Table.Keys) {
-                Assert.Contains(key, _keysVisited);
-            }
-
-            return this;
-        }
     }
 }

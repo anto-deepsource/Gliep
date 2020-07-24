@@ -1,10 +1,10 @@
 using GeminiLab.Glos;
 using GeminiLab.Glug;
 using GeminiLab.Glug.AST;
+using GeminiLab.XUnitTester.Gliep.Misc;
 using Xunit;
-using XUnitTester.Misc;
 
-namespace XUnitTester.Glug {
+namespace GeminiLab.XUnitTester.Gliep.Glug {
     public class ASTTest : GlugTest {
         [Fact]
         public void SysCallAndToValueTest() {

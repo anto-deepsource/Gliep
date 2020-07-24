@@ -1,10 +1,10 @@
 using GeminiLab.Core2.Text;
 using GeminiLab.Glos;
 using GeminiLab.Glug;
+using GeminiLab.XUnitTester.Gliep.Misc;
 using Xunit;
-using XUnitTester.Misc;
 
-namespace XUnitTester.Glug {
+namespace GeminiLab.XUnitTester.Gliep.Glug {
     public class BasicStructures : GlugExecutionTestBase {
         [Fact]
         public void Return0() {

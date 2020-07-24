@@ -4,10 +4,10 @@ using GeminiLab.Core2.Random;
 using GeminiLab.Core2.Random.RNG;
 using GeminiLab.Core2.Yielder;
 using GeminiLab.Glos;
+using GeminiLab.XUnitTester.Gliep.Misc;
 using Xunit;
-using XUnitTester.Misc;
 
-namespace XUnitTester.Glug {
+namespace GeminiLab.XUnitTester.Gliep.Glug {
     public class GlugTest : GlugExecutionTestBase {
 
         [Fact]
