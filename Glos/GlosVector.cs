@@ -31,5 +31,7 @@ namespace GeminiLab.Glos {
         internal GlosStack<GlosValue> Container() => _list;
 
         public Memory<GlosValue> AsMemory() => _list.AsMemory();
+
+        public int Count => _list.Count;
     }
 }

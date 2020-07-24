@@ -1,13 +1,5 @@
 # TODO list
 
-## X-lang
-
-### About table
-
-- Glug language needs lists. An acceptable approach is to make tables here more lua-like, which means
-  - Integer index optimization. (Glos)
-  - Extended table literal syntax. (Glug)
-
 ## Glos
 
 ### GlosUnit

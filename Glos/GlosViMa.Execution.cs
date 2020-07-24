@@ -151,30 +151,74 @@ namespace GeminiLab.Glos {
                             stackTop().SetNil();
                         }
                         break;
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Ren:
-                        if (stackTop(1).AssertTable().TryReadEntry(stackTop(), out temp)) {
-                            stackTop(1) = temp;
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Ren: {
+                        ref var target = ref stackTop(1);
+
+                        if (target.Type == GlosValueType.Vector) {
+                            var vec = target.AssumeVector();
+                            var idx = stackTop().ValueNumber.Integer;
+                            if (stackTop().Type == GlosValueType.Integer && idx >= 0 && idx < vec.Count) {
+                                target = vec[(int)idx];
+                            } else {
+                                target.SetNil();
+                            }
                         } else {
-                            stackTop(1).SetNil();
+                            if (target.AssertTable().TryReadEntry(stackTop(), out temp)) {
+                                target = temp;
+                            } else {
+                                target.SetNil();
+                            }
                         }
+
                         popStack();
                         break;
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Uen:
-                        stackTop(1).AssertTable().UpdateEntry(stackTop(), stackTop(2));
+                    }
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Uen: {
+                        ref var target = ref stackTop(1);
+
+                        if (target.Type == GlosValueType.Vector) {
+                            stackTop(1).AssumeVector()[(int)stackTop().AssertInteger()] = stackTop(2);
+                        } else {
+                            stackTop(1).AssertTable().UpdateEntry(stackTop(), stackTop(2));
+                        }
+
                         popStack(3);
                         break;
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.RenL:
-                        if (stackTop(1).AssertTable().TryReadEntryLocally(stackTop(), out temp)) {
-                            stackTop(1) = temp;
+                    }
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.RenL: {
+                        ref var target = ref stackTop(1);
+
+                        if (target.Type == GlosValueType.Vector) {
+                            var vec = target.AssumeVector();
+                            var idx = stackTop().ValueNumber.Integer;
+                            if (stackTop().Type == GlosValueType.Integer && idx >= 0 && idx < vec.Count) {
+                                target = vec[(int)idx];
+                            } else {
+                                target.SetNil();
+                            }
                         } else {
-                            stackTop(1).SetNil();
+                            if (target.AssertTable().TryReadEntryLocally(stackTop(), out temp)) {
+                                target = temp;
+                            } else {
+                                target.SetNil();
+                            }
                         }
+
                         popStack();
                         break;
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.UenL:
-                        stackTop(1).AssertTable().UpdateEntryLocally(stackTop(), stackTop(2));
+                    }
+                    case GlosOpCategory.TableVectorOperator when op == GlosOp.UenL: {
+                        ref var target = ref stackTop(1);
+
+                        if (target.Type == GlosValueType.Vector) {
+                            stackTop(1).AssumeVector()[(int)stackTop().AssertInteger()] = stackTop(2);
+                        } else {
+                            stackTop(1).AssertTable().UpdateEntryLocally(stackTop(), stackTop(2));
+                        }
+
                         popStack(3);
                         break;
+                    }
                     case GlosOpCategory.TableVectorOperator when op == GlosOp.Ien:
                         stackTop(2).AssertTable().UpdateEntryLocally(stackTop(1), stackTop());
                         popStack(2);
