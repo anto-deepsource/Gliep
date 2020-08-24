@@ -224,7 +224,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
         [Fact]
         public void TableHash() {
             var code = @"
-                mt = { .__hash: v -> v.x, .__equ: [x, y] -> x.x == y.x };
+                mt = { .__hash: v -> v.x % 4, .__equ: [x, y] -> x.x % 4 == y.x % 4 };
 
                 fn ntb[x] (
                     rv = { .x: x };
@@ -236,7 +236,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 k@[ntb[0]] = 0;
                 k@[ntb[1]] = 1;
 
-                [k @ (ntb 1), k @ (ntb 0)]
+                [k @ (ntb 101), k @ (ntb 100)]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -405,48 +405,6 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
 
             GlosValueArrayChecker.Create(Execute(code))
                 .FirstOne().AssertFloatAbsoluteError(expected, epsilon)
-                .MoveNext().AssertEnd();
-        }
-
-        [Fact]
-        public void TableIndex() {
-            var code = @"
-                # Evil metatable
-                mt = {
-                    .__ren: [t, k] -> k,
-                    .__uen: [t, k, v] -> (),
-                };
-                
-                `(!a = { .x: 1, .y: 2 }) = mt;
-                `(!b = { .x: 3, .y: 4 }) = mt;
-                
-                [rt0, rt1, rt2, rt3, rt4, rt5, rt6, rt7] = [a.x, a.y, a.!x, a.!y, b.x, b.y, b.!x, b.!y];
-                
-                a@""x"" = 5; a@!""y"" = 6;
-                b@""x"" = 7; b@!""y"" = 8;
-                
-                [rt8, rt9, rta, rtb, rtc, rtd, rte, rtf] = [a.x, a.y, a.!x, a.!y, b.x, b.y, b.!x, b.!y];
-                
-                [rt0, rt1, rt2, rt3, rt4, rt5, rt6, rt7, rt8, rt9, rta, rtb, rtc, rtd, rte, rtf]
-            ";
-
-            GlosValueArrayChecker.Create(Execute(code))
-                .FirstOne().AssertString("x")
-                .MoveNext().AssertString("y")
-                .MoveNext().AssertInteger(1)
-                .MoveNext().AssertInteger(2)
-                .MoveNext().AssertString("x")
-                .MoveNext().AssertString("y")
-                .MoveNext().AssertInteger(3)
-                .MoveNext().AssertInteger(4)
-                .MoveNext().AssertString("x")
-                .MoveNext().AssertString("y")
-                .MoveNext().AssertInteger(1)
-                .MoveNext().AssertInteger(6)
-                .MoveNext().AssertString("x")
-                .MoveNext().AssertString("y")
-                .MoveNext().AssertInteger(3)
-                .MoveNext().AssertInteger(8)
                 .MoveNext().AssertEnd();
         }
     }
