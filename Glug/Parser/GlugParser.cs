@@ -11,7 +11,7 @@ namespace GeminiLab.Glug.Parser {
 
         protected virtual bool LikelyExpr(GlugTokenType type) {
             return type.GetCategory() == GlugTokenTypeCategory.Literal
-                   || IsUnOp(type)
+                   || IsSymbolUnOp(type)
                    || type == GlugTokenType.Identifier
                    || type == GlugTokenType.SymbolLParen
                    || type == GlugTokenType.KeywordIf
@@ -122,16 +122,14 @@ namespace GeminiLab.Glug.Parser {
             _ => throw new ArgumentOutOfRangeException(),
         };
 
-        protected virtual bool IsUnOp(GlugTokenType op) => 
+        protected virtual bool IsSymbolUnOp(GlugTokenType op) => 
             op == GlugTokenType.SymbolSub ||
             op == GlugTokenType.SymbolNot ||
-            op == GlugTokenType.SymbolQuote ||
             op == GlugTokenType.SymbolQuery;
 
         protected virtual GlugUnOpType UnOpFromToken(GlugTokenType op) => op switch {
             GlugTokenType.SymbolSub => GlugUnOpType.Neg,
             GlugTokenType.SymbolNot => GlugUnOpType.Not,
-            GlugTokenType.SymbolQuote => GlugUnOpType.Typeof,
             GlugTokenType.SymbolQuery => GlugUnOpType.IsNil,
             _ => throw new ArgumentOutOfRangeException(),
         };
@@ -255,8 +253,9 @@ namespace GeminiLab.Glug.Parser {
                     _ => throw new ArgumentOutOfRangeException()
                 };
             }
-
-            if (IsUnOp(tok.Type)) {
+            
+            
+            if (IsSymbolUnOp(tok.Type)) {
                 Stream.GetToken();
 
                 if (tok.Type != GlugTokenType.SymbolSub) return new UnOp(UnOpFromToken(tok.Type), ReadExprItem());
@@ -264,12 +263,20 @@ namespace GeminiLab.Glug.Parser {
                 var item = ReadExprItem();
                 if (item is LiteralInteger li) return new LiteralInteger(unchecked(-li.Value));
                 return new UnOp(GlugUnOpType.Neg, item);
-
             }
             
             if (tok.Type == GlugTokenType.SymbolBackquote) {
                 Stream.GetToken();
-                return new Metatable(ReadExprItem());
+
+               
+                return ReadIdentifier() switch {
+                    "meta" => new Metatable(ReadExprItem()),
+                    "type" => new UnOp(GlugUnOpType.Typeof, ReadExprItem()),
+                    "isnil" => new UnOp(GlugUnOpType.IsNil, ReadExprItem()),
+                    "neg" => new UnOp(GlugUnOpType.Neg, ReadExprItem()),
+                    "not" => new UnOp(GlugUnOpType.Not, ReadExprItem()),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
             }
 
             VarRef? vr = null;

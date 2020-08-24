@@ -1,4 +1,4 @@
 {
-    .is_numeric: x -> 'x == "integer" | 'x == "float",
+    .is_numeric: x -> `type x == "integer" | `type x == "float",
     .sqrt: !!__built_in_sqrt,
 }

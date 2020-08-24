@@ -14,7 +14,7 @@ return !complex = {
 
     .__str: c -> format["{0} + {1}i", c.r, c.i],
 
-    .new: [r, i] -> (rv = { .r: r, .i: i }; `rv = complex; rv),
+    .new: [r, i] -> (rv = { .r: r, .i: i }; `meta rv = complex; rv),
     .mod2: c -> c.r * c.r + c.i * c.i,
     .mod: c -> math.sqrt$complex.mod2$c,
     .conj: c -> complex.new[c.r, -c.i],

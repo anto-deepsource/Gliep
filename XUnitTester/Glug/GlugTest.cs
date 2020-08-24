@@ -161,7 +161,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
         [Fact]
         public void Vector2D() { 
             var code = @"
-                fn is_numeric[x] 'x == ""integer"" | 'x == ""float"";
+                fn is_numeric[x] `type x == ""integer"" | `type x == ""float"";
 
                 vector = { 
                     .__add: [a, b] -> vector.new[a.x + b.x, a.y + b.y],
@@ -173,7 +173,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                     .__equ: [a, b] -> a.x == b.x & a.y == b.y,
                     .__neg: v -> vector.new[-v.x, -v.y],
 
-                    .new: [x, y] -> (rv = { .x: x, .y: y }; `rv = vector; rv),
+                    .new: [x, y] -> (rv = { .x: x, .y: y }; `meta rv = vector; rv),
                     .len2: v -> v * v,
                 };
 
@@ -228,7 +228,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
 
                 fn ntb[x] (
                     rv = { .x: x };
-                    `rv = mt;
+                    `meta rv = mt;
                     rv;
                 );
 
@@ -286,7 +286,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                     .__xor: [x, y] -> i128.new[x.hi ^ y.hi, x.lo ^ y.lo],
                     .__not: v -> i128.new[~(x.hi), ~(x.lo)],
 
-                    .new: [hi, lo] -> (rv = { .hi: hi, .lo: lo }; `rv = i128; rv),
+                    .new: [hi, lo] -> (rv = { .hi: hi, .lo: lo }; `meta rv = i128; rv),
                 };
 
 

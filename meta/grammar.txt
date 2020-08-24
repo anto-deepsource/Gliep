@@ -31,7 +31,7 @@ ExprItem    : literal
             | TableDef
             | "-" ExprItem
             | "~" ExprItem
-            | "`" ExprItem
+            | "`" identifier ExprItem
             | BlockInParen
             | If
             | While

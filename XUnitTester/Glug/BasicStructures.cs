@@ -22,7 +22,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
         [Fact]
         public void Evaluation() {
             var code = @"
-                return [1, -2, 2--2, nil == (), nil ~= `{}, -(1 + 2), 3.14159,]
+                return [1, -2, 2--2, nil == (), nil ~= `meta {}, -(1 + 2), 3.14159,]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -211,7 +211,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 a = { .a: 1, .b: 2, ""dd"": 0, @e: 0 };
                 [a.c, a@""dd"", b, !mt] = [3, (a@e = 5) - 1, { .a: a.ee },  { .__add: [x, y] -> x.a + y.a }];
                 
-                [`a, `b] = [mt, mt];
+                [`meta a, `meta b] = [mt, mt];
 
                 [a.a, a.b, a.c, a.dd, a.ee, a + b]
             ";
@@ -305,8 +305,8 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                     .__uen: [t, k, v] -> (),
                 };
                 
-                `(!a = { .x: 1, .y: 2 }) = mt;
-                `(!b = { .x: 3, .y: 4 }) = mt;
+                `meta(!a = { .x: 1, .y: 2 }) = mt;
+                `meta(!b = { .x: 3, .y: 4 }) = mt;
                 
                 [rt0, rt1, rt2, rt3, rt4, rt5, rt6, rt7] = [a.x, a.y, a.!x, a.!y, b.x, b.y, b.!x, b.!y];
                 

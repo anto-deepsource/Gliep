@@ -8,7 +8,6 @@
 - `%`: modulus
 - `&`: and
   - `&&`: short-circuit and
-- `'`: typeof
 - `(` `)`: block
 - `*`: multiplication
 - `+`: addition
@@ -35,7 +34,7 @@
   - `@!`: index locally by variable
 - `[` `]`: on stack list
 - `^`: xor
-- `` ` ``: metatable
+- `` ` ``: unary op prefix
 - `{` `}`: table literal
 - `|`: or
   - `|>`: pseudo-index tail
@@ -46,3 +45,4 @@
 ## Not used yet
 
 - `\`
+- `'`
