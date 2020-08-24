@@ -158,6 +158,10 @@ namespace GeminiLab.Glug.PostProcess {
             parent.InsertLabel(endLabel);
         }
 
+        public override void VisitFor(For val, CodeGenContext arg) {
+            throw new NotImplementedException();
+        }
+
         public override void VisitReturn(Return val, CodeGenContext ctx) {
             var (parent, _) = ctx;
 

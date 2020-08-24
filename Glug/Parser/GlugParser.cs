@@ -28,6 +28,13 @@ namespace GeminiLab.Glug.Parser {
                 ;
         }
 
+        protected virtual bool LikelyVarRef(GlugTokenType type) {
+            return type == GlugTokenType.Identifier
+                   || type == GlugTokenType.SymbolBang
+                   || type == GlugTokenType.SymbolBangBang
+                ;
+        }
+
         protected virtual GlugBiOpType BiOpFromTokenType(GlugTokenType op) => op switch {
             GlugTokenType.SymbolAssign => GlugBiOpType.Assign,
             GlugTokenType.SymbolQueryQuery => GlugBiOpType.NullCoalescing,
@@ -279,19 +286,8 @@ namespace GeminiLab.Glug.Parser {
                 };
             }
 
-            VarRef? vr = null;
-            if (tok.Type == GlugTokenType.SymbolBang) {
-                Stream.GetToken();
-                vr = new VarRef(ReadIdentifier(), isDef: true);
-            } else if (tok.Type == GlugTokenType.SymbolBangBang) {
-                Stream.GetToken();
-                vr = new VarRef(ReadIdentifier(), isGlobal: true);
-            } else if (tok.Type == GlugTokenType.Identifier) {
-                vr = new VarRef(ReadIdentifier());
-            }
-
-            if (vr != null) {
-                Expr rv = vr;
+            if (LikelyVarRef(tok.Type)) {
+                Expr rv = ReadVarRef();
                 while (!Stream.NextEof() && Stream.PeekToken().Type == GlugTokenType.SymbolDot) {
                     Stream.GetToken();
                     rv = new BiOp(GlugBiOpType.Index, rv, new LiteralString(ReadIdentifier()));
@@ -299,6 +295,7 @@ namespace GeminiLab.Glug.Parser {
 
                 return rv;
             }
+            
 
             if (tok.Type == GlugTokenType.SymbolBra || tok.Type == GlugTokenType.SymbolKet) {
                 Stream.GetToken();
@@ -309,6 +306,7 @@ namespace GeminiLab.Glug.Parser {
                 GlugTokenType.SymbolLParen => (Expr)ReadBlockInParen(),
                 GlugTokenType.KeywordIf => ReadIf(),
                 GlugTokenType.KeywordWhile => ReadWhile(),
+                GlugTokenType.KeywordFor => ReadFor(),
                 GlugTokenType.KeywordBreak => ReadBreak(),
                 GlugTokenType.KeywordReturn => ReadReturn(),
                 GlugTokenType.KeywordFn => ReadFunction(),
@@ -317,6 +315,22 @@ namespace GeminiLab.Glug.Parser {
                 GlugTokenType.SymbolVecBegin => ReadVectorDef(),
                 _ => throw new ArgumentOutOfRangeException(),
             };
+        }
+
+        protected virtual VarRef ReadVarRef() {
+            var tok = Stream.PeekToken();
+            
+            if (tok.Type == GlugTokenType.SymbolBang) {
+                Stream.GetToken();
+                return new VarRef(ReadIdentifier(), isDef: true);
+            } else if (tok.Type == GlugTokenType.SymbolBangBang) {
+                Stream.GetToken();
+                return new VarRef(ReadIdentifier(), isGlobal: true);
+            } else if (tok.Type == GlugTokenType.Identifier) {
+                return new VarRef(ReadIdentifier());
+            }
+            
+            throw new ArgumentOutOfRangeException();
         }
 
         protected virtual string ReadIdentifier() {
@@ -368,6 +382,31 @@ namespace GeminiLab.Glug.Parser {
             return new While(expr, block);
         }
 
+        protected virtual For ReadFor() {
+            var iv = new List<VarRef>();
+            Expr expr, body;
+
+            Consume(GlugTokenType.KeywordFor);
+            Consume(GlugTokenType.SymbolLParen);
+
+            var tok = Stream.PeekToken();
+            while (LikelyVarRef(tok.Type)) {
+                iv.Add(ReadVarRef());
+                
+                if (Stream.PeekToken().Type == GlugTokenType.SymbolColon) break;
+                
+                Consume(GlugTokenType.SymbolComma);
+                tok = Stream.PeekToken();
+            }
+            
+            Consume(GlugTokenType.SymbolColon);
+            expr = ReadExprGreedily();
+            Consume(GlugTokenType.SymbolRParen);
+
+            body = ReadExprGreedily();
+            return new For(iv, expr, body);
+        }
+        
         protected virtual Break ReadBreak() {
             Consume(GlugTokenType.KeywordBreak);
             return new Break(ReadOptionalExpr() ?? new OnStackList(new List<Expr>()));

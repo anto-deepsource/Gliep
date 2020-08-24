@@ -83,6 +83,26 @@ namespace GeminiLab.Glug.AST {
             Writer.DecreaseIndent();
         }
 
+        public override void VisitFor(For val) {
+            Writer.WriteLine("for");
+            Writer.IncreaseIndent();
+            Writer.WriteLine("<iter-vals>");
+            Writer.IncreaseIndent();
+            foreach (var varRef in val.IteratorVariables) {
+                Visit(varRef);
+            }
+            Writer.DecreaseIndent();
+            Writer.WriteLine("<expr>");
+            Writer.IncreaseIndent();
+            Visit(val.Expression);
+            Writer.DecreaseIndent();
+            Writer.WriteLine("<body>");
+            Writer.IncreaseIndent();
+            Visit(val.Body);
+            Writer.DecreaseIndent();
+            Writer.DecreaseIndent();
+        }
+
         public override void VisitReturn(Return val) {
             Writer.WriteLine("<return>");
             Writer.IncreaseIndent();

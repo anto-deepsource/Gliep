@@ -53,3 +53,13 @@ d = x * 3 - 4 * -y;
 e = x * 5;
 
 print[c, d, e];
+
+############################################
+
+for (i: range[0, 10]) print i;
+
+!vec = {| 9, 8, 7, 6 |};
+
+for (j: iter vec) print j;
+for (index, value: pairs vec) print[index, value]; 
+

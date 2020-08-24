@@ -87,6 +87,18 @@ namespace GeminiLab.Glug.AST {
         public Expr Body { get; }
     }
 
+    public class For : Expr {
+        public For(IList<VarRef> iteratorVariables, Expr expression, Expr body) {
+            IteratorVariables = iteratorVariables;
+            Expression = expression;
+            Body = body;
+        }
+        
+        public IList<VarRef> IteratorVariables { get; }
+        public Expr Expression { get; }
+        public Expr Body { get; }
+    }
+
     public class Return : Expr {
         public Return(Expr expr) {
             Expr = expr;

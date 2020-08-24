@@ -35,6 +35,7 @@ ExprItem    : literal
             | BlockInParen
             | If
             | While
+            | For
             | Return
             | Break
             | Function
@@ -58,6 +59,9 @@ If          : "if" BlockInParen Expr ( "elif" BlockInParen Expr )* ( "else" Expr
             ;
 
 While       : "while" BlockInParen Expr
+            ;
+
+For         : "for" "(" identifier ("," identifier)* ":" expr ")" Expr
             ;
 
 Return      : "return" Expr?
