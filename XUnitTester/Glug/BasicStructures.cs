@@ -22,7 +22,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
         [Fact]
         public void Evaluation() {
             var code = @"
-                return [1, -2, 2--2, nil == (), nil ~= `meta {}, -(1 + 2), 3.14159,]
+                return [1, -2, 2--2, nil == (), nil ~= `meta {}, `neg (1 + 2), 3.14159,]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -56,7 +56,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
             var code = $@"
                 !a = if (true) 1;
                 !b = if (false) 2;
-                [!c, !d] = if (?a) [3, 3, 3] elif (?b) [4, 5, 6] else 5;
+                [!c, !d] = if (`isnil a) [3, 3, 3] elif (?b) [4, 5, 6] else 5;
                 !e;
                 if (c == d) (
                     e = false;
