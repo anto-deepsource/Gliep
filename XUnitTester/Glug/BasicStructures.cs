@@ -268,7 +268,23 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .MoveNext().AssertInteger(2)
                 .MoveNext().AssertEnd();
         }
+        
+        [Fact]
+        public void ForLoop() {
+            var code = @"
+                fn range[max] (
+                    !x = -1;
+                    return fn[] if (x + 1 < max) x = x + 1
+                );
 
+                for (v: range[16]) v;
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(15)
+                .MoveNext().AssertEnd();
+        }
+        
         [Fact]
         public void ShortCircuitOperators() {
             var code = @"
