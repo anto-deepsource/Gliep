@@ -34,6 +34,18 @@ namespace GeminiLab.Glug.PostProcess {
             else if (val.IsGlobal) _info.Variable[val] = RootTable.CreateVariable(val.Id);
         }
 
+        public override void VisitFor(For val, VariableTable currentScope) {
+            if (!_info.PrivateVariables.ContainsKey(val)) {
+                _info.PrivateVariables[val] = new Dictionary<string, Variable>();
+            }
+
+            _info.PrivateVariables[val][For.PrivateVariableNameIterateFunction] = currentScope.CreatePrivateVariable(For.PrivateVariableNameIterateFunction);
+            _info.PrivateVariables[val][For.PrivateVariableNameStatus] = currentScope.CreatePrivateVariable(For.PrivateVariableNameStatus);
+            _info.PrivateVariables[val][For.PrivateVariableNameIterator] = currentScope.CreatePrivateVariable(For.PrivateVariableNameIterator);
+            
+            base.VisitFor(val, currentScope);
+        }
+
         // place this function here temporarily, TODO: find a better place for it
         public void DetermineVariablePlace() {
             foreach (var function in Functions) {

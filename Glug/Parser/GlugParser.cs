@@ -16,6 +16,7 @@ namespace GeminiLab.Glug.Parser {
                    || type == GlugTokenType.SymbolLParen
                    || type == GlugTokenType.KeywordIf
                    || type == GlugTokenType.KeywordWhile
+                   || type == GlugTokenType.KeywordFor
                    || type == GlugTokenType.KeywordReturn
                    || type == GlugTokenType.KeywordFn
                    || type == GlugTokenType.SymbolLBracket

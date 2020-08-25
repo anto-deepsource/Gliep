@@ -56,10 +56,16 @@ print[c, d, e];
 
 ############################################
 
-for (i: range[0, 10]) print i;
+#for (i: range[0, 10]) print i;
+#!vec = {| 9, 8, 7, 6 |};
+#for (j: iter vec) print j;
+#for (index, value: pairs vec) print[index, value]; 
 
-!vec = {| 9, 8, 7, 6 |};
+fn range[max] (
+    !x = -1;
+    return fn[] if (x + 1 < max) x = x + 1
+    # return [fn[s, v] (print["in iterfun", s, v]; if (x + 1 < max) x = x + 1), "status", -1]
+);
 
-for (j: iter vec) print j;
-for (index, value: pairs vec) print[index, value]; 
-
+for (v: range[10]) print v;
+print for (v: range[16]) v;

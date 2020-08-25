@@ -158,8 +158,59 @@ namespace GeminiLab.Glug.PostProcess {
             parent.InsertLabel(endLabel);
         }
 
-        public override void VisitFor(For val, CodeGenContext arg) {
-            throw new NotImplementedException();
+        public override void VisitFor(For val, CodeGenContext ctx) {
+            var (parent, ru) = ctx;
+            var endLabel = parent.AllocateLabel();
+            
+            if (ru) {
+                if (_info.IsOnStackList[val]) parent.AppendLdDel();
+                else parent.AppendLdNil();
+            }
+
+            var pvFunc = _info.PrivateVariables[val][For.PrivateVariableNameIterateFunction];
+            var pvStatus = _info.PrivateVariables[val][For.PrivateVariableNameStatus];
+            var pvIterator = _info.PrivateVariables[val][For.PrivateVariableNameIterator];
+            
+            var iterVarOsl = new OnStackList(new List<Expr>(val.IteratorVariables));
+
+            visitForOsl(val.Expression, parent);
+            parent.AppendShpRv(3);
+            
+            pvIterator.CreateStoreInstr(parent);
+            pvStatus.CreateStoreInstr(parent);
+            pvFunc.CreateStoreInstr(parent);
+            
+            var beginLabel = parent.AllocateAndInsertLabel();
+            
+            parent.AppendLdDel();
+            pvStatus.CreateLoadInstr(parent);
+            pvIterator.CreateLoadInstr(parent);
+            pvFunc.CreateLoadInstr(parent);
+            parent.AppendCall();
+
+            parent.AppendDupList();
+            createStoreInstr(iterVarOsl, parent);
+            
+            parent.AppendShpRv(1);
+            parent.AppendDup();
+            pvIterator.CreateStoreInstr(parent);
+            parent.AppendBn(endLabel);
+            
+            if (ru) {
+                if (_info.IsOnStackList[val]) parent.AppendShpRv(0);
+                else parent.AppendPop();
+            }
+
+            parent.AppendLdDel();
+            
+            if (!ru) visitForDiscard(val.Body, parent);
+            else if (_info.IsOnStackList[val]) visitForOsl(val.Body, parent);
+            else visitForValue(val.Body, parent);
+
+            parent.AppendPopDel();
+            parent.AppendB(beginLabel);
+            
+            parent.InsertLabel(endLabel);
         }
 
         public override void VisitReturn(Return val, CodeGenContext ctx) {
@@ -232,7 +283,8 @@ namespace GeminiLab.Glug.PostProcess {
 
         private void createStoreInstr(Node node, GlosFunctionBuilder parent) {
             switch (node) {
-                case OnStackList { List: var list } osl when _info.IsAssignable[osl]:
+                // allow pseudo ast nodes
+                case OnStackList { List: var list } osl when !_info.IsAssignable.TryGetValue(osl, out var assignable) || assignable:
                     var count = list.Count;
                     parent.AppendShpRv(count);
                     for (int i = count - 1; i >= 0; --i) createStoreInstr(list[i], parent);

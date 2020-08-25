@@ -26,6 +26,12 @@ namespace GeminiLab.Glug.PostProcess {
             _info.IsOnStackList[val] = _info.IsOnStackList[val.Body] || _info.Breaks[val].Any(b => _info.IsOnStackList[b]);
         }
 
+        public override void VisitFor(For val) {
+            base.VisitFor(val);
+
+            _info.IsOnStackList[val] = _info.IsOnStackList[val.Body];
+        }
+
         public override void VisitBreak(Break val) {
             base.VisitBreak(val);
 

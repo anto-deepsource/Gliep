@@ -10,8 +10,7 @@ namespace GeminiLab.Glug.PostProcess {
             CurrentScope = currentScope;
             AllowImplicitDeclaration = allowImplicitDeclaration;
         }
-
-
+        
         public void Deconstruct(out VariableTable currentScope, out bool implicitDeclaration) =>
             (currentScope, implicitDeclaration) = (CurrentScope, AllowImplicitDeclaration);
     }
@@ -30,6 +29,17 @@ namespace GeminiLab.Glug.PostProcess {
             _info.Variable[val]?.MarkAssigned();
 
             base.VisitFunction(val, new VarRefVisitorContext(_info.VariableTable[val], false));
+        }
+
+        public override void VisitFor(For val, VarRefVisitorContext ctx) {
+            var (scope, _) = ctx;
+
+            foreach (var varRef in val.IteratorVariables) {
+                Visit(varRef, new VarRefVisitorContext(scope, true));
+            }
+            
+            Visit(val.Expression, ctx);
+            Visit(val.Body, ctx);
         }
 
         public override void VisitBiOp(BiOp val, VarRefVisitorContext ctx) {

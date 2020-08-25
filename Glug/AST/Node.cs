@@ -88,6 +88,10 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class For : Expr {
+        public const string PrivateVariableNameIterateFunction = "iter_fun";
+        public const string PrivateVariableNameStatus = "status";
+        public const string PrivateVariableNameIterator = "iterator";
+        
         public For(IList<VarRef> iteratorVariables, Expr expression, Expr body) {
             IteratorVariables = iteratorVariables;
             Expression = expression;

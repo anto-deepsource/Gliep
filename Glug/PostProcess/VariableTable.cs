@@ -141,6 +141,12 @@ namespace GeminiLab.Glug.PostProcess {
             return Parent != null && Parent.TryLookupVariable(name, out variable);
         }
 
+        private const string privateVariablePrefix = "<pv>";
+        private int _privateVariableCount = -1;
+        public Variable CreatePrivateVariable(string? hint = null) {
+            return CreateVariable(privateVariablePrefix + "_" + (hint ?? " ") + "_" + (_privateVariableCount += 1));
+        }
+        
         public Variable CreateVariable(string name) {
             if (_variables.TryGetValue(name, out var rv)) return rv;
             return _variables[name] = Variable.Create(this, name);
