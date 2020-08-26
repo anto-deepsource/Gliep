@@ -8,6 +8,50 @@ using GeminiLab.Glos;
 using GeminiLab.Glug;
 
 namespace GeminiLab.Gliep {
+    public class Functions {
+        private readonly GlosViMa _vm;
+        public Functions(GlosViMa vm) {
+            _vm = vm;
+        }
+
+        [GlosBuiltInFunction("print")]
+        public GlosValue[] Print(params GlosValue[] values) {
+            Console.WriteLine(values.Select(x => _vm.Calculator.Stringify(x)).JoinBy(" "));
+
+            return Array.Empty<GlosValue>();
+        }
+        
+        [GlosBuiltInFunction("debug")]
+        public GlosValue[] Debug(params GlosValue[] values) {
+            Console.WriteLine(values.Select(x => GlosValue.Calculator.DebugStringify(x)).JoinBy(" "));
+
+            return Array.Empty<GlosValue>();
+        }
+
+        [GlosBuiltInFunction("format")]
+        public GlosValue[] Format(string format, params GlosValue[] values) {
+            var args = values.Select(x => x.Type switch {
+                GlosValueType.Nil => "nil",
+                GlosValueType.Integer => x.AssumeInteger(),
+                GlosValueType.Float => x.AssumeFloat(),
+                GlosValueType.Boolean => x.AssumeBoolean(),
+                _ => x.ValueObject,
+            }).ToArray();
+
+            return new GlosValue[] { string.Format(format, args: args) };
+        }
+
+        [GlosBuiltInFunction("iter")]
+        public GlosValue[] Iter(GlosVector vec) {
+            var len = vec.Count;
+            var idx = -1;
+
+            return new GlosValue[] {
+                (GlosExternalFunction)(p => new[] { ++idx >= len ? GlosValue.NewNil() : vec[idx] })
+            };
+        }
+    }
+
     public static class Program {
         public static void AddBuiltInFunctions(GlosContext ctx) { }
 
@@ -29,30 +73,7 @@ namespace GeminiLab.Gliep {
             }
 
             var global = new GlosContext(null!);
-            global.CreateVariable("print", GlosValue.NewExternalFunction(param => {
-                Console.WriteLine(param.Select(x => vm.Calculator.Stringify(x)).JoinBy(" "));
-
-                return Array.Empty<GlosValue>();
-            }));
-            global.CreateVariable("debug", GlosValue.NewExternalFunction(param => {
-                Console.WriteLine(param.Select(x => GlosValue.Calculator.DebugStringify(x)).JoinBy(" "));
-
-                return Array.Empty<GlosValue>();
-            }));
-            global.CreateVariable("format", GlosValue.NewExternalFunction(param => {
-                if (param.Length <= 0) return new GlosValue[] {""};
-
-                var format = param[0].AssertString();
-                var args = param[1..].Select(x => x.Type switch {
-                    GlosValueType.Nil     => "nil",
-                    GlosValueType.Integer => x.AssumeInteger(),
-                    GlosValueType.Float   => x.AssumeFloat(),
-                    GlosValueType.Boolean => x.AssumeBoolean(),
-                    _                     => x.ValueObject,
-                }).ToArray();
-
-                return new GlosValue[] {string.Format(format, args: args)};
-            }));
+            GlosBuiltInFunctionGenerator.AddFromInstanceFunctions(new Functions(vm), global);
             global.CreateVariable("require", GlosValue.NewExternalFunction(param => {
                 var callerUnit = vm.CallStackFrames[^1].Function.Prototype.Unit;
                 var callerLoc = unit2Location.TryGetValue(callerUnit, out var cl) ? cl : "./.pseudo";
@@ -71,18 +92,10 @@ namespace GeminiLab.Gliep {
 
                 return requireCache[target] = vm.ExecuteUnit(newUnit, Array.Empty<GlosValue>(), global);
             }));
-            global.CreateVariable("iter", GlosValue.NewExternalFunction(param => {
-                var vec = param[0].AssertVector();
-                var len = vec.Count;
-                var idx = -1;
-                
-                return new GlosValue[] {
-                    (GlosExternalFunction)(p => new[] { ++idx >= len ? GlosValue.NewNil() : vec[idx] })
-                };
-            }));
-            global.CreateVariable("__built_in_sqrt", GlosValue.NewExternalFunction(param => {
-                return new GlosValue[] { Math.Sqrt(param[0].Type == GlosValueType.Integer ? param[0].AssumeInteger() : param[0].AssumeFloat()) };
-            }));
+            global.CreateVariable("__built_in_sqrt",
+                GlosValue.NewExternalFunction(param => {
+                    return new GlosValue[] { Math.Sqrt(param[0].Type == GlosValueType.Integer ? param[0].AssumeInteger() : param[0].AssumeFloat()) };
+                }));
 
             try {
                 vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);
