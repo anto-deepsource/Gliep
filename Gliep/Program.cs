@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using GeminiLab.Core2;
 using GeminiLab.Core2.Collections;
 using GeminiLab.Glos;
@@ -10,6 +9,8 @@ using GeminiLab.Glug;
 
 namespace GeminiLab.Gliep {
     public static class Program {
+        public static void AddBuiltInFunctions(GlosContext ctx) { }
+
         public static void Main(string[] args) {
             var vm = new GlosViMa();
             var unit2Location = new Dictionary<GlosUnit, string>();
@@ -26,7 +27,7 @@ namespace GeminiLab.Gliep {
                 using var input = new StreamReader(new FileStream(entryLoc, FileMode.Open, FileAccess.Read));
                 unit2Location[unit = location2Unit[entryLoc] = TypicalCompiler.Compile(input, entryLoc)] = entryLoc;
             }
-            
+
             var global = new GlosContext(null!);
             global.CreateVariable("print", GlosValue.NewExternalFunction(param => {
                 Console.WriteLine(param.Select(x => vm.Calculator.Stringify(x)).JoinBy(" "));
@@ -39,18 +40,18 @@ namespace GeminiLab.Gliep {
                 return Array.Empty<GlosValue>();
             }));
             global.CreateVariable("format", GlosValue.NewExternalFunction(param => {
-                if (param.Length <= 0) return new GlosValue[] { "" };
+                if (param.Length <= 0) return new GlosValue[] {""};
 
                 var format = param[0].AssertString();
                 var args = param[1..].Select(x => x.Type switch {
-                    GlosValueType.Nil => "nil",
+                    GlosValueType.Nil     => "nil",
                     GlosValueType.Integer => x.AssumeInteger(),
-                    GlosValueType.Float => x.AssumeFloat(),
+                    GlosValueType.Float   => x.AssumeFloat(),
                     GlosValueType.Boolean => x.AssumeBoolean(),
-                    _ => x.ValueObject,
+                    _                     => x.ValueObject,
                 }).ToArray();
 
-                return new GlosValue[] { string.Format(format, args: args) };
+                return new GlosValue[] {string.Format(format, args: args)};
             }));
             global.CreateVariable("require", GlosValue.NewExternalFunction(param => {
                 var callerUnit = vm.CallStackFrames[^1].Function.Prototype.Unit;
@@ -66,9 +67,18 @@ namespace GeminiLab.Gliep {
                 var newUnit = TypicalCompiler.Compile(targetFS, target);
 
                 unit2Location[newUnit] = target;
-                location2Unit[target] = newUnit; 
+                location2Unit[target] = newUnit;
 
                 return requireCache[target] = vm.ExecuteUnit(newUnit, Array.Empty<GlosValue>(), global);
+            }));
+            global.CreateVariable("iter", GlosValue.NewExternalFunction(param => {
+                var vec = param[0].AssertVector();
+                var len = vec.Count;
+                var idx = -1;
+                
+                return new GlosValue[] {
+                    (GlosExternalFunction)(p => new[] { ++idx >= len ? GlosValue.NewNil() : vec[idx] })
+                };
             }));
             global.CreateVariable("__built_in_sqrt", GlosValue.NewExternalFunction(param => {
                 return new GlosValue[] { Math.Sqrt(param[0].Type == GlosValueType.Integer ? param[0].AssumeInteger() : param[0].AssumeFloat()) };

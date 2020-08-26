@@ -56,9 +56,8 @@ print[c, d, e];
 
 ############################################
 
-#for (i: range[0, 10]) print i;
-#!vec = {| 9, 8, 7, 6 |};
-#for (j: iter vec) print j;
+!vec = {| 9, 8, 7, 6 |};
+for (j: iter vec) print j;
 #for (index, value: pairs vec) print[index, value]; 
 
 fn range[max] (

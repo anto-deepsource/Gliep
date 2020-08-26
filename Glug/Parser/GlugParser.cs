@@ -24,6 +24,7 @@ namespace GeminiLab.Glug.Parser {
                    || type == GlugTokenType.SymbolBang
                    || type == GlugTokenType.SymbolBangBang
                    || type == GlugTokenType.SymbolBackquote
+                   || type == GlugTokenType.SymbolVecBegin
                    || type == GlugTokenType.SymbolBra
                    || type == GlugTokenType.SymbolKet
                 ;
