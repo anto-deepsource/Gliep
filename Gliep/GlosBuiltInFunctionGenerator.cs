@@ -50,6 +50,8 @@ namespace GeminiLab.Gliep {
                                 args.Add(unchecked((int)pi.AssertInteger()));
                             } else if (paramType == typeof(long)) {
                                 args.Add(pi.AssertInteger());
+                            } else if (paramType == typeof(double)) {
+                                args.Add(pi.ToFloat());
                             } else if (paramType == typeof(string)) {
                                 args.Add(pi.AssertString());
                             } else if (paramType == typeof(GlosVector)) {

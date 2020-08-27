@@ -181,31 +181,7 @@ namespace GeminiLab.Gliep.Dumper {
             var vm = new GlosViMa();
 
             var global = new GlosContext(null!);
-            global.CreateVariable("print", GlosValue.NewExternalFunction(param => {
-                Console.WriteLine(param.Select(x => vm.Calculator.Stringify(x)).JoinBy(" "));
-
-                return Array.Empty<GlosValue>();
-            }));
-            global.CreateVariable("debug", GlosValue.NewExternalFunction(param => {
-                Console.WriteLine(param.Select(x => GlosValue.Calculator.DebugStringify(x)).JoinBy(" "));
-
-                return Array.Empty<GlosValue>();
-            }));
-            global.CreateVariable("format", GlosValue.NewExternalFunction(param => {
-                if (param.Length <= 0) return new GlosValue[] { "" };
-
-                var format = param[0].AssertString();
-                var args = param[1..].Select(x => x.Type switch {
-                    GlosValueType.Nil => "nil",
-                    GlosValueType.Integer => x.ValueNumber.Integer,
-                    GlosValueType.Float => x.ValueNumber.Float,
-                    GlosValueType.Boolean => x.Truthy(),
-                    _ => x.ValueObject,
-                }).ToArray();
-
-                return new GlosValue[] { string.Format(format, args: args) };
-            }));
-
+            GlosBuiltInFunctionGenerator.AddFromInstanceFunctions(new Functions(vm), global);
             try {
                 var j1 = GlosUnitJsonSerializer.ToJson(unit);
                 

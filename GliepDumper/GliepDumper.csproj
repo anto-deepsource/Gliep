@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Gliep\Gliep.csproj" />
     <ProjectReference Include="..\Glos.Serialization\Glos.Serialization.csproj" />
     <ProjectReference Include="..\Glug\Glug.csproj" />
     <ProjectReference Include="..\Glos\Glos.csproj" />

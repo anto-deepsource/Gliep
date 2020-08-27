@@ -50,6 +50,13 @@ namespace GeminiLab.Gliep {
                 (GlosExternalFunction)(p => new[] { ++idx >= len ? GlosValue.NewNil() : vec[idx] })
             };
         }
+
+        [GlosBuiltInFunction("__built_in_sqrt")]
+        public GlosValue[] Sqrt(double val) {
+            return new GlosValue[] {
+                Math.Sqrt(val)
+            };
+        }
     }
 
     public static class Program {
@@ -92,10 +99,6 @@ namespace GeminiLab.Gliep {
 
                 return requireCache[target] = vm.ExecuteUnit(newUnit, Array.Empty<GlosValue>(), global);
             }));
-            global.CreateVariable("__built_in_sqrt",
-                GlosValue.NewExternalFunction(param => {
-                    return new GlosValue[] { Math.Sqrt(param[0].Type == GlosValueType.Integer ? param[0].AssumeInteger() : param[0].AssumeFloat()) };
-                }));
 
             try {
                 vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);

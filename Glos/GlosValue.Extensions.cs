@@ -144,6 +144,11 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GlosVector AssumeVector(this in GlosValue v) => (GlosVector)v.ValueObject!;
 
+        public static double ToFloat(this in GlosValue v) {
+            if (v.Type == GlosValueType.Float) return v.ValueNumber.Float;
+            if (v.Type == GlosValueType.Integer) return v.ValueNumber.Integer;
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Float);
+        }
 
         public static bool Truthy(this in GlosValue v) {
             if (v.Type == GlosValueType.Nil) return false;
