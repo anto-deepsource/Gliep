@@ -23,8 +23,8 @@ STEP = 2 * R / (N - 1);
 while (i < N) (
     !j = 0;
     !s = "";
-    while (j < N) (
-        t = time[complex.new[-R + j * STEP, R - i * STEP]];
+    while (j < N * 2) (
+        t = time[complex.new[-R + j * STEP / 2, R - i * STEP]];
         s = s + if (t == 0) " " elif (t == 1) "." elif (t == 2) "," elif (t <= 6) "*" elif (t <= 24) "%" else "@";
         j = j + 1;
     );
