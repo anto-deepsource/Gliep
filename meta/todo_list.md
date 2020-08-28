@@ -31,3 +31,9 @@
     a = require "a";
     a.foo[a.bar, a.taz]
     ```
+
+- [ ] *(2020/08/28)* Replace current unit manager with a `GliepEnv` class which:
+
+    - provides builtin functions
+    - manage vm and units
+    - etc

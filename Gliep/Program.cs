@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using GeminiLab.Core2;
 using GeminiLab.Core2.Collections;
@@ -10,6 +11,7 @@ using GeminiLab.Glug;
 namespace GeminiLab.Gliep {
     public class Functions {
         private readonly GlosViMa _vm;
+
         public Functions(GlosViMa vm) {
             _vm = vm;
         }
@@ -20,7 +22,7 @@ namespace GeminiLab.Gliep {
 
             return Array.Empty<GlosValue>();
         }
-        
+
         [GlosBuiltInFunction("debug")]
         public GlosValue[] Debug(params GlosValue[] values) {
             Console.WriteLine(values.Select(x => GlosValue.Calculator.DebugStringify(x)).JoinBy(" "));
@@ -31,11 +33,11 @@ namespace GeminiLab.Gliep {
         [GlosBuiltInFunction("format")]
         public GlosValue[] Format(string format, params GlosValue[] values) {
             var args = values.Select(x => x.Type switch {
-                GlosValueType.Nil => "nil",
+                GlosValueType.Nil     => "nil",
                 GlosValueType.Integer => x.AssumeInteger(),
-                GlosValueType.Float => x.AssumeFloat(),
+                GlosValueType.Float   => x.AssumeFloat(),
                 GlosValueType.Boolean => x.AssumeBoolean(),
-                _ => x.ValueObject,
+                _                     => x.ValueObject,
             }).ToArray();
 
             return new GlosValue[] { string.Format(format, args: args) };
@@ -47,7 +49,7 @@ namespace GeminiLab.Gliep {
             var idx = -1;
 
             return new GlosValue[] {
-                (GlosExternalFunction)(p => new[] { ++idx >= len ? GlosValue.NewNil() : vec[idx] })
+                (GlosExternalFunction) (p => new[] { ++idx >= len ? GlosValue.NewNil() : vec[idx] })
             };
         }
 
@@ -59,46 +61,50 @@ namespace GeminiLab.Gliep {
         }
     }
 
-    public static class Program {
-        public static void AddBuiltInFunctions(GlosContext ctx) { }
+    public class UnitManagerWrapper {
+        private readonly UnitManager _um;
+        private readonly IFileSystem _fs;
 
+        public UnitManagerWrapper(IFileSystem fs, GlosViMa viMa, GlosContext global) {
+            _um = new UnitManager(_fs = fs, viMa, global);
+        }
+
+        public void AddEntryManually(string entry, string entryLoc, GlosUnit unit) {
+            _um.AddUnit(new LoadedUnit(entry, _fs.FileInfo.FromFileName(entryLoc), unit, GlosValue.NewNil()));
+        }
+        
+        [GlosBuiltInFunction("require")]
+        public GlosValue[] Require(string key) {
+            return new[] { _um.Load(key).Result };
+        }
+    }
+
+    public static class Program {
         public static void Main(string[] args) {
             var vm = new GlosViMa();
-            var unit2Location = new Dictionary<GlosUnit, string>();
-            var location2Unit = new Dictionary<string, GlosUnit>();
-            var requireCache = new Dictionary<string, GlosValue[]>();
+            vm.WorkingDirectory = Environment.CurrentDirectory;
+            var entryLoc = "";
 
             GlosUnit unit;
             if (args.Length <= 0 || args[0] == "-") {
                 unit = TypicalCompiler.Compile(Console.In, @"<stdin>");
+                entryLoc = "./.1";
             } else if (args[0] == "-c") {
                 unit = TypicalCompiler.Compile(new StringReader(args.Skip(1).JoinBy("\n")), @"<commandline>");
+                entryLoc = "./.1";
             } else {
-                var entryLoc = new FileInfo(args[0]).FullName;
+                entryLoc = new FileInfo(args[0]).FullName;
                 using var input = new StreamReader(new FileStream(entryLoc, FileMode.Open, FileAccess.Read));
-                unit2Location[unit = location2Unit[entryLoc] = TypicalCompiler.Compile(input, entryLoc)] = entryLoc;
+                unit = TypicalCompiler.Compile(input, entryLoc);
             }
-
+            
             var global = new GlosContext(null!);
             GlosBuiltInFunctionGenerator.AddFromInstanceFunctions(new Functions(vm), global);
-            global.CreateVariable("require", GlosValue.NewExternalFunction(param => {
-                var callerUnit = vm.CallStackFrames[^1].Function.Prototype.Unit;
-                var callerLoc = unit2Location.TryGetValue(callerUnit, out var cl) ? cl : "./.pseudo";
-
-                var required = param[0].AssertString();
-
-                var target = Path.Join(new FileInfo(callerLoc).Directory?.FullName, required);
-
-                if (requireCache.TryGetValue(target, out var cached)) return cached;
-
-                using var targetFS = new StreamReader(new FileStream(target, FileMode.Open, FileAccess.Read));
-                var newUnit = TypicalCompiler.Compile(targetFS, target);
-
-                unit2Location[newUnit] = target;
-                location2Unit[target] = newUnit;
-
-                return requireCache[target] = vm.ExecuteUnit(newUnit, Array.Empty<GlosValue>(), global);
-            }));
+            
+            var umw = new UnitManagerWrapper(new FileSystem(), vm, global);
+            umw.AddEntryManually("entry", entryLoc, unit);
+            
+            GlosBuiltInFunctionGenerator.AddFromInstanceFunctions(umw, global);
 
             try {
                 vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);

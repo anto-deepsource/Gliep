@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Gliep": {
+      "commandName": "Project",
+      "commandLineArgs": "../../../../meta/example/mandelbrot.gl"
+    }
+  }
+}

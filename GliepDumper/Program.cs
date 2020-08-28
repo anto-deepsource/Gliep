@@ -179,6 +179,7 @@ namespace GeminiLab.Gliep.Dumper {
             }
 
             var vm = new GlosViMa();
+            vm.WorkingDirectory = Environment.CurrentDirectory;
 
             var global = new GlosContext(null!);
             GlosBuiltInFunctionGenerator.AddFromInstanceFunctions(new Functions(vm), global);
