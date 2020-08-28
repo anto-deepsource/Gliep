@@ -52,7 +52,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
         [Fact]
         public void Counter() {
             var code = @"
-                fn counter [begin,] ( begin = begin - 1; fn -> begin = begin + 1 ); # test duplicate comma here
+                fn counter [begin] ( begin = begin - 1; fn -> begin = begin + 1 );
                 [!ca, cb, !cc, cd] = [counter 0, counter(0), counter[7], counter$-1];
 
                 return [ca == cb, ca ~= cb, ca[], ca[], ca[], cb[], ca[], cc[], ca[], cd[], ca[]];

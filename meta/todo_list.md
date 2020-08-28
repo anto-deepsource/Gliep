@@ -32,8 +32,51 @@
     a.foo[a.bar, a.taz]
     ```
 
-- [ ] *(2020/08/28)* Replace current unit manager with a `GliepEnv` class which:
+- [ ] *(2020/08/28)* Replace current unit manager with a `GliepEnv` class
 
+    which:
     - provides builtin functions
     - manage vm and units
     - etc
+
+- [x] *(2020/08/29)* Make it clear where trailing separators are allowed/prohibited and make parser more strict
+
+    - [ ] **Prohibited** in function parameter list:
+
+        ```
+        // CE
+        fn x[p0, p1,] p0 + p1;
+        ```
+
+    - [ ] **Allowed** in on-stack-list, and lambda parameter list (parsed as on-stack-list):
+
+        ```
+        // OK
+        [a, b,] = [0, 1,]
+        // OK
+        y = [p2, p3,] -> p2 - p3;
+        ```
+
+    - [ ] **Allowed** in block:
+
+        ```
+        // OK
+        ( 0; 1; 2; )
+        ```
+    
+    - [ ] **Allowed** in table and vector literal:
+
+        ```
+        // OK
+        x = { .a: 0, .b: 1, .c: 2, }
+        // OK
+        y = {| 3, 4, 5, |}
+        ```
+    
+    - [ ] **Prohibited** in for-loop iteration variable list:
+
+        ```
+        // CE
+        for (x, y,: pairs {| 0, 1, 2 |}) x + y;
+        ```
+    

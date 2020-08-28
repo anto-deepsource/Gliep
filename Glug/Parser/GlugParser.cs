@@ -186,7 +186,7 @@ namespace GeminiLab.Glug.Parser {
                 if (op == GlugTokenType.SymbolRArrow) {
                     var param = new List<string>();
                     
-                    if (expr is VarRef vr) {
+                    if (expr is VarRef { IsDef: false, IsGlobal: false } vr) {
                         param.Add(vr.Id);
                     } else if (expr is OnStackList osl && osl.List.All(x => x is VarRef { IsDef: false, IsGlobal: false })) {
                         param.AddRange(osl.List.Cast<VarRef>().Select(x => x.Id));
@@ -262,8 +262,7 @@ namespace GeminiLab.Glug.Parser {
                     _ => throw new ArgumentOutOfRangeException()
                 };
             }
-            
-            
+                        
             if (IsSymbolUnOp(tok.Type)) {
                 Stream.GetToken();
 
@@ -277,7 +276,6 @@ namespace GeminiLab.Glug.Parser {
             if (tok.Type == GlugTokenType.SymbolBackquote) {
                 Stream.GetToken();
 
-               
                 return ReadIdentifier() switch {
                     "meta" => new Metatable(ReadExprItem()),
                     "type" => new UnOp(GlugUnOpType.Typeof, ReadExprItem()),
@@ -297,7 +295,6 @@ namespace GeminiLab.Glug.Parser {
 
                 return rv;
             }
-            
 
             if (tok.Type == GlugTokenType.SymbolBra || tok.Type == GlugTokenType.SymbolKet) {
                 Stream.GetToken();
@@ -391,14 +388,10 @@ namespace GeminiLab.Glug.Parser {
             Consume(GlugTokenType.KeywordFor);
             Consume(GlugTokenType.SymbolLParen);
 
-            var tok = Stream.PeekToken();
-            while (LikelyVarRef(tok.Type)) {
-                iv.Add(ReadVarRef());
-                
-                if (Stream.PeekToken().Type == GlugTokenType.SymbolColon) break;
-                
+            iv.Add(ReadVarRef());
+            while (Stream.PeekToken().Type == GlugTokenType.SymbolComma) {
                 Consume(GlugTokenType.SymbolComma);
-                tok = Stream.PeekToken();
+                iv.Add(ReadVarRef());
             }
             
             Consume(GlugTokenType.SymbolColon);
@@ -409,14 +402,14 @@ namespace GeminiLab.Glug.Parser {
             return new For(iv, expr, body);
         }
         
-        protected virtual Break ReadBreak() {
-            Consume(GlugTokenType.KeywordBreak);
-            return new Break(ReadOptionalExpr() ?? new OnStackList(new List<Expr>()));
-        }
-
         protected virtual Return ReadReturn() {
             Consume(GlugTokenType.KeywordReturn);
             return new Return(ReadOptionalExpr() ?? new OnStackList(new List<Expr>()));
+        }
+
+        protected virtual Break ReadBreak() {
+            Consume(GlugTokenType.KeywordBreak);
+            return new Break(ReadOptionalExpr() ?? new OnStackList(new List<Expr>()));
         }
 
         protected virtual Expr? ReadOptionalExpr() {
@@ -447,22 +440,13 @@ namespace GeminiLab.Glug.Parser {
             // Optional parameter list will never be the last part of of a legal code
             if (Stream.PeekToken().Type == GlugTokenType.SymbolLBracket) {
                 Consume(GlugTokenType.SymbolLBracket);
-                for (;;) {
-                    var tok = Stream.PeekToken();
-                    if (tok.Type == GlugTokenType.Identifier) {
-                        rv.Add(tok.ValueString!);
-                    } else if (tok.Type == GlugTokenType.SymbolRBracket) {
-                        break;
-                    } else {
-                        throw new ArgumentOutOfRangeException();
-                    }
-                    Stream.GetToken();
 
-                    if (Stream.PeekToken().Type != GlugTokenType.SymbolComma) {
-                        break;
+                if (Stream.PeekToken().Type != GlugTokenType.SymbolRBracket) {
+                    rv.Add(ReadIdentifier());
+                    while (Stream.PeekToken().Type == GlugTokenType.SymbolComma) {
+                        Consume(GlugTokenType.SymbolComma);
+                        rv.Add(ReadIdentifier());
                     }
-
-                    Consume(GlugTokenType.SymbolComma);
                 }
 
                 Consume(GlugTokenType.SymbolRBracket);

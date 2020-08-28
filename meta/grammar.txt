@@ -1,4 +1,4 @@
-%token: int id
+%token: identifier
 %root: Program
 
 Program     : Block
@@ -7,13 +7,20 @@ Program     : Block
 Block       : ( Expr ';'?)*
             ;
 
-# Expr eats tokens greedily
+# Expr eats tokens greedily, so do following symbols
+#   - Block
+#   - QualifiedIdentifer
+#   - If
+#   - Return
+#   - Break
+#   - TableDefItem
 # earlier appearence, higher precedence
 Expr        : ExprItem
+            | Expr ("."| ".!") identifier
+            | Expr ("@"| "@!") Expr
             | Expr Expr
             | Expr "$" Expr
-            | Expr "." identifier
-            | Expr "@" Expr
+            | Expr ".." Expr
             | Expr ( "*" | "/" | "%" ) Expr
             | Expr ( "+" | "-" ) Expr
             | Expr ( "<<" | ">>" ) Expr
@@ -22,35 +29,39 @@ Expr        : ExprItem
             | Expr "&" Expr
             | Expr "^" Expr
             | Expr "|" Expr
+            | Expr "&&" Expr
+            | Expr "||" Expr
+            | Expr "??" Expr
             | Expr "=" Expr
             ;
 
 # ExprItem also eats tokens greedily
 ExprItem    : literal
-            | QualifiedIdentifer
-            | TableDef
-            | "-" ExprItem
-            | "~" ExprItem
-            | "`" identifier ExprItem
+            | ("-" | "~" | "?") ExprItem
+            | NamedOperator ExprItem
+            | VarRef
+            | ("<|" | "|>")
             | BlockInParen
             | If
             | While
             | For
-            | Return
             | Break
+            | Return
             | Function
             | Lambda
             | OnStackList
+            | TableDef
+            | VectorDef
             ;
 
-QualifiedIdentifer  : ("!" | "!!")? identifier ("." identifier)*
-                    ;
-
-TableDef    : "{" (TableDefItem ","?)* "}"
-            ;
-
-TableDefItem    : (("@"? Expr ) | ("." identifier)) ":" Expr
+NamedOperator   : "`" identifier
                 ;
+
+VarRef      : ("!" | "!!")? QualifiedIdentifer
+            ;
+
+QualifiedIdentifer  : identifier ("." identifier)*
+                    ;
 
 BlockInParen    : "(" Block ")"
                 ;
@@ -61,7 +72,7 @@ If          : "if" BlockInParen Expr ( "elif" BlockInParen Expr )* ( "else" Expr
 While       : "while" BlockInParen Expr
             ;
 
-For         : "for" "(" identifier ("," identifier)* ":" expr ")" Expr
+For         : "for" "(" identifier ("," identifier)* ":" Expr ")" Expr
             ;
 
 Return      : "return" Expr?
@@ -76,8 +87,17 @@ Function    : "fn" identifier? ParamList? "->"? Expr
 ParamList   : "[" (identifier ("," identifier)*)? "]"
             ;
 
-Lambda      : (ParamList | identifier) "->" expr
+Lambda      : (LambdaParamList | identifier) "->" expr
             ;
+
+LambdaParamList : "[" (identifier ("," identifier)* ","?)? "]"
+                ;
 
 OnStackList : "[" (Expr ","?)* "]"
             ;
+
+TableDef    : "{" (TableDefItem ","?)* "}"
+            ;
+
+TableDefItem    : (("@"? Expr ) | ("." identifier)) ":" Expr
+                ;

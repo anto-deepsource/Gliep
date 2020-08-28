@@ -34,7 +34,7 @@
   - `@!`: index locally by variable
 - `[` `]`: on stack list
 - `^`: xor
-- `` ` ``: unary op prefix
+- `` ` ``: named op prefix
 - `{` `}`: table literal
 - `|`: or
   - `|>`: pseudo-index tail
