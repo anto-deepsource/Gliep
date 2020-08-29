@@ -23,6 +23,7 @@ namespace GeminiLab.Glug.PostProcess {
         private readonly NodeInformation _info;
         private readonly Dictionary<While, Label> _whileEndLabel = new Dictionary<While, Label>();
         private readonly Dictionary<While, bool> _whileResultUsed = new Dictionary<While, bool>();
+        private readonly Dictionary<While, int> _whileGuardianDelimiterId = new Dictionary<While, int>();
 
         public CodeGenVisitor(NodeInformation info) {
             _info = info;
@@ -30,6 +31,7 @@ namespace GeminiLab.Glug.PostProcess {
 
         public GlosUnitBuilder Builder { get; } = new GlosUnitBuilder();
 
+        private Dictionary<GlosFunctionBuilder, int> _delCount = new Dictionary<GlosFunctionBuilder, int>();
 
         private void visitForDiscard(Expr expr, GlosFunctionBuilder parent) {
             Visit(expr, new CodeGenContext(parent, false));
@@ -38,11 +40,17 @@ namespace GeminiLab.Glug.PostProcess {
         private void visitForValue(Expr expr, GlosFunctionBuilder parent) {
             Visit(expr, new CodeGenContext(parent, true));
 
-            if (_info.IsOnStackList[expr]) parent.AppendShpRv(1);
+            if (_info.IsOnStackList[expr]) {
+                parent.AppendShpRv(1);
+                --_delCount[parent];
+            }
         }
-        
+
         private void visitForOsl(Expr expr, GlosFunctionBuilder parent) {
-            if (!_info.IsOnStackList[expr]) parent.AppendLdDel();
+            if (!_info.IsOnStackList[expr]) {
+                parent.AppendLdDel();
+                ++_delCount[parent];
+            }
 
             Visit(expr, new CodeGenContext(parent, true));
         }
@@ -55,7 +63,7 @@ namespace GeminiLab.Glug.PostProcess {
         public override void VisitFunction(Function val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
             var fun = Builder.AddFunction();
-            
+
             if (parent == null) fun.SetEntry();
             fun.Name = val.Name;
 
@@ -76,6 +84,7 @@ namespace GeminiLab.Glug.PostProcess {
                 }
             }
 
+            _delCount[fun] = 0;
             visitForAny(val.Body, fun);
             fun.AppendRetIfNone();
 
@@ -130,10 +139,12 @@ namespace GeminiLab.Glug.PostProcess {
             var (parent, ru) = ctx;
             var endLabel = _whileEndLabel[val] = parent.AllocateLabel();
             _whileResultUsed[val] = ru;
-            
+
             if (ru) {
-                if (_info.IsOnStackList[val]) parent.AppendLdDel();
-                else parent.AppendLdNil();
+                if (_info.IsOnStackList[val]) {
+                    parent.AppendLdDel();
+                    ++_delCount[parent];
+                } else parent.AppendLdNil();
             }
 
             var beginLabel = parent.AllocateAndInsertLabel();
@@ -142,17 +153,22 @@ namespace GeminiLab.Glug.PostProcess {
             parent.AppendBf(endLabel);
 
             if (ru) {
-                if (_info.IsOnStackList[val]) parent.AppendShpRv(0);
-                else parent.AppendPop();
+                if (_info.IsOnStackList[val]) {
+                    parent.AppendShpRv(0);
+                    --_delCount[parent];
+                } else parent.AppendPop();
             }
 
             parent.AppendLdDel();
-            
+            _whileGuardianDelimiterId[val] = _delCount[parent];
+            ++_delCount[parent];
+
             if (!ru) visitForDiscard(val.Body, parent);
             else if (_info.IsOnStackList[val]) visitForOsl(val.Body, parent);
             else visitForValue(val.Body, parent);
 
             parent.AppendPopDel();
+            --_delCount[parent];
             parent.AppendB(beginLabel);
 
             parent.InsertLabel(endLabel);
@@ -161,7 +177,7 @@ namespace GeminiLab.Glug.PostProcess {
         public override void VisitFor(For val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
             var endLabel = parent.AllocateLabel();
-            
+
             if (ru) {
                 if (_info.IsOnStackList[val]) parent.AppendLdDel();
                 else parent.AppendLdNil();
@@ -170,18 +186,18 @@ namespace GeminiLab.Glug.PostProcess {
             var pvFunc = _info.PrivateVariables[val][For.PrivateVariableNameIterateFunction];
             var pvStatus = _info.PrivateVariables[val][For.PrivateVariableNameStatus];
             var pvIterator = _info.PrivateVariables[val][For.PrivateVariableNameIterator];
-            
+
             var iterVarOsl = new OnStackList(new List<Expr>(val.IteratorVariables));
 
             visitForOsl(val.Expression, parent);
             parent.AppendShpRv(3);
-            
+
             pvIterator.CreateStoreInstr(parent);
             pvStatus.CreateStoreInstr(parent);
             pvFunc.CreateStoreInstr(parent);
-            
+
             var beginLabel = parent.AllocateAndInsertLabel();
-            
+
             parent.AppendLdDel();
             pvStatus.CreateLoadInstr(parent);
             pvIterator.CreateLoadInstr(parent);
@@ -190,26 +206,26 @@ namespace GeminiLab.Glug.PostProcess {
 
             parent.AppendDupList();
             createStoreInstr(iterVarOsl, parent);
-            
+
             parent.AppendShpRv(1);
             parent.AppendDup();
             pvIterator.CreateStoreInstr(parent);
             parent.AppendBn(endLabel);
-            
+
             if (ru) {
                 if (_info.IsOnStackList[val]) parent.AppendShpRv(0);
                 else parent.AppendPop();
             }
 
             parent.AppendLdDel();
-            
+
             if (!ru) visitForDiscard(val.Body, parent);
             else if (_info.IsOnStackList[val]) visitForOsl(val.Body, parent);
             else visitForValue(val.Body, parent);
 
             parent.AppendPopDel();
             parent.AppendB(beginLabel);
-            
+
             parent.InsertLabel(endLabel);
         }
 
@@ -223,17 +239,31 @@ namespace GeminiLab.Glug.PostProcess {
         public override void VisitBreak(Break val, CodeGenContext ctx) {
             var (parent, _) = ctx;
 
-            parent.AppendShpRv(0);
+            var target = _info.BreakParent[val];
+
+            var guardian = _whileGuardianDelimiterId[target];
+            var delCnt = _delCount[parent];
+            while (delCnt > guardian) {
+                parent.AppendShpRv(0);
+                --delCnt;
+            }
+
+            _delCount[parent] = guardian;
+
             if (!_whileResultUsed[_info.BreakParent[val]]) visitForDiscard(val.Expr, parent);
             else if (_info.IsOnStackList[_info.BreakParent[val]]) visitForOsl(val.Expr, parent);
             else visitForValue(val.Expr, parent);
+            
             parent.AppendB(_whileEndLabel[_info.BreakParent[val]]);
         }
 
         public override void VisitOnStackList(OnStackList val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
-            
-            if (ru) parent.AppendLdDel();
+
+            if (ru) {
+                parent.AppendLdDel();
+                ++_delCount[parent];
+            }
 
             foreach (var item in val.List) {
                 if (ru) visitForValue(item, parent);
@@ -287,6 +317,7 @@ namespace GeminiLab.Glug.PostProcess {
                 case OnStackList { List: var list } osl when !_info.IsAssignable.TryGetValue(osl, out var assignable) || assignable:
                     var count = list.Count;
                     parent.AppendShpRv(count);
+                    --_delCount[parent];
                     for (int i = count - 1; i >= 0; --i) createStoreInstr(list[i], parent);
                     break;
                 case VarRef vr:
@@ -322,11 +353,17 @@ namespace GeminiLab.Glug.PostProcess {
                 visitForValue(val.ExprL, parent);
                 parent.AppendCall();
 
-                if (!ru) parent.AppendShpRv(0);
+                if (!ru) {
+                    parent.AppendShpRv(0);
+                    --_delCount[parent];
+                }
             } else if (val.Op == GlugBiOpType.Assign) {
                 if (val.ExprL is OnStackList) {
                     visitForOsl(val.ExprR, parent);
-                    if (ru) parent.AppendDupList();
+                    if (ru) {
+                        parent.AppendDupList();
+                        ++_delCount[parent];
+                    }
                 } else {
                     visitForValue(val.ExprR, parent);
                     if (ru) parent.AppendDup();
@@ -338,13 +375,14 @@ namespace GeminiLab.Glug.PostProcess {
                     visitForOsl(val.ExprL, parent);
                     visitForOsl(val.ExprR, parent);
                     parent.AppendPopDel();
+                    --_delCount[parent];
                 } else {
                     visitForDiscard(val.ExprL, parent);
                     visitForDiscard(val.ExprR, parent);
                 }
-            }  else if (BiOp.IsShortCircuitOp(val.Op)) {
+            } else if (BiOp.IsShortCircuitOp(val.Op)) {
                 visitForValue(val.ExprL, parent);
-                
+
                 parent.AppendDup();
 
                 var labelAnother = parent.AllocateLabel();
@@ -360,12 +398,12 @@ namespace GeminiLab.Glug.PostProcess {
                     parent.AppendBn(labelAnother);
                     parent.AppendB(labelEnd);
                 }
-                
+
                 parent.InsertLabel(labelAnother);
-                
+
                 parent.AppendPop();
                 visitForValue(val.ExprR, parent);
-                
+
                 parent.InsertLabel(labelEnd);
 
                 if (!ru) parent.AppendPop();
@@ -376,7 +414,7 @@ namespace GeminiLab.Glug.PostProcess {
                 } else {
                     throw new NotImplementedException();
                 }
-                
+
                 if (!ru) parent.AppendPop();
             } else {
                 visitForValue(val.ExprL, parent);
@@ -455,28 +493,28 @@ namespace GeminiLab.Glug.PostProcess {
 
         public override void VisitVectorDef(VectorDef val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
-            
+
             parent.AppendLdNVec();
 
             foreach (var item in val.Items) {
                 visitForValue(item, parent);
                 parent.AppendIniv();
             }
-            
+
             if (!ru) parent.AppendPop();
         }
-        
+
         public override void VisitMetatable(Metatable val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
             visitForValue(val.Table, parent);
             parent.AppendGmt();
             if (!ru) parent.AppendPop();
         }
-        
+
         public override void VisitPseudoIndex(PseudoIndex val, CodeGenContext arg) {
             throw new InvalidOperationException();
         }
-        
+
         public override void VisitSysCall(SysCall val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
 
