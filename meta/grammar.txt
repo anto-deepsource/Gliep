@@ -37,10 +37,10 @@ Expr        : ExprItem
 
 # ExprItem also eats tokens greedily
 ExprItem    : literal
-            | ("-" | "~" | "?") ExprItem
+            | ( "-" | "~" | "?" ) ExprItem
             | NamedOperator ExprItem
             | VarRef
-            | ("<|" | "|>")
+            | ( "<|" | "|>" )
             | BlockInParen
             | If
             | While
@@ -57,7 +57,7 @@ ExprItem    : literal
 NamedOperator   : "`" identifier
                 ;
 
-VarRef      : ("!" | "!!")? QualifiedIdentifer
+VarRef      : ( "!" | "!!" )? QualifiedIdentifer
             ;
 
 QualifiedIdentifer  : identifier ("." identifier)*
@@ -69,35 +69,38 @@ BlockInParen    : "(" Block ")"
 If          : "if" BlockInParen Expr ( "elif" BlockInParen Expr )* ( "else" Expr )?
             ;
 
-While       : "while" BlockInParen Expr
+While       : "while" ControlFlowLabel? BlockInParen Expr
             ;
 
-For         : "for" "(" identifier ("," identifier)* ":" Expr ")" Expr
+ControlFlowLabel    : "'" identifier
+                    ;
+
+For         : "for" ControlFlowLabel? "(" identifier ("," identifier)* ":" Expr ")" Expr
             ;
 
 Return      : "return" Expr?
             ;
 
-Break       : "break" Expr?
+Break       : "break" ControlFlowLabel? Expr?
             ;
 
 Function    : "fn" identifier? ParamList? "->"? Expr
             ;
 
-ParamList   : "[" (identifier ("," identifier)*)? "]"
+ParamList   : "[" ( identifier ( "," identifier )* )? "]"
             ;
 
-Lambda      : (LambdaParamList | identifier) "->" expr
+Lambda      : ( LambdaParamList | identifier ) "->" expr
             ;
 
-LambdaParamList : "[" (identifier ("," identifier)* ","?)? "]"
+LambdaParamList : "[" ( identifier ("," identifier)* ","? )? "]"
                 ;
 
-OnStackList : "[" (Expr ","?)* "]"
+OnStackList : "[" ( Expr ","? )* "]"
             ;
 
-TableDef    : "{" (TableDefItem ","?)* "}"
+TableDef    : "{" ( TableDefItem ","? )* "}"
             ;
 
-TableDefItem    : (("@"? Expr ) | ("." identifier)) ":" Expr
+TableDefItem    : ( ( "@"? Expr ) | ( "." identifier ) ) ":" Expr
                 ;

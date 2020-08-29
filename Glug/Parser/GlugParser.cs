@@ -371,14 +371,22 @@ namespace GeminiLab.Glug.Parser {
         }
 
         protected virtual While ReadWhile() {
-            Expr expr;
-            Expr block;
-
             Consume(GlugTokenType.KeywordWhile);
-            expr = ReadBlockInParen();
-            block = ReadExprGreedily();
+            
+            var label = ReadOptionalControlFlowLabel();
+            var expr = ReadBlockInParen();
+            var block = ReadExprGreedily();
+            
+            return new While(expr, block, label);
+        }
 
-            return new While(expr, block);
+        protected virtual string? ReadOptionalControlFlowLabel() {
+            if (Stream.PeekToken().Type == GlugTokenType.SymbolQuote) {
+                Consume(GlugTokenType.SymbolQuote);
+                return ReadIdentifier();
+            }
+
+            return null;
         }
 
         protected virtual For ReadFor() {
@@ -386,6 +394,7 @@ namespace GeminiLab.Glug.Parser {
             Expr expr, body;
 
             Consume(GlugTokenType.KeywordFor);
+            var label = ReadOptionalControlFlowLabel();
             Consume(GlugTokenType.SymbolLParen);
 
             iv.Add(ReadVarRef());
@@ -399,7 +408,7 @@ namespace GeminiLab.Glug.Parser {
             Consume(GlugTokenType.SymbolRParen);
 
             body = ReadExprGreedily();
-            return new For(iv, expr, body);
+            return new For(iv, expr, body, label);
         }
         
         protected virtual Return ReadReturn() {
@@ -409,7 +418,8 @@ namespace GeminiLab.Glug.Parser {
 
         protected virtual Break ReadBreak() {
             Consume(GlugTokenType.KeywordBreak);
-            return new Break(ReadOptionalExpr() ?? new OnStackList(new List<Expr>()));
+            var label = ReadOptionalControlFlowLabel();
+            return new Break(ReadOptionalExpr() ?? new OnStackList(new List<Expr>()), label);
         }
 
         protected virtual Expr? ReadOptionalExpr() {

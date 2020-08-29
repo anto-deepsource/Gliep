@@ -1,6 +1,6 @@
 # TODO List
 
-- [ ] *(2020/08/27)* Make for-loop breakable
+- [x] *(2020/08/27)* Make for-loop breakable
 
     ```
     print for (i: iter {| 1, 1, 2, 3, 5, 8, 13 |}) if (i > 5) break i;

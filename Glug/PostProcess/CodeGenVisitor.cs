@@ -21,9 +21,9 @@ namespace GeminiLab.Glug.PostProcess {
 
     public class CodeGenVisitor : InVisitor<CodeGenContext> {
         private readonly NodeInformation _info;
-        private readonly Dictionary<While, Label> _whileEndLabel = new Dictionary<While, Label>();
-        private readonly Dictionary<While, bool> _whileResultUsed = new Dictionary<While, bool>();
-        private readonly Dictionary<While, int> _whileGuardianDelimiterId = new Dictionary<While, int>();
+        private readonly Dictionary<Breakable, Label> _whileEndLabel = new Dictionary<Breakable, Label>();
+        private readonly Dictionary<Breakable, bool> _whileResultUsed = new Dictionary<Breakable, bool>();
+        private readonly Dictionary<Breakable, int> _whileGuardianDelimiterId = new Dictionary<Breakable, int>();
 
         public CodeGenVisitor(NodeInformation info) {
             _info = info;
@@ -176,21 +176,24 @@ namespace GeminiLab.Glug.PostProcess {
 
         public override void VisitFor(For val, CodeGenContext ctx) {
             var (parent, ru) = ctx;
-            var endLabel = parent.AllocateLabel();
-
-            if (ru) {
-                if (_info.IsOnStackList[val]) parent.AppendLdDel();
-                else parent.AppendLdNil();
-            }
+            var endLabel = _whileEndLabel[val] = parent.AllocateLabel();
+            _whileResultUsed[val] = ru;
 
             var pvFunc = _info.PrivateVariables[val][For.PrivateVariableNameIterateFunction];
             var pvStatus = _info.PrivateVariables[val][For.PrivateVariableNameStatus];
             var pvIterator = _info.PrivateVariables[val][For.PrivateVariableNameIterator];
-
             var iterVarOsl = new OnStackList(new List<Expr>(val.IteratorVariables));
-
+            
+            if (ru) {
+                if (_info.IsOnStackList[val]) {
+                    parent.AppendLdDel();
+                    ++_delCount[parent];
+                } else parent.AppendLdNil();
+            }
+            
             visitForOsl(val.Expression, parent);
             parent.AppendShpRv(3);
+            --_delCount[parent];
 
             pvIterator.CreateStoreInstr(parent);
             pvStatus.CreateStoreInstr(parent);
@@ -199,31 +202,40 @@ namespace GeminiLab.Glug.PostProcess {
             var beginLabel = parent.AllocateAndInsertLabel();
 
             parent.AppendLdDel();
+            ++_delCount[parent];
             pvStatus.CreateLoadInstr(parent);
             pvIterator.CreateLoadInstr(parent);
             pvFunc.CreateLoadInstr(parent);
             parent.AppendCall();
 
             parent.AppendDupList();
+            ++_delCount[parent];
             createStoreInstr(iterVarOsl, parent);
 
             parent.AppendShpRv(1);
+            --_delCount[parent];
             parent.AppendDup();
             pvIterator.CreateStoreInstr(parent);
             parent.AppendBn(endLabel);
 
             if (ru) {
-                if (_info.IsOnStackList[val]) parent.AppendShpRv(0);
+                if (_info.IsOnStackList[val]) {
+                    parent.AppendShpRv(0);
+                    --_delCount[parent];
+                }
                 else parent.AppendPop();
             }
 
             parent.AppendLdDel();
+            _whileGuardianDelimiterId[val] = _delCount[parent];
+            ++_delCount[parent];
 
             if (!ru) visitForDiscard(val.Body, parent);
             else if (_info.IsOnStackList[val]) visitForOsl(val.Body, parent);
             else visitForValue(val.Body, parent);
 
             parent.AppendPopDel();
+            --_delCount[parent];
             parent.AppendB(beginLabel);
 
             parent.InsertLabel(endLabel);

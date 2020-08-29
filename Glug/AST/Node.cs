@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace GeminiLab.Glug.AST {
     public abstract class Node { }
@@ -77,8 +78,16 @@ namespace GeminiLab.Glug.AST {
         public Expr? ElseBranch { get; }
     }
 
-    public class While : Expr {
-        public While(Expr condition, Expr body) {
+    public abstract class Breakable : Expr {
+        public string? Label { get; }
+
+        public Breakable(string? label) {
+            Label = label;
+        }
+    }
+    
+    public class While : Breakable {
+        public While(Expr condition, Expr body, string? label) : base(label) {
             Condition = condition;
             Body = body;
         }
@@ -87,12 +96,12 @@ namespace GeminiLab.Glug.AST {
         public Expr Body { get; }
     }
 
-    public class For : Expr {
+    public class For : Breakable {
         public const string PrivateVariableNameIterateFunction = "iter_fun";
         public const string PrivateVariableNameStatus = "status";
         public const string PrivateVariableNameIterator = "iterator";
         
-        public For(IList<VarRef> iteratorVariables, Expr expression, Expr body) {
+        public For(IList<VarRef> iteratorVariables, Expr expression, Expr body, string? label) : base(label) {
             IteratorVariables = iteratorVariables;
             Expression = expression;
             Body = body;
@@ -112,11 +121,13 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class Break : Expr {
-        public Break(Expr expr) {
+        public Break(Expr expr, string? label) {
             Expr = expr;
+            Label = label;
         }
 
         public Expr Expr { get; }
+        public string? Label { get; }
     }
 
     public class Function : Expr {

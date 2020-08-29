@@ -101,11 +101,17 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
         }
         
         [Fact]
-        public void WhileWithAwfulBreak() {
+        public void AwfulBreak() {
             var code = $@"
-                [1, 2] .. while (true) (
+                fn range[max] (
+                    !x = -1;
+                    return fn[] if (x + 1 < max) x = x + 1
+                );
+                [1, 2] .. 
+                (while (true) (
                     3 + 4 * [[5, 6], [[break [7, 8], 9]]]
-                )
+                )) ..
+                (for (i: range[10]) if (i == 3) break [i * i])
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -113,6 +119,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .MoveNext().AssertInteger(2)
                 .MoveNext().AssertInteger(7)
                 .MoveNext().AssertInteger(8)
+                .MoveNext().AssertInteger(9)
                 .MoveNext().AssertEnd();
         }
 

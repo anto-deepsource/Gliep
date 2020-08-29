@@ -8,6 +8,7 @@
 - `%`: modulus
 - `&`: and
   - `&&`: short-circuit and
+- `'`: control flow label
 - `(` `)`: block
 - `*`: multiplication
 - `+`: addition
@@ -45,4 +46,3 @@
 ## Not used yet
 
 - `\`
-- `'`
