@@ -4,11 +4,15 @@ using System.Collections.Generic;
 using GeminiLab.Glug.AST;
 
 namespace GeminiLab.Glug.PostProcess {
-    public class WhileBreakPairingVisitor : RecursiveInVisitor<Breakable?> {
+    public class BreakTargetVisitor : RecursiveInVisitor<Breakable?> {
         private readonly NodeInformation _info;
 
-        public WhileBreakPairingVisitor(NodeInformation info) {
+        public BreakTargetVisitor(NodeInformation info) {
             _info = info;
+        }
+
+        public override void VisitFunction(Function val, Breakable? arg) {
+            base.VisitFunction(val, null);
         }
 
         public override void VisitWhile(While val, Breakable? arg) {

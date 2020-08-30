@@ -5,18 +5,16 @@ namespace GeminiLab.Glute.Compile {
     public class GluteVarRefVisitor : VarRefVisitor {
         public GluteVarRefVisitor(VariableTable root, NodeInformation info) : base(root, info) { }
 
-        public override void VisitVarRef(VarRef val, VarRefVisitorContext ctx) {
-            var (scope, aid) = ctx;
-            
+        public override void VisitVarRef(VarRef val, VariableTable currentScope, bool allowImplicitDeclaration) {
             if (!_info.Variable.TryGetValue(val, out _)) {
-                if (!scope.TryLookupVariable(val.Id, out var v)) {
-                    v = scope.CreateDynamicVariable(val.Id);
+                if (!currentScope.TryLookupVariable(val.Id, out var v)) {
+                    v = currentScope.CreateDynamicVariable(val.Id);
                 }
 
                 _info.Variable[val] = v;
             }
 
-            _info.Variable[val].MarkUsedIn(scope);
+            _info.Variable[val].MarkUsedIn(currentScope);
         }
     }
 }

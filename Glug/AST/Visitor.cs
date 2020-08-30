@@ -37,8 +37,10 @@ namespace GeminiLab.Glug.AST {
 
 
         protected virtual void PreVisit(Node node) { }
-
         protected virtual void PostVisit(Node node) { }
+        protected virtual void OnUnknownNode(Node node) {
+            throw new ArgumentOutOfRangeException();
+        }
 
         public void Visit(Node node) {
             PreVisit(node);
@@ -111,7 +113,8 @@ namespace GeminiLab.Glug.AST {
                 VisitToValue(tv);
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                OnUnknownNode(node);
+                break;
             }
 
             PostVisit(node);
@@ -121,11 +124,8 @@ namespace GeminiLab.Glug.AST {
     public class RecursiveVisitor : Visitor {
         public override void VisitLiteralInteger(LiteralInteger val) { }
         public override void VisitLiteralFloat(LiteralFloat val) { }
-
         public override void VisitLiteralBool(LiteralBool val) { }
-
         public override void VisitLiteralString(LiteralString val) { }
-
         public override void VisitLiteralNil(LiteralNil val) { }
 
         public override void VisitVarRef(VarRef val) { }
@@ -207,46 +207,47 @@ namespace GeminiLab.Glug.AST {
         }
     }
 
+    public abstract class InVisitor<T0> {
+        public abstract void VisitLiteralInteger(LiteralInteger val, T0 arg);
+        public abstract void VisitLiteralFloat(LiteralFloat val, T0 arg);
+        public abstract void VisitLiteralBool(LiteralBool val, T0 arg);
+        public abstract void VisitLiteralString(LiteralString val, T0 arg);
+        public abstract void VisitLiteralNil(LiteralNil val, T0 arg);
 
-    public abstract class InVisitor<TParameter> {
-        public abstract void VisitLiteralInteger(LiteralInteger val, TParameter arg);
-        public abstract void VisitLiteralFloat(LiteralFloat val, TParameter arg);
-        public abstract void VisitLiteralBool(LiteralBool val, TParameter arg);
-        public abstract void VisitLiteralString(LiteralString val, TParameter arg);
-        public abstract void VisitLiteralNil(LiteralNil val, TParameter arg);
+        public abstract void VisitVarRef(VarRef val, T0 arg);
 
-        public abstract void VisitVarRef(VarRef val, TParameter arg);
+        public abstract void VisitIf(If val, T0 arg);
+        public abstract void VisitWhile(While val, T0 arg);
+        public abstract void VisitFor(For val, T0 arg);
+        public abstract void VisitReturn(Return val, T0 arg);
+        public abstract void VisitBreak(Break val, T0 arg);
+        public abstract void VisitFunction(Function val, T0 arg);
 
-        public abstract void VisitIf(If val, TParameter arg);
-        public abstract void VisitWhile(While val, TParameter arg);
-        public abstract void VisitFor(For val, TParameter arg);
-        public abstract void VisitReturn(Return val, TParameter arg);
-        public abstract void VisitBreak(Break val, TParameter arg);
-        public abstract void VisitFunction(Function val, TParameter arg);
+        public abstract void VisitOnStackList(OnStackList val, T0 arg);
 
-        public abstract void VisitOnStackList(OnStackList val, TParameter arg);
+        public abstract void VisitBlock(Block val, T0 arg);
 
-        public abstract void VisitBlock(Block val, TParameter arg);
+        public abstract void VisitUnOp(UnOp val, T0 arg);
+        public abstract void VisitBiOp(BiOp val, T0 arg);
 
-        public abstract void VisitUnOp(UnOp val, TParameter arg);
-        public abstract void VisitBiOp(BiOp val, TParameter arg);
-
-        public abstract void VisitTableDef(TableDef val, TParameter arg);
-        public abstract void VisitVectorDef(VectorDef val, TParameter arg);
+        public abstract void VisitTableDef(TableDef val, T0 arg);
+        public abstract void VisitVectorDef(VectorDef val, T0 arg);
         
-        public abstract void VisitMetatable(Metatable val, TParameter arg);
+        public abstract void VisitMetatable(Metatable val, T0 arg);
 
-        public abstract void VisitPseudoIndex(PseudoIndex val, TParameter arg);
+        public abstract void VisitPseudoIndex(PseudoIndex val, T0 arg);
         
-        public abstract void VisitSysCall(SysCall val, TParameter arg);
-        public abstract void VisitToValue(ToValue val, TParameter arg);
+        public abstract void VisitSysCall(SysCall val, T0 arg);
+        public abstract void VisitToValue(ToValue val, T0 arg);
         
 
         protected virtual void PreVisit(Node node) { }
-
         protected virtual void PostVisit(Node node) { }
-
-        public void Visit(Node node, TParameter arg) {
+        protected virtual void OnUnknownNode(Node node) {
+            throw new ArgumentOutOfRangeException();
+        }
+        
+        public void Visit(Node node, T0 arg) {
             PreVisit(node);
 
             switch (node) {
@@ -317,29 +318,30 @@ namespace GeminiLab.Glug.AST {
                 VisitToValue(tv, arg);
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                OnUnknownNode(node);
+                break;
             }
 
             PostVisit(node);
         }
     }
 
-    public class RecursiveInVisitor<TParameter> : InVisitor<TParameter> {
-        public override void VisitLiteralInteger(LiteralInteger val, TParameter arg) { }
+    public class RecursiveInVisitor<T0> : InVisitor<T0> {
+        public override void VisitLiteralInteger(LiteralInteger val, T0 arg) { }
 
-        public override void VisitLiteralFloat(LiteralFloat val, TParameter arg) { }
+        public override void VisitLiteralFloat(LiteralFloat val, T0 arg) { }
 
-        public override void VisitLiteralBool(LiteralBool val, TParameter arg) { }
+        public override void VisitLiteralBool(LiteralBool val, T0 arg) { }
 
-        public override void VisitLiteralString(LiteralString val, TParameter arg) { }
+        public override void VisitLiteralString(LiteralString val, T0 arg) { }
 
-        public override void VisitLiteralNil(LiteralNil val, TParameter arg) { }
+        public override void VisitLiteralNil(LiteralNil val, T0 arg) { }
 
-        public override void VisitVarRef(VarRef val, TParameter arg) { }
+        public override void VisitVarRef(VarRef val, T0 arg) { }
 
-        public override void VisitPseudoIndex(PseudoIndex val, TParameter arg) { }
+        public override void VisitPseudoIndex(PseudoIndex val, T0 arg) { }
 
-        public override void VisitIf(If val, TParameter arg) {
+        public override void VisitIf(If val, T0 arg) {
             foreach (var (cond, expr) in val.Branches) {
                 Visit(cond, arg);
                 Visit(expr, arg);
@@ -348,12 +350,12 @@ namespace GeminiLab.Glug.AST {
             if (val.ElseBranch != null) Visit(val.ElseBranch, arg);
         }
 
-        public override void VisitWhile(While val, TParameter arg) {
+        public override void VisitWhile(While val, T0 arg) {
             Visit(val.Condition, arg);
             Visit(val.Body, arg);
         }
 
-        public override void VisitFor(For val, TParameter arg) {
+        public override void VisitFor(For val, T0 arg) {
             foreach (var varRef in val.IteratorVariables) {
                 Visit(varRef, arg);
             }
@@ -362,64 +364,282 @@ namespace GeminiLab.Glug.AST {
             Visit(val.Body, arg);
         }
 
-        public override void VisitReturn(Return val, TParameter arg) {
+        public override void VisitReturn(Return val, T0 arg) {
             Visit(val.Expr, arg);
         }
 
-        public override void VisitBreak(Break val, TParameter arg) {
+        public override void VisitBreak(Break val, T0 arg) {
             Visit(val.Expr, arg);
         }
 
-        public override void VisitFunction(Function val, TParameter arg) {
+        public override void VisitFunction(Function val, T0 arg) {
             Visit(val.Body, arg);
         }
 
-        public override void VisitOnStackList(OnStackList val, TParameter arg) {
+        public override void VisitOnStackList(OnStackList val, T0 arg) {
             foreach (var expr in val.List) {
                 Visit(expr, arg);
             }
         }
 
-        public override void VisitBlock(Block val, TParameter arg) {
+        public override void VisitBlock(Block val, T0 arg) {
             foreach (var expr in val.List) {
                 Visit(expr, arg);
             }
         }
 
-        public override void VisitUnOp(UnOp val, TParameter arg) {
+        public override void VisitUnOp(UnOp val, T0 arg) {
             Visit(val.Expr, arg);
         }
 
-        public override void VisitBiOp(BiOp val, TParameter arg) {
+        public override void VisitBiOp(BiOp val, T0 arg) {
             Visit(val.ExprL, arg);
             Visit(val.ExprR, arg);
         }
 
-        public override void VisitTableDef(TableDef val, TParameter arg) {
+        public override void VisitTableDef(TableDef val, T0 arg) {
             foreach (var (key, value) in val.Pairs) {
                 Visit(key, arg);
                 Visit(value, arg);
             }
         }
 
-        public override void VisitVectorDef(VectorDef val, TParameter arg) {
+        public override void VisitVectorDef(VectorDef val, T0 arg) {
             foreach (var item in val.Items) {
                 Visit(item, arg);
             }
         }
 
-        public override void VisitMetatable(Metatable val, TParameter arg) {
+        public override void VisitMetatable(Metatable val, T0 arg) {
             Visit(val.Table, arg);
         }
 
-        public override void VisitSysCall(SysCall val, TParameter arg) {
+        public override void VisitSysCall(SysCall val, T0 arg) {
             foreach (var input in val.Inputs) {
                 Visit(input, arg);
             }
         }
 
-        public override void VisitToValue(ToValue val, TParameter arg) {
+        public override void VisitToValue(ToValue val, T0 arg) {
             Visit(val.Child, arg);
+        }
+    }
+    
+    public abstract class InVisitor<T0, T1> {
+        public abstract void VisitLiteralInteger(LiteralInteger val, T0 arg0, T1 arg1);
+        public abstract void VisitLiteralFloat(LiteralFloat val, T0 arg0, T1 arg1);
+        public abstract void VisitLiteralBool(LiteralBool val, T0 arg0, T1 arg1);
+        public abstract void VisitLiteralString(LiteralString val, T0 arg0, T1 arg1);
+        public abstract void VisitLiteralNil(LiteralNil val, T0 arg0, T1 arg1);
+
+        public abstract void VisitVarRef(VarRef val, T0 arg0, T1 arg1);
+
+        public abstract void VisitIf(If val, T0 arg0, T1 arg1);
+        public abstract void VisitWhile(While val, T0 arg0, T1 arg1);
+        public abstract void VisitFor(For val, T0 arg0, T1 arg1);
+        public abstract void VisitReturn(Return val, T0 arg0, T1 arg1);
+        public abstract void VisitBreak(Break val, T0 arg0, T1 arg1);
+        public abstract void VisitFunction(Function val, T0 arg0, T1 arg1);
+
+        public abstract void VisitOnStackList(OnStackList val, T0 arg0, T1 arg1);
+
+        public abstract void VisitBlock(Block val, T0 arg0, T1 arg1);
+
+        public abstract void VisitUnOp(UnOp val, T0 arg0, T1 arg1);
+        public abstract void VisitBiOp(BiOp val, T0 arg0, T1 arg1);
+
+        public abstract void VisitTableDef(TableDef val, T0 arg0, T1 arg1);
+        public abstract void VisitVectorDef(VectorDef val, T0 arg0, T1 arg1);
+        
+        public abstract void VisitMetatable(Metatable val, T0 arg0, T1 arg1);
+
+        public abstract void VisitPseudoIndex(PseudoIndex val, T0 arg0, T1 arg1);
+        
+        public abstract void VisitSysCall(SysCall val, T0 arg0, T1 arg1);
+        public abstract void VisitToValue(ToValue val, T0 arg0, T1 arg1);
+        
+
+        protected virtual void PreVisit(Node node) { }
+        protected virtual void PostVisit(Node node) { }
+        protected virtual void OnUnknownNode(Node node) {
+            throw new ArgumentOutOfRangeException();
+        }
+        
+        public void Visit(Node node, T0 arg0, T1 arg1) {
+            PreVisit(node);
+
+            switch (node) {
+            case LiteralInteger li:
+                VisitLiteralInteger(li, arg0, arg1);
+                break;
+            case LiteralFloat lf:
+                VisitLiteralFloat(lf, arg0, arg1);
+                break;
+            case LiteralBool lb:
+                VisitLiteralBool(lb, arg0, arg1);
+                break;
+            case LiteralString ls:
+                VisitLiteralString(ls, arg0, arg1);
+                break;
+            case LiteralNil ln:
+                VisitLiteralNil(ln, arg0, arg1);
+                break;
+            case VarRef vr:
+                VisitVarRef(vr, arg0, arg1);
+                break;
+            case If i:
+                VisitIf(i, arg0, arg1);
+                break;
+            case While w:
+                VisitWhile(w, arg0, arg1);
+                break;
+            case For f:
+                VisitFor(f, arg0, arg1);
+                break;
+            case Return ret:
+                VisitReturn(ret, arg0, arg1);
+                break;
+            case Break b:
+                VisitBreak(b, arg0, arg1);
+                break;
+            case Function fun:
+                VisitFunction(fun, arg0, arg1);
+                break;
+            case OnStackList osl:
+                VisitOnStackList(osl, arg0, arg1);
+                break;
+            case Block blk:
+                VisitBlock(blk, arg0, arg1);
+                break;
+            case UnOp uop:
+                VisitUnOp(uop, arg0, arg1);
+                break;
+            case BiOp bop:
+                VisitBiOp(bop, arg0, arg1);
+                break;
+            case TableDef tdef:
+                VisitTableDef(tdef, arg0, arg1);
+                break;
+            case VectorDef vdef:
+                VisitVectorDef(vdef, arg0, arg1);
+                break;
+            case Metatable mt:
+                VisitMetatable(mt, arg0, arg1);
+                break;
+            case PseudoIndex pi:
+                VisitPseudoIndex(pi, arg0, arg1);
+                break;
+            case SysCall sc:
+                VisitSysCall(sc, arg0, arg1);
+                break;
+            case ToValue tv:
+                VisitToValue(tv, arg0, arg1);
+                break;
+            default:
+                OnUnknownNode(node);
+                break;
+            }
+
+            PostVisit(node);
+        }
+    }
+
+    public class RecursiveInVisitor<T0, T1> : InVisitor<T0, T1> {
+        public override void VisitLiteralInteger(LiteralInteger val, T0 arg0, T1 arg1) { }
+
+        public override void VisitLiteralFloat(LiteralFloat val, T0 arg0, T1 arg1) { }
+
+        public override void VisitLiteralBool(LiteralBool val, T0 arg0, T1 arg1) { }
+
+        public override void VisitLiteralString(LiteralString val, T0 arg0, T1 arg1) { }
+
+        public override void VisitLiteralNil(LiteralNil val, T0 arg0, T1 arg1) { }
+
+        public override void VisitVarRef(VarRef val, T0 arg0, T1 arg1) { }
+
+        public override void VisitPseudoIndex(PseudoIndex val, T0 arg0, T1 arg1) { }
+
+        public override void VisitIf(If val, T0 arg0, T1 arg1) {
+            foreach (var (cond, expr) in val.Branches) {
+                Visit(cond, arg0, arg1);
+                Visit(expr, arg0, arg1);
+            }
+
+            if (val.ElseBranch != null) Visit(val.ElseBranch, arg0, arg1);
+        }
+
+        public override void VisitWhile(While val, T0 arg0, T1 arg1) {
+            Visit(val.Condition, arg0, arg1);
+            Visit(val.Body, arg0, arg1);
+        }
+
+        public override void VisitFor(For val, T0 arg0, T1 arg1) {
+            foreach (var varRef in val.IteratorVariables) {
+                Visit(varRef, arg0, arg1);
+            }
+            
+            Visit(val.Expression, arg0, arg1);
+            Visit(val.Body, arg0, arg1);
+        }
+
+        public override void VisitReturn(Return val, T0 arg0, T1 arg1) {
+            Visit(val.Expr, arg0, arg1);
+        }
+
+        public override void VisitBreak(Break val, T0 arg0, T1 arg1) {
+            Visit(val.Expr, arg0, arg1);
+        }
+
+        public override void VisitFunction(Function val, T0 arg0, T1 arg1) {
+            Visit(val.Body, arg0, arg1);
+        }
+
+        public override void VisitOnStackList(OnStackList val, T0 arg0, T1 arg1) {
+            foreach (var expr in val.List) {
+                Visit(expr, arg0, arg1);
+            }
+        }
+
+        public override void VisitBlock(Block val, T0 arg0, T1 arg1) {
+            foreach (var expr in val.List) {
+                Visit(expr, arg0, arg1);
+            }
+        }
+
+        public override void VisitUnOp(UnOp val, T0 arg0, T1 arg1) {
+            Visit(val.Expr, arg0, arg1);
+        }
+
+        public override void VisitBiOp(BiOp val, T0 arg0, T1 arg1) {
+            Visit(val.ExprL, arg0, arg1);
+            Visit(val.ExprR, arg0, arg1);
+        }
+
+        public override void VisitTableDef(TableDef val, T0 arg0, T1 arg1) {
+            foreach (var (key, value) in val.Pairs) {
+                Visit(key, arg0, arg1);
+                Visit(value, arg0, arg1);
+            }
+        }
+
+        public override void VisitVectorDef(VectorDef val, T0 arg0, T1 arg1) {
+            foreach (var item in val.Items) {
+                Visit(item, arg0, arg1);
+            }
+        }
+
+        public override void VisitMetatable(Metatable val, T0 arg0, T1 arg1) {
+            Visit(val.Table, arg0, arg1);
+        }
+
+        public override void VisitSysCall(SysCall val, T0 arg0, T1 arg1) {
+            foreach (var input in val.Inputs) {
+                Visit(input, arg0, arg1);
+            }
+        }
+
+        public override void VisitToValue(ToValue val, T0 arg0, T1 arg1) {
+            Visit(val.Child, arg0, arg1);
         }
     }
 }

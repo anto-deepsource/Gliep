@@ -28,7 +28,7 @@ namespace GeminiLab.Glute.Compile {
 
             var it = new NodeInformation();
 
-            new WhileBreakPairingVisitor(it).Visit(root, null);
+            new BreakTargetVisitor(it).Visit(root, null);
             new IsOnStackListVisitor(it).Visit(root);
             new IsAssignableVisitor(it).Visit(root);
 
@@ -36,14 +36,14 @@ namespace GeminiLab.Glute.Compile {
             vdv.Visit(root, vdv.RootTable);
 
             var vcv = new GluteVarRefVisitor(vdv.RootTable, it);
-            vcv.Visit(root, new VarRefVisitorContext(vdv.RootTable, false));
+            vcv.Visit(root, vdv.RootTable, false);
 
             vdv.DetermineVariablePlace();
 
             new VariableInContextMarker(it).Visit(root);
 
             var gen = new CodeGenVisitor(it);
-            gen.Visit(root, new CodeGenContext(null!, false));
+            gen.Visit(root, null!, false);
 
             return gen.Builder.GetResult();
         }
