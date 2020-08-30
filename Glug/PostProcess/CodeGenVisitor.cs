@@ -239,8 +239,8 @@ namespace GeminiLab.Glug.PostProcess {
                 --delCnt;
             }
 
-            if (!_breakableResultUsed[_info.BreakParent[val]]) visitForDiscard(val.Expr, fun);
-            else if (_info.IsOnStackList[_info.BreakParent[val]]) visitForOsl(val.Expr, fun);
+            if (!_breakableResultUsed[target]) visitForDiscard(val.Expr, fun);
+            else if (_info.IsOnStackList[target]) visitForOsl(val.Expr, fun);
             else visitForValue(val.Expr, fun);
             
             fun.AppendB(_breakableEndLabel[_info.BreakParent[val]]);
