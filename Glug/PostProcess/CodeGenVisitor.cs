@@ -239,8 +239,6 @@ namespace GeminiLab.Glug.PostProcess {
                 --delCnt;
             }
 
-            _delCount[fun] = guardian;
-
             if (!_breakableResultUsed[_info.BreakParent[val]]) visitForDiscard(val.Expr, fun);
             else if (_info.IsOnStackList[_info.BreakParent[val]]) visitForOsl(val.Expr, fun);
             else visitForValue(val.Expr, fun);
