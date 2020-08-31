@@ -7,7 +7,7 @@
     # 8 expected
     ```
 
-- [ ] *(2020/08/27)* Add optional labels for breakable blocks
+- [x] *(2020/08/27)* Add optional labels for breakable blocks
 
     ```
     print for 'outer (i: iter {| 1, 2, 3, 4, 5 |}) (
@@ -79,4 +79,3 @@
         // CE
         for (x, y,: pairs {| 0, 1, 2 |}) x + y;
         ```
-    
