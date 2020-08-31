@@ -3,8 +3,7 @@
 <~~ 
 !project_section_item_template = "Project(\"{{{0}}}\") = \"{1}\", \"{2}\", \"{{{3}}}\"\nEndProject\n";
 !configuration_section_item_template = "		{{{0}}}.Develop|Any CPU.ActiveCfg = Develop|Any CPU\n		{{{0}}}.Develop|Any CPU.Build.0 = Develop|Any CPU\n		{{{0}}}.Preview|Any CPU.ActiveCfg = Preview|Any CPU\n		{{{0}}}.Preview|Any CPU.Build.0 = Preview|Any CPU\n		{{{0}}}.Release|Any CPU.ActiveCfg = Release|Any CPU\n		{{{0}}}.Release|Any CPU.Build.0 = Release|Any CPU\n";
-!project_section = "";
-!configuration_section = "";
+!projects = {||};
 !solution_guid = create_guid[];
 
 !cs_proj_type_guid = "9A19103F-16F7-4668-BE54-9A1E7A4F7556";
@@ -15,7 +14,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
-<~ project_section ~~>
+<~~
+	for (!p: iter projects) (
+~~>
+<~ 		format[project_section_item_template, cs_proj_type_guid, p.name, p.path, p.guid] ~~>
+<~~
+	);
+~~>
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Develop|Any CPU = Develop|Any CPU
@@ -23,7 +28,13 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-<~ configuration_section ~~>
+<~~
+	for (!p: iter projects) (
+~~>
+<~ 		format[configuration_section_item_template, p.guid] ~~>
+<~~
+	);
+~~>
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,9 +47,7 @@ EndGlobal
 );
 
 fn add_project[name, path] (
-	!guid = create_guid[];
-	project_section = project_section + format[project_section_item_template, cs_proj_type_guid, name, path, guid];
-	configuration_section = configuration_section + format[configuration_section_item_template, guid];
+	projects @ |> = { .name: name, .path: path, .guid: create_guid[] };
 );
 
 fn simple_project_file[name, desc, namespace] (

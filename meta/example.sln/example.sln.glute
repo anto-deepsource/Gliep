@@ -1,5 +1,6 @@
 <~~
-add_project["example", "example.csproj"];
+add_project["Example", "example.csproj"];
+add_project["Example1", "example1.csproj"];
 
 print_content[];
 ~~>

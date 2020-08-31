@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using GeminiLab.Core2.IO;
 using GeminiLab.Core2.Logger;
+using GeminiLab.Gliep;
 using GeminiLab.Glos;
 using GeminiLab.Glug.AST;
 using GeminiLab.Glute.Compile;
@@ -121,6 +122,7 @@ namespace GeminiLab.Glute {
                 
                 return new GlosValue[] { DateTime.Now.ToString(format) };
             }));
+            GlosBuiltInFunctionGenerator.AddFromInstanceFunctions(new Functions(_viMa), rv);
             
             return rv;
         } 
