@@ -7,10 +7,10 @@ using GeminiLab.Glug.AST;
 
 namespace GeminiLab.Glug.PostProcess {
     public class CodeGenVisitor : InVisitor<GlosFunctionBuilder, bool> {
-        private readonly NodeInformation _info;
-        private readonly Dictionary<Breakable, Label> _breakableEndLabel = new Dictionary<Breakable, Label>();
-        private readonly Dictionary<Breakable, bool> _breakableResultUsed = new Dictionary<Breakable, bool>();
-        private readonly Dictionary<Breakable, int> _breakableGuardianDelimiterId = new Dictionary<Breakable, int>();
+        private readonly NodeInformation              _info;
+        private readonly Dictionary<Breakable, Label> _breakableEndLabel            = new Dictionary<Breakable, Label>();
+        private readonly Dictionary<Breakable, bool>  _breakableResultUsed          = new Dictionary<Breakable, bool>();
+        private readonly Dictionary<Breakable, int>   _breakableGuardianDelimiterId = new Dictionary<Breakable, int>();
 
         public CodeGenVisitor(NodeInformation info) {
             _info = info;
@@ -100,21 +100,32 @@ namespace GeminiLab.Glug.PostProcess {
                 visitForValue(branch.Condition, fun);
                 fun.AppendBf(nextLabel);
 
-                if (!ru) visitForDiscard(branch.Body, fun);
-                else if (_info.IsOnStackList[val]) visitForOsl(branch.Body, fun);
-                else visitForValue(branch.Body, fun);
+                if (!ru) {
+                    visitForDiscard(branch.Body, fun);
+                } else if (_info.IsOnStackList[val]) {
+                    visitForOsl(branch.Body, fun);
+                } else {
+                    visitForValue(branch.Body, fun);
+                }
 
                 fun.AppendB(endLabel);
             }
 
             fun.InsertLabel(nextLabel!); // brc must be at least 1 when this ast is well-formed
             if (val.ElseBranch != null) {
-                if (!ru) visitForDiscard(val.ElseBranch, fun);
-                else if (_info.IsOnStackList[val]) visitForOsl(val.ElseBranch, fun);
-                else visitForValue(val.ElseBranch, fun);
+                if (!ru) {
+                    visitForDiscard(val.ElseBranch, fun);
+                } else if (_info.IsOnStackList[val]) {
+                    visitForOsl(val.ElseBranch, fun);
+                } else {
+                    visitForValue(val.ElseBranch, fun);
+                }
             } else if (ru) {
-                if (_info.IsOnStackList[val]) fun.AppendLdDel();
-                else fun.AppendLdNil();
+                if (_info.IsOnStackList[val]) {
+                    fun.AppendLdDel();
+                } else {
+                    fun.AppendLdNil();
+                }
             }
 
             fun.InsertLabel(endLabel);
@@ -128,7 +139,9 @@ namespace GeminiLab.Glug.PostProcess {
                 if (_info.IsOnStackList[val]) {
                     fun.AppendLdDel();
                     ++_delCount[fun];
-                } else fun.AppendLdNil();
+                } else {
+                    fun.AppendLdNil();
+                }
             }
 
             var beginLabel = fun.AllocateAndInsertLabel();
@@ -140,16 +153,22 @@ namespace GeminiLab.Glug.PostProcess {
                 if (_info.IsOnStackList[val]) {
                     fun.AppendShpRv(0);
                     --_delCount[fun];
-                } else fun.AppendPop();
+                } else {
+                    fun.AppendPop();
+                }
             }
 
             fun.AppendLdDel();
             _breakableGuardianDelimiterId[val] = _delCount[fun];
             ++_delCount[fun];
 
-            if (!ru) visitForDiscard(val.Body, fun);
-            else if (_info.IsOnStackList[val]) visitForOsl(val.Body, fun);
-            else visitForValue(val.Body, fun);
+            if (!ru) {
+                visitForDiscard(val.Body, fun);
+            } else if (_info.IsOnStackList[val]) {
+                visitForOsl(val.Body, fun);
+            } else {
+                visitForValue(val.Body, fun);
+            }
 
             fun.AppendPopDel();
             --_delCount[fun];
@@ -166,14 +185,16 @@ namespace GeminiLab.Glug.PostProcess {
             var pvStatus = _info.PrivateVariables[val][For.PrivateVariableNameStatus];
             var pvIterator = _info.PrivateVariables[val][For.PrivateVariableNameIterator];
             var iterVarOsl = new OnStackList(new List<Expr>(val.IteratorVariables));
-            
+
             if (ru) {
                 if (_info.IsOnStackList[val]) {
                     fun.AppendLdDel();
                     ++_delCount[fun];
-                } else fun.AppendLdNil();
+                } else {
+                    fun.AppendLdNil();
+                }
             }
-            
+
             visitForOsl(val.Expression, fun);
             fun.AppendShpRv(3);
             --_delCount[fun];
@@ -205,17 +226,22 @@ namespace GeminiLab.Glug.PostProcess {
                 if (_info.IsOnStackList[val]) {
                     fun.AppendShpRv(0);
                     --_delCount[fun];
+                } else {
+                    fun.AppendPop();
                 }
-                else fun.AppendPop();
             }
 
             fun.AppendLdDel();
             _breakableGuardianDelimiterId[val] = _delCount[fun];
             ++_delCount[fun];
 
-            if (!ru) visitForDiscard(val.Body, fun);
-            else if (_info.IsOnStackList[val]) visitForOsl(val.Body, fun);
-            else visitForValue(val.Body, fun);
+            if (!ru) {
+                visitForDiscard(val.Body, fun);
+            } else if (_info.IsOnStackList[val]) {
+                visitForOsl(val.Body, fun);
+            } else {
+                visitForValue(val.Body, fun);
+            }
 
             fun.AppendPopDel();
             --_delCount[fun];
@@ -239,10 +265,14 @@ namespace GeminiLab.Glug.PostProcess {
                 --delCnt;
             }
 
-            if (!_breakableResultUsed[target]) visitForDiscard(val.Expr, fun);
-            else if (_info.IsOnStackList[target]) visitForOsl(val.Expr, fun);
-            else visitForValue(val.Expr, fun);
-            
+            if (!_breakableResultUsed[target]) {
+                visitForDiscard(val.Expr, fun);
+            } else if (_info.IsOnStackList[target]) {
+                visitForOsl(val.Expr, fun);
+            } else {
+                visitForValue(val.Expr, fun);
+            }
+
             fun.AppendB(_breakableEndLabel[_info.BreakParent[val]]);
         }
 
@@ -253,8 +283,11 @@ namespace GeminiLab.Glug.PostProcess {
             }
 
             foreach (var item in val.List) {
-                if (ru) visitForValue(item, fun);
-                else visitForDiscard(item, fun);
+                if (ru) {
+                    visitForValue(item, fun);
+                } else {
+                    visitForDiscard(item, fun);
+                }
             }
         }
 
@@ -268,8 +301,11 @@ namespace GeminiLab.Glug.PostProcess {
                     if (i < count - 1) {
                         visitForDiscard(val.List[i], fun);
                     } else {
-                        if (ru) visitForAny(val.List[i], fun);
-                        else visitForDiscard(val.List[i], fun);
+                        if (ru) {
+                            visitForAny(val.List[i], fun);
+                        } else {
+                            visitForDiscard(val.List[i], fun);
+                        }
                     }
                 }
             }
@@ -298,36 +334,36 @@ namespace GeminiLab.Glug.PostProcess {
 
         private void createStoreInstr(Node node, GlosFunctionBuilder fun) {
             switch (node) {
-                // allow pseudo ast nodes
-                case OnStackList { List: var list } osl when !_info.IsAssignable.TryGetValue(osl, out var assignable) || assignable:
-                    var count = list.Count;
-                    fun.AppendShpRv(count);
-                    --_delCount[fun];
-                    for (int i = count - 1; i >= 0; --i) createStoreInstr(list[i], fun);
-                    break;
-                case VarRef vr:
-                    _info.Variable[vr].CreateStoreInstr(fun);
-                    break;
-                case BiOp { Op: GlugBiOpType.Index, ExprL: var indexee, ExprR: PseudoIndex { IsTail: var isTail } }:
-                    visitForValue(indexee, fun);
-                    fun.AppendPshv();
-                    break;
-                case BiOp { Op: GlugBiOpType.Index, ExprL: var indexee, ExprR: var index }:
-                    visitForValue(indexee, fun);
-                    visitForValue(index, fun);
-                    fun.AppendUen();
-                    break;
-                case BiOp { Op: GlugBiOpType.IndexLocal, ExprL: var indexee, ExprR: var index }:
-                    visitForValue(indexee, fun);
-                    visitForValue(index, fun);
-                    fun.AppendUenL();
-                    break;
-                case Metatable { Table: var table }:
-                    visitForValue(table, fun);
-                    fun.AppendSmt();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+            // allow pseudo ast nodes
+            case OnStackList { List: var list } osl when !_info.IsAssignable.TryGetValue(osl, out var assignable) || assignable:
+                var count = list.Count;
+                fun.AppendShpRv(count);
+                --_delCount[fun];
+                for (int i = count - 1; i >= 0; --i) createStoreInstr(list[i], fun);
+                break;
+            case VarRef vr:
+                _info.Variable[vr].CreateStoreInstr(fun);
+                break;
+            case BiOp { Op: GlugBiOpType.Index, ExprL: var indexee, ExprR: PseudoIndex { IsTail: var isTail } }:
+                visitForValue(indexee, fun);
+                fun.AppendPshv();
+                break;
+            case BiOp { Op: GlugBiOpType.Index, ExprL: var indexee, ExprR: var index }:
+                visitForValue(indexee, fun);
+                visitForValue(index, fun);
+                fun.AppendUen();
+                break;
+            case BiOp { Op: GlugBiOpType.IndexLocal, ExprL: var indexee, ExprR: var index }:
+                visitForValue(indexee, fun);
+                visitForValue(index, fun);
+                fun.AppendUenL();
+                break;
+            case Metatable { Table: var table }:
+                visitForValue(table, fun);
+                fun.AppendSmt();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -405,25 +441,25 @@ namespace GeminiLab.Glug.PostProcess {
                 visitForValue(val.ExprR, fun);
 
                 fun.AppendInstruction(val.Op switch {
-                    GlugBiOpType.Add => GlosOp.Add,
-                    GlugBiOpType.Sub => GlosOp.Sub,
-                    GlugBiOpType.Mul => GlosOp.Mul,
-                    GlugBiOpType.Div => GlosOp.Div,
-                    GlugBiOpType.Mod => GlosOp.Mod,
-                    GlugBiOpType.Lsh => GlosOp.Lsh,
-                    GlugBiOpType.Rsh => GlosOp.Rsh,
-                    GlugBiOpType.And => GlosOp.And,
-                    GlugBiOpType.Orr => GlosOp.Orr,
-                    GlugBiOpType.Xor => GlosOp.Xor,
-                    GlugBiOpType.Gtr => GlosOp.Gtr,
-                    GlugBiOpType.Lss => GlosOp.Lss,
-                    GlugBiOpType.Geq => GlosOp.Geq,
-                    GlugBiOpType.Leq => GlosOp.Leq,
-                    GlugBiOpType.Equ => GlosOp.Equ,
-                    GlugBiOpType.Neq => GlosOp.Neq,
-                    GlugBiOpType.Index => GlosOp.Ren,
+                    GlugBiOpType.Add        => GlosOp.Add,
+                    GlugBiOpType.Sub        => GlosOp.Sub,
+                    GlugBiOpType.Mul        => GlosOp.Mul,
+                    GlugBiOpType.Div        => GlosOp.Div,
+                    GlugBiOpType.Mod        => GlosOp.Mod,
+                    GlugBiOpType.Lsh        => GlosOp.Lsh,
+                    GlugBiOpType.Rsh        => GlosOp.Rsh,
+                    GlugBiOpType.And        => GlosOp.And,
+                    GlugBiOpType.Orr        => GlosOp.Orr,
+                    GlugBiOpType.Xor        => GlosOp.Xor,
+                    GlugBiOpType.Gtr        => GlosOp.Gtr,
+                    GlugBiOpType.Lss        => GlosOp.Lss,
+                    GlugBiOpType.Geq        => GlosOp.Geq,
+                    GlugBiOpType.Leq        => GlosOp.Leq,
+                    GlugBiOpType.Equ        => GlosOp.Equ,
+                    GlugBiOpType.Neq        => GlosOp.Neq,
+                    GlugBiOpType.Index      => GlosOp.Ren,
                     GlugBiOpType.IndexLocal => GlosOp.RenL,
-                    _ => GlosOp.Nop, // Add a exception here
+                    _                       => GlosOp.Nop, // Add a exception here
                 });
 
                 if (!ru) fun.AppendPop();

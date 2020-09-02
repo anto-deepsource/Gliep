@@ -22,7 +22,7 @@ namespace GeminiLab.Glug.PostProcess {
             foreach (var varRef in val.IteratorVariables) {
                 Visit(varRef, currentScope, true);
             }
-            
+
             Visit(val.Expression, currentScope, false);
             Visit(val.Body, currentScope, false);
         }

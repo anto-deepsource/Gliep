@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 
 namespace GeminiLab.Glug.AST {
     public abstract class Node { }
-    
+
     public abstract class Expr : Node { }
 
     public abstract class Literal : Expr { }
@@ -85,7 +85,7 @@ namespace GeminiLab.Glug.AST {
             Label = label;
         }
     }
-    
+
     public class While : Breakable {
         public While(Expr condition, Expr body, string? label) : base(label) {
             Condition = condition;
@@ -98,15 +98,15 @@ namespace GeminiLab.Glug.AST {
 
     public class For : Breakable {
         public const string PrivateVariableNameIterateFunction = "iter_fun";
-        public const string PrivateVariableNameStatus = "status";
-        public const string PrivateVariableNameIterator = "iterator";
-        
+        public const string PrivateVariableNameStatus          = "status";
+        public const string PrivateVariableNameIterator        = "iterator";
+
         public For(IList<VarRef> iteratorVariables, Expr expression, Expr body, string? label) : base(label) {
             IteratorVariables = iteratorVariables;
             Expression = expression;
             Body = body;
         }
-        
+
         public IList<VarRef> IteratorVariables { get; }
         public Expr Expression { get; }
         public Expr Body { get; }
@@ -216,9 +216,7 @@ namespace GeminiLab.Glug.AST {
         public Expr ExprR { get; }
 
         public static bool IsShortCircuitOp(GlugBiOpType type) {
-            return type == GlugBiOpType.ShortCircuitAnd || 
-                type == GlugBiOpType.ShortCircuitOrr ||
-                type == GlugBiOpType.NullCoalescing;
+            return type == GlugBiOpType.ShortCircuitAnd || type == GlugBiOpType.ShortCircuitOrr || type == GlugBiOpType.NullCoalescing;
         }
     }
 
@@ -232,7 +230,7 @@ namespace GeminiLab.Glug.AST {
         public Expr Value;
 
         public void Deconstruct(out Expr key, out Expr value) => (key, value) = (Key, Value);
-    } 
+    }
 
     public class TableDef : Expr {
         public TableDef(IList<TableDefPair> pairs) {
@@ -246,7 +244,7 @@ namespace GeminiLab.Glug.AST {
         public VectorDef(IList<Expr> items) {
             Items = items;
         }
-        
+
         public IList<Expr> Items { get; }
     }
 
@@ -262,7 +260,7 @@ namespace GeminiLab.Glug.AST {
         public PseudoIndex(bool isTail) {
             IsTail = isTail;
         }
-        
+
         public bool IsTail { get; }
     }
 
@@ -297,7 +295,7 @@ namespace GeminiLab.Glug.AST {
         public ToValue(Expr child) {
             Child = child;
         }
-        
+
         public Expr Child { get; }
     }
 }

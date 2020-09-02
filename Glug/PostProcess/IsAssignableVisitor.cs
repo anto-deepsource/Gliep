@@ -1,12 +1,11 @@
 using System;
 using System.Linq;
-
 using GeminiLab.Glug.AST;
 
 namespace GeminiLab.Glug.PostProcess {
     public class IsAssignableVisitor : RecursiveVisitor {
         private readonly NodeInformation _info;
-        
+
         public IsAssignableVisitor(NodeInformation info) {
             _info = info;
         }

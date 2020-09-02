@@ -14,7 +14,7 @@ namespace GeminiLab.Glug {
         public static IGlugTokenStream Tokenize(string value, string? sourceName = null) => new GlugTokenizer(new StringReader(value), sourceName);
 
         public static Expr Parse(IGlugTokenStream stream) => new GlugParser(stream).Parse();
-        
+
         public static GlosUnit PostProcessAndCodeGen(Expr root) {
             root = new Function("<root>", false, new List<string>(), root);
 
@@ -23,7 +23,7 @@ namespace GeminiLab.Glug {
             new BreakTargetVisitor(it).Visit(root, null);
             new IsOnStackListVisitor(it).Visit(root);
             new IsAssignableVisitor(it).Visit(root);
-            
+
             var vdv = new VarDefVisitor(it);
             vdv.Visit(root, vdv.RootTable);
 

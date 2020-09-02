@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-
 using GeminiLab.Core2;
 using GeminiLab.Core2.Collections;
 using GeminiLab.Core2.IO;
@@ -44,7 +43,7 @@ namespace GeminiLab.Glug.AST {
         public override void VisitIf(If val) {
             Writer.WriteLine("if");
             Writer.IncreaseIndent();
-            
+
             foreach (var (cond, expr) in val.Branches) {
                 Writer.WriteLine("<branch>");
                 Writer.IncreaseIndent();
@@ -88,9 +87,7 @@ namespace GeminiLab.Glug.AST {
             Writer.IncreaseIndent();
             Writer.WriteLine("<iter-vals>");
             Writer.IncreaseIndent();
-            foreach (var varRef in val.IteratorVariables) {
-                Visit(varRef);
-            }
+            foreach (var varRef in val.IteratorVariables) { Visit(varRef); }
             Writer.DecreaseIndent();
             Writer.WriteLine("<expr>");
             Writer.IncreaseIndent();
@@ -140,11 +137,11 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitUnOp(UnOp val) {
             Writer.WriteLine(val.Op switch {
-                GlugUnOpType.Not => "not",
-                GlugUnOpType.Neg => "neg",
+                GlugUnOpType.Not    => "not",
+                GlugUnOpType.Neg    => "neg",
                 GlugUnOpType.Typeof => "typeof",
-                GlugUnOpType.IsNil => "isnil",
-                _ => throw new ArgumentOutOfRangeException(),
+                GlugUnOpType.IsNil  => "isnil",
+                _                   => throw new ArgumentOutOfRangeException(),
             });
             Writer.IncreaseIndent();
             Visit(val.Expr);
@@ -153,31 +150,31 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitBiOp(BiOp val) {
             Writer.WriteLine(val.Op switch {
-                GlugBiOpType.Add => "add",
-                GlugBiOpType.Sub => "sub",
-                GlugBiOpType.Mul => "mul",
-                GlugBiOpType.Div => "div",
-                GlugBiOpType.Mod => "mod",
-                GlugBiOpType.Lsh => "lsh",
-                GlugBiOpType.Rsh => "rsh",
-                GlugBiOpType.And => "and",
-                GlugBiOpType.Orr => "orr",
-                GlugBiOpType.Xor => "xor",
-                GlugBiOpType.Gtr => "gtr",
-                GlugBiOpType.Lss => "lss",
-                GlugBiOpType.Geq => "geq",
-                GlugBiOpType.Leq => "leq",
-                GlugBiOpType.Equ => "equ",
-                GlugBiOpType.Neq => "neq",
-                GlugBiOpType.Call => "call",
-                GlugBiOpType.Assign => "assign",
-                GlugBiOpType.Index => "index",
-                GlugBiOpType.IndexLocal => "index-local",
-                GlugBiOpType.Concat => "concat",
+                GlugBiOpType.Add             => "add",
+                GlugBiOpType.Sub             => "sub",
+                GlugBiOpType.Mul             => "mul",
+                GlugBiOpType.Div             => "div",
+                GlugBiOpType.Mod             => "mod",
+                GlugBiOpType.Lsh             => "lsh",
+                GlugBiOpType.Rsh             => "rsh",
+                GlugBiOpType.And             => "and",
+                GlugBiOpType.Orr             => "orr",
+                GlugBiOpType.Xor             => "xor",
+                GlugBiOpType.Gtr             => "gtr",
+                GlugBiOpType.Lss             => "lss",
+                GlugBiOpType.Geq             => "geq",
+                GlugBiOpType.Leq             => "leq",
+                GlugBiOpType.Equ             => "equ",
+                GlugBiOpType.Neq             => "neq",
+                GlugBiOpType.Call            => "call",
+                GlugBiOpType.Assign          => "assign",
+                GlugBiOpType.Index           => "index",
+                GlugBiOpType.IndexLocal      => "index-local",
+                GlugBiOpType.Concat          => "concat",
                 GlugBiOpType.ShortCircuitAnd => "short-circuit and",
                 GlugBiOpType.ShortCircuitOrr => "short-circuit orr",
-                GlugBiOpType.NullCoalescing => "coalescing",
-                _ => throw new ArgumentOutOfRangeException(),
+                GlugBiOpType.NullCoalescing  => "coalescing",
+                _                            => throw new ArgumentOutOfRangeException(),
             });
             Writer.IncreaseIndent();
             Visit(val.ExprL);
@@ -195,15 +192,14 @@ namespace GeminiLab.Glug.AST {
                 Visit(value);
                 Writer.DecreaseIndent();
             }
+
             Writer.DecreaseIndent();
         }
 
         public override void VisitVectorDef(VectorDef val) {
             Writer.WriteLine("<vector-def>");
             Writer.IncreaseIndent();
-            foreach (var item in val.Items) {
-                Visit(item);
-            }
+            foreach (var item in val.Items) { Visit(item); }
             Writer.DecreaseIndent();
         }
 

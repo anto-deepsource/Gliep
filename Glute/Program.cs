@@ -42,12 +42,14 @@ namespace GeminiLab.Glute {
             var mfs = new MockFileSystem();
             mfs.AddDirectory("/");
             mfs.AddFile("/.glute", new MockFileData("<~~ !x = 1; ~~>"));
-            mfs.AddFile("/a.glute", new MockFileData("<~ x ~>"));
+            mfs.AddFile("/a.glute", new MockFileData("<~ x ~~>"));
+            mfs.AddFile("/b.glute", new MockFileData("<~~x=x+1;~~>\n<~x*10~>\nb"));
             
             new Processor(mfs, ctx.GetLogger("virtual")!).ProcessDirectory("/");
             
             Console.WriteLine(mfs.GetFile("/a").Contents.Decode(Encoding.UTF8));
-            
+            Console.WriteLine(mfs.GetFile("/b").Contents.Decode(Encoding.UTF8));
+
             return;
         }
     }

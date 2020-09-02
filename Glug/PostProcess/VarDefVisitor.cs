@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-
 using GeminiLab.Glug.AST;
 
 namespace GeminiLab.Glug.PostProcess {
@@ -30,8 +29,11 @@ namespace GeminiLab.Glug.PostProcess {
         public override void VisitVarRef(VarRef val, VariableTable currentScope) {
             base.VisitVarRef(val, currentScope);
 
-            if (val.IsDef) _info.Variable[val] = currentScope.CreateVariable(val.Id);
-            else if (val.IsGlobal) _info.Variable[val] = RootTable.CreateVariable(val.Id);
+            if (val.IsDef) {
+                _info.Variable[val] = currentScope.CreateVariable(val.Id);
+            } else if (val.IsGlobal) {
+                _info.Variable[val] = RootTable.CreateVariable(val.Id);
+            }
         }
 
         public override void VisitFor(For val, VariableTable currentScope) {
@@ -42,7 +44,7 @@ namespace GeminiLab.Glug.PostProcess {
             _info.PrivateVariables[val][For.PrivateVariableNameIterateFunction] = currentScope.CreatePrivateVariable(For.PrivateVariableNameIterateFunction);
             _info.PrivateVariables[val][For.PrivateVariableNameStatus] = currentScope.CreatePrivateVariable(For.PrivateVariableNameStatus);
             _info.PrivateVariables[val][For.PrivateVariableNameIterator] = currentScope.CreatePrivateVariable(For.PrivateVariableNameIterator);
-            
+
             base.VisitFor(val, currentScope);
         }
 

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-
 using GeminiLab.Core2;
 using GeminiLab.Core2.Text;
 using GeminiLab.Glos;
@@ -11,13 +10,13 @@ namespace GeminiLab.Glug.Tokenizer {
     // carefully make all these classes stateless so they can work lock-free. 
     internal class AsciiTrie {
         private const int DefaultNodeSize = 256;
-        private const int MaxAscii = 128;
-        private const int Occupied = sizeof(GlugTokenType) / sizeof(short) + 1;
+        private const int MaxAscii        = 128;
+        private const int Occupied        = sizeof(GlugTokenType) / sizeof(short) + 1;
 
         private unsafe struct Node {
-            public GlugTokenType Type;
-            public short Parent;
-            public fixed short Next[MaxAscii - Occupied];
+            public       GlugTokenType Type;
+            public       short         Parent;
+            public fixed short         Next[MaxAscii - Occupied];
 
             public ref short this[char c] => ref Next[c - Occupied];
         }
@@ -32,6 +31,7 @@ namespace GeminiLab.Glug.Tokenizer {
             while (ptr < len) {
                 char c = str[ptr];
                 if (c < Occupied || c >= MaxAscii || _nodes[nptr][c] == 0) break;
+
                 nptr = _nodes[nptr][c];
                 ++ptr;
             }
@@ -50,6 +50,7 @@ namespace GeminiLab.Glug.Tokenizer {
             short ptr = 0;
             foreach (var c in str) {
                 if (c < Occupied || c >= MaxAscii) throw new ArgumentOutOfRangeException(nameof(str));
+
                 if (_nodes[ptr][c] == 0) {
                     _nodes[ptr][c] = (short)_nodes.Count;
                     ref var nxt = ref _nodes.PushStack();
@@ -69,7 +70,7 @@ namespace GeminiLab.Glug.Tokenizer {
         }
     }
 
-    public class GlugTokenizer: IGlugTokenStream {
+    public class GlugTokenizer : IGlugTokenStream {
         // true means int
         private static bool ReadNumeric(string value, int len, ref int ptr, out long resultInt, out double resultFloat) {
             if (len - ptr >= 3 && value[ptr] == '0' && (value[ptr + 1] == 'x' || value[ptr + 1] == 'X') && value[ptr + 2].IsHexadecimalDigit()) {
@@ -79,8 +80,7 @@ namespace GeminiLab.Glug.Tokenizer {
                     unchecked {
                         char c = value[ptr];
                         if (c.IsHexadecimalDigit()) {
-                            if (c.IsDecimalDigit()) rv = rv * 16 + (c - '0');
-                            else rv = rv * 16 + ((c & 0xdf) - 'A' + 10);
+                            rv = c.IsDecimalDigit() ? rv * 16 + (c - '0') : rv * 16 + ((c & 0xdf) - 'A' + 10);
                         } else {
                             break;
                         }
@@ -100,8 +100,12 @@ namespace GeminiLab.Glug.Tokenizer {
                 while (ptr < len) {
                     unchecked {
                         char c = value[ptr];
-                        if (c.IsDecimalDigit()) rv = rv * 10 + (c - '0');
-                        else break;
+                        if (c.IsDecimalDigit()) {
+                            rv = rv * 10 + (c - '0');
+                        } else {
+                            break;
+                        }
+
                         ++ptr;
                     }
                 }
@@ -134,13 +138,19 @@ namespace GeminiLab.Glug.Tokenizer {
 
         private static bool IsIdentifierChar(char c) {
             var cat = CharUnicodeInfo.GetUnicodeCategory(c);
-            return c == '_' || cat == UnicodeCategory.LowercaseLetter || cat == UnicodeCategory.UppercaseLetter ||
-                   cat == UnicodeCategory.OtherLetter || cat == UnicodeCategory.DecimalDigitNumber;
+            return c == '_'
+                || cat == UnicodeCategory.LowercaseLetter
+                || cat == UnicodeCategory.UppercaseLetter
+                || cat == UnicodeCategory.OtherLetter
+                || cat == UnicodeCategory.DecimalDigitNumber;
         }
+
         private static bool IsIdentifierLeadingChar(char c) {
             var cat = CharUnicodeInfo.GetUnicodeCategory(c);
-            return c == '_' || cat == UnicodeCategory.LowercaseLetter || cat == UnicodeCategory.UppercaseLetter ||
-                   cat == UnicodeCategory.OtherLetter;
+            return c == '_'
+                || cat == UnicodeCategory.LowercaseLetter
+                || cat == UnicodeCategory.UppercaseLetter
+                || cat == UnicodeCategory.OtherLetter;
         }
 
         private static string ReadIdentifier(string str, int len, ref int ptr) {
@@ -148,6 +158,7 @@ namespace GeminiLab.Glug.Tokenizer {
 
             while (ptr < len) {
                 if (!IsIdentifierChar(str[ptr])) break;
+
                 ++ptr;
             }
 
@@ -175,7 +186,6 @@ namespace GeminiLab.Glug.Tokenizer {
                 ["<="] = GlugTokenType.SymbolLeq,
                 ["=="] = GlugTokenType.SymbolEqu,
                 ["~="] = GlugTokenType.SymbolNeq,
-
                 ["("] = GlugTokenType.SymbolLParen,
                 [")"] = GlugTokenType.SymbolRParen,
                 ["{"] = GlugTokenType.SymbolLBrace,
@@ -192,20 +202,16 @@ namespace GeminiLab.Glug.Tokenizer {
                 ["."] = GlugTokenType.SymbolDot,
                 ["`"] = GlugTokenType.SymbolBackquote,
                 [":"] = GlugTokenType.SymbolColon,
-
                 ["$"] = GlugTokenType.SymbolDollar,
                 ["@"] = GlugTokenType.SymbolAt,
                 ["'"] = GlugTokenType.SymbolQuote,
                 [".."] = GlugTokenType.SymbolDotDot,
                 ["?"] = GlugTokenType.SymbolQuery,
-                
                 ["&&"] = GlugTokenType.SymbolAndAnd,
                 ["||"] = GlugTokenType.SymbolOrrOrr,
                 ["??"] = GlugTokenType.SymbolQueryQuery,
-                
                 [".!"] = GlugTokenType.SymbolDotBang,
                 ["@!"] = GlugTokenType.SymbolAtBang,
-                
                 ["<|"] = GlugTokenType.SymbolBra,
                 ["|>"] = GlugTokenType.SymbolKet,
                 ["{|"] = GlugTokenType.SymbolVecBegin,
@@ -247,18 +253,18 @@ namespace GeminiLab.Glug.Tokenizer {
                     var id = ReadIdentifier(line, len, ref ptr);
 
                     rv.Type = id switch {
-                        "nil" => GlugTokenType.LiteralNil,
-                        "true" => GlugTokenType.LiteralTrue,
-                        "false" => GlugTokenType.LiteralFalse,
-                        "if" => GlugTokenType.KeywordIf,
-                        "else" => GlugTokenType.KeywordElse,
-                        "elif" => GlugTokenType.KeywordElif,
-                        "fn" => GlugTokenType.KeywordFn,
+                        "nil"    => GlugTokenType.LiteralNil,
+                        "true"   => GlugTokenType.LiteralTrue,
+                        "false"  => GlugTokenType.LiteralFalse,
+                        "if"     => GlugTokenType.KeywordIf,
+                        "else"   => GlugTokenType.KeywordElse,
+                        "elif"   => GlugTokenType.KeywordElif,
+                        "fn"     => GlugTokenType.KeywordFn,
                         "return" => GlugTokenType.KeywordReturn,
-                        "while" => GlugTokenType.KeywordWhile,
-                        "break" => GlugTokenType.KeywordBreak,
-                        "for" => GlugTokenType.KeywordFor,
-                        _ => GlugTokenType.Identifier,
+                        "while"  => GlugTokenType.KeywordWhile,
+                        "break"  => GlugTokenType.KeywordBreak,
+                        "for"    => GlugTokenType.KeywordFor,
+                        _        => GlugTokenType.Identifier,
                     };
 
                     if (rv.Type == GlugTokenType.Identifier) rv.ValueString = id;
@@ -270,6 +276,7 @@ namespace GeminiLab.Glug.Tokenizer {
                     ++ptr;
                     while (ptr < len) {
                         if (line[ptr] == '\"' && line[ptr - 1] != '\\') break;
+
                         ++ptr;
                     }
 
@@ -288,9 +295,9 @@ namespace GeminiLab.Glug.Tokenizer {
                 ++ptr;
             }
         }
-        
+
         public TextReader Source { get; }
-        
+
         public string SourceName { get; }
 
         public GlugTokenizer(TextReader source, string? sourceName = null) {
@@ -301,10 +308,10 @@ namespace GeminiLab.Glug.Tokenizer {
             _row = 0;
         }
 
-        private bool _eof;
-        private string? _currLine;
-        private int _row;
-        private int _ptr;
+        private bool       _eof;
+        private string?    _currLine;
+        private int        _row;
+        private int        _ptr;
         private GlugToken? _buffer = null;
 
         private bool readNewLine() {
@@ -321,18 +328,21 @@ namespace GeminiLab.Glug.Tokenizer {
             if ((_currLine == null || _ptr >= _currLine.Length) && !readNewLine()) return null;
 
             GlugToken? tok = null;
-            do tok = ReadNextToken(_currLine!, ref _ptr, SourceName, _row); while (tok == null && readNewLine());
+            do {
+                tok = ReadNextToken(_currLine!, ref _ptr, SourceName, _row);
+            } while (tok == null && readNewLine());
             return tok;
         }
 
         public bool HasNext() {
             if (_disposed) throw new ObjectDisposedException(nameof(GlugTokenizer));
+
             return (_buffer ??= readNextToken()) != null;
         }
 
         public GlugToken Next() {
             if (_disposed) throw new ObjectDisposedException(nameof(GlugTokenizer));
-            
+
             if (_buffer != null) {
                 var rv = _buffer;
                 _buffer = null;
@@ -342,7 +352,8 @@ namespace GeminiLab.Glug.Tokenizer {
             return readNextToken() ?? throw new InvalidOperationException();
         }
 
-        #region IDisposable Support
+#region IDisposable Support
+
         private bool _disposed = false;
 
         protected virtual void Dispose(bool disposing) {
@@ -354,11 +365,12 @@ namespace GeminiLab.Glug.Tokenizer {
                 _disposed = true;
             }
         }
-        
+
         public void Dispose() {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        #endregion
+
+#endregion
     }
 }

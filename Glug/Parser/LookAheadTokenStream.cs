@@ -13,6 +13,7 @@ namespace GeminiLab.Glug.Parser {
 
     public class LookAheadTokenStream {
         private IGlugTokenStream _source;
+
         public LookAheadTokenStream(IGlugTokenStream source) {
             _source = source;
         }
@@ -35,6 +36,7 @@ namespace GeminiLab.Glug.Parser {
             }
 
             if (NextEof()) throw new ArgumentOutOfRangeException();
+
             return _source.Next();
         }
     }

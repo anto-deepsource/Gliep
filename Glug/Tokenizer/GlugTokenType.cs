@@ -1,10 +1,10 @@
 namespace GeminiLab.Glug.Tokenizer {
     public enum GlugTokenTypeCategory {
-        Literal     = 0x000,
-        Symbol      = 0x001,
-        Pseudo      = 0x002,
-        Keyword     = 0x003,
-        Identifier  = 0x004,
+        Literal         = 0x000,
+        Symbol          = 0x001,
+        Pseudo          = 0x002,
+        Keyword         = 0x003,
+        Identifier      = 0x004,
 
         PrivateUseHead  = 0x100,
         PrivateUseTail  = 0x1ff,    

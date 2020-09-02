@@ -28,10 +28,11 @@ namespace GeminiLab.Glute {
         }
 
         protected virtual void ProcessText(TextReader input, TextWriter output, GlosContext thisContext) {
-            _viMa.SetSyscall(0, (stack, callStack, delStack) => {
-                var v = stack.PopStack();
-                output.Write(_viMa.Calculator.Stringify(v));
-            });
+            _viMa.SetSyscall(0,
+                             (stack, callStack, delStack) => {
+                                 var v = stack.PopStack();
+                                 output.Write(_viMa.Calculator.Stringify(v));
+                             });
 
             var unit = GlutePostProcess.PostProcessAndCodeGen(new GluteParser(new GluteTokenizer(input)).Parse());
             _viMa.ExecuteUnitWithProvidedContextForRootFunction(unit, thisContext);
@@ -45,7 +46,7 @@ namespace GeminiLab.Glute {
 
             using var input = f.OpenText();
             using var output = isDirFile ? TextWriter.Null : new StreamWriter(FileSystem.File.OpenWrite(outputPath), new UTF8Encoding(false));
-            
+
             var thisCtx = isDirFile ? dirContext : new GlosContext(dirContext);
 
             if (!isDirFile) {
@@ -59,7 +60,7 @@ namespace GeminiLab.Glute {
 
             Logger.Debug($"Processed {f.FullName}.");
         }
-        
+
         protected virtual void ProcessDirectory(IDirectoryInfo d, GlosContext parentContext) {
             Logger.Debug($"Enter {d.FullName}.");
 
@@ -95,36 +96,38 @@ namespace GeminiLab.Glute {
 
         protected virtual GlosContext GetRootContext() {
             var rv = new GlosContext(null);
-            
-            rv.CreateVariable("create_guid", GlosValue.NewExternalFunction(param => {
-                return new GlosValue[] { Guid.NewGuid().ToString().ToUpper() };
-            }));
-            rv.CreateVariable("format", GlosValue.NewExternalFunction(param => {
-                if (param.Length <= 0) return new GlosValue[] { "" };
 
-                var format = param[0].AssertString();
-                var args = param[1..].Select(x => x.Type switch {
-                    GlosValueType.Nil => "nil",
-                    GlosValueType.Integer => x.AssumeInteger(),
-                    GlosValueType.Float => x.AssumeFloat(),
-                    GlosValueType.Boolean => x.AssumeBoolean(),
-                    _ => x.ValueObject,
-                }).ToArray();
+            rv.CreateVariable("create_guid", GlosValue.NewExternalFunction(param => { return new GlosValue[] { Guid.NewGuid().ToString().ToUpper() }; }));
+            rv.CreateVariable("format",
+                              GlosValue.NewExternalFunction(param => {
+                                  if (param.Length <= 0) return new GlosValue[] { "" };
 
-                return new GlosValue[] { string.Format(format, args: args) };
-            }));
-            rv.CreateVariable("now", GlosValue.NewExternalFunction(param => {
-                string format = @"yyyy/MM/dd HH:mm:ss";
-                
-                if (param.Length > 0 && param[0].Type == GlosValueType.String) {
-                    format = param[0].AssumeString();
-                }
-                
-                return new GlosValue[] { DateTime.Now.ToString(format) };
-            }));
+                                  var format = param[0].AssertString();
+                                  var args = param[1..]
+                                             .Select(x => x.Type switch {
+                                                 GlosValueType.Nil     => "nil",
+                                                 GlosValueType.Integer => x.AssumeInteger(),
+                                                 GlosValueType.Float   => x.AssumeFloat(),
+                                                 GlosValueType.Boolean => x.AssumeBoolean(),
+                                                 _                     => x.ValueObject,
+                                             })
+                                             .ToArray();
+
+                                  return new GlosValue[] { string.Format(format, args: args) };
+                              }));
+            rv.CreateVariable("now",
+                              GlosValue.NewExternalFunction(param => {
+                                  string format = @"yyyy/MM/dd HH:mm:ss";
+
+                                  if (param.Length > 0 && param[0].Type == GlosValueType.String) {
+                                      format = param[0].AssumeString();
+                                  }
+
+                                  return new GlosValue[] { DateTime.Now.ToString(format) };
+                              }));
             GlosBuiltInFunctionGenerator.AddFromInstanceFunctions(new Functions(_viMa), rv);
-            
+
             return rv;
-        } 
+        }
     }
 }

@@ -31,13 +31,14 @@ namespace GeminiLab.Glug.AST {
         public abstract void VisitMetatable(Metatable val);
 
         public abstract void VisitPseudoIndex(PseudoIndex val);
-        
+
         public abstract void VisitSysCall(SysCall val);
         public abstract void VisitToValue(ToValue val);
 
 
         protected virtual void PreVisit(Node node) { }
         protected virtual void PostVisit(Node node) { }
+
         protected virtual void OnUnknownNode(Node node) {
             throw new ArgumentOutOfRangeException();
         }
@@ -189,9 +190,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitVectorDef(VectorDef val) {
-            foreach (var item in val.Items) {
-                Visit(item);
-            }
+            foreach (var item in val.Items) { Visit(item); }
         }
 
         public override void VisitMetatable(Metatable val) {
@@ -232,21 +231,22 @@ namespace GeminiLab.Glug.AST {
 
         public abstract void VisitTableDef(TableDef val, T0 arg);
         public abstract void VisitVectorDef(VectorDef val, T0 arg);
-        
+
         public abstract void VisitMetatable(Metatable val, T0 arg);
 
         public abstract void VisitPseudoIndex(PseudoIndex val, T0 arg);
-        
+
         public abstract void VisitSysCall(SysCall val, T0 arg);
         public abstract void VisitToValue(ToValue val, T0 arg);
-        
+
 
         protected virtual void PreVisit(Node node) { }
         protected virtual void PostVisit(Node node) { }
+
         protected virtual void OnUnknownNode(Node node) {
             throw new ArgumentOutOfRangeException();
         }
-        
+
         public void Visit(Node node, T0 arg) {
             PreVisit(node);
 
@@ -356,10 +356,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitFor(For val, T0 arg) {
-            foreach (var varRef in val.IteratorVariables) {
-                Visit(varRef, arg);
-            }
-            
+            foreach (var varRef in val.IteratorVariables) { Visit(varRef, arg); }
             Visit(val.Expression, arg);
             Visit(val.Body, arg);
         }
@@ -377,15 +374,11 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitOnStackList(OnStackList val, T0 arg) {
-            foreach (var expr in val.List) {
-                Visit(expr, arg);
-            }
+            foreach (var expr in val.List) { Visit(expr, arg); }
         }
 
         public override void VisitBlock(Block val, T0 arg) {
-            foreach (var expr in val.List) {
-                Visit(expr, arg);
-            }
+            foreach (var expr in val.List) { Visit(expr, arg); }
         }
 
         public override void VisitUnOp(UnOp val, T0 arg) {
@@ -405,9 +398,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitVectorDef(VectorDef val, T0 arg) {
-            foreach (var item in val.Items) {
-                Visit(item, arg);
-            }
+            foreach (var item in val.Items) { Visit(item, arg); }
         }
 
         public override void VisitMetatable(Metatable val, T0 arg) {
@@ -415,16 +406,14 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitSysCall(SysCall val, T0 arg) {
-            foreach (var input in val.Inputs) {
-                Visit(input, arg);
-            }
+            foreach (var input in val.Inputs) { Visit(input, arg); }
         }
 
         public override void VisitToValue(ToValue val, T0 arg) {
             Visit(val.Child, arg);
         }
     }
-    
+
     public abstract class InVisitor<T0, T1> {
         public abstract void VisitLiteralInteger(LiteralInteger val, T0 arg0, T1 arg1);
         public abstract void VisitLiteralFloat(LiteralFloat val, T0 arg0, T1 arg1);
@@ -450,21 +439,22 @@ namespace GeminiLab.Glug.AST {
 
         public abstract void VisitTableDef(TableDef val, T0 arg0, T1 arg1);
         public abstract void VisitVectorDef(VectorDef val, T0 arg0, T1 arg1);
-        
+
         public abstract void VisitMetatable(Metatable val, T0 arg0, T1 arg1);
 
         public abstract void VisitPseudoIndex(PseudoIndex val, T0 arg0, T1 arg1);
-        
+
         public abstract void VisitSysCall(SysCall val, T0 arg0, T1 arg1);
         public abstract void VisitToValue(ToValue val, T0 arg0, T1 arg1);
-        
+
 
         protected virtual void PreVisit(Node node) { }
         protected virtual void PostVisit(Node node) { }
+
         protected virtual void OnUnknownNode(Node node) {
             throw new ArgumentOutOfRangeException();
         }
-        
+
         public void Visit(Node node, T0 arg0, T1 arg1) {
             PreVisit(node);
 
@@ -574,10 +564,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitFor(For val, T0 arg0, T1 arg1) {
-            foreach (var varRef in val.IteratorVariables) {
-                Visit(varRef, arg0, arg1);
-            }
-            
+            foreach (var varRef in val.IteratorVariables) { Visit(varRef, arg0, arg1); }
             Visit(val.Expression, arg0, arg1);
             Visit(val.Body, arg0, arg1);
         }
@@ -595,15 +582,11 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitOnStackList(OnStackList val, T0 arg0, T1 arg1) {
-            foreach (var expr in val.List) {
-                Visit(expr, arg0, arg1);
-            }
+            foreach (var expr in val.List) { Visit(expr, arg0, arg1); }
         }
 
         public override void VisitBlock(Block val, T0 arg0, T1 arg1) {
-            foreach (var expr in val.List) {
-                Visit(expr, arg0, arg1);
-            }
+            foreach (var expr in val.List) { Visit(expr, arg0, arg1); }
         }
 
         public override void VisitUnOp(UnOp val, T0 arg0, T1 arg1) {
@@ -623,9 +606,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitVectorDef(VectorDef val, T0 arg0, T1 arg1) {
-            foreach (var item in val.Items) {
-                Visit(item, arg0, arg1);
-            }
+            foreach (var item in val.Items) { Visit(item, arg0, arg1); }
         }
 
         public override void VisitMetatable(Metatable val, T0 arg0, T1 arg1) {
@@ -633,9 +614,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitSysCall(SysCall val, T0 arg0, T1 arg1) {
-            foreach (var input in val.Inputs) {
-                Visit(input, arg0, arg1);
-            }
+            foreach (var input in val.Inputs) { Visit(input, arg0, arg1); }
         }
 
         public override void VisitToValue(ToValue val, T0 arg0, T1 arg1) {

@@ -9,6 +9,7 @@ namespace GeminiLab.Glute.Compile {
 
         protected override bool LikelyExpr(GlugTokenType type) {
             if ((uint)type == (uint)GlugTokenTypeGluteExtension.GlutePlainText || (uint)type == (uint)GlugTokenTypeGluteExtension.GluteInterpolationBegin) return true;
+
             return base.LikelyExpr(type);
         }
 
@@ -17,7 +18,7 @@ namespace GeminiLab.Glute.Compile {
 
             if (type == GlugTokenTypeGluteExtension.GlutePlainText) {
                 var tok = Stream.GetToken();
-                return new SysCall(0, new List<Expr> { new ToValue(new LiteralString(tok.ValueString!)) }, SysCall.ResultType.None );
+                return new SysCall(0, new List<Expr> { new ToValue(new LiteralString(tok.ValueString!)) }, SysCall.ResultType.None);
             }
 
             if (type == GlugTokenTypeGluteExtension.GluteInterpolationBegin) {
@@ -26,7 +27,6 @@ namespace GeminiLab.Glute.Compile {
                 Consume((GlugTokenType)GlugTokenTypeGluteExtension.GluteInterpolationEnd);
 
                 return new SysCall(0, new List<Expr> { new ToValue(expr) }, SysCall.ResultType.None);
-
             }
 
             return base.ReadExprGreedily();

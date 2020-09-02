@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-
 using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glug.AST;
 
@@ -21,24 +20,24 @@ namespace GeminiLab.Glug.PostProcess {
             ArgumentId = argumentId;
             Dynamic = isDynamic;
         }
-        
+
         public static Variable Create(VariableTable table, string name) => new Variable(table, name);
         public static Variable CreateArgument(VariableTable table, string name, int argumentId) => new Variable(table, name, argumentId: argumentId);
         public static Variable CreateDynamic(VariableTable table, string name) => new Variable(table, name, isDynamic: true);
-        
+
         public VariableTable Table { get; }
 
         public string Name { get; }
 
         public bool IsArgument => ArgumentId >= 0;
         public int ArgumentId { get; }
-        
+
         public bool Dynamic { get; }
-        
+
         public bool RefOutsideScope { get; private set; } = false;
 
         public bool Assigned { get; private set; } = false;
-        
+
         public LocalVariable? LocalVariable { get; set; }
 
         public VariablePlace Place { get; set; }
@@ -141,27 +140,32 @@ namespace GeminiLab.Glug.PostProcess {
             return Parent != null && Parent.TryLookupVariable(name, out variable);
         }
 
-        private const string privateVariablePrefix = "<pv>";
+        private const string PrivateVariablePrefix = "<pv>";
+
         private int _privateVariableCount = -1;
+
         public Variable CreatePrivateVariable(string? hint = null) {
-            return CreateVariable(privateVariablePrefix + "_" + (hint ?? " ") + "_" + (_privateVariableCount += 1));
+            return CreateVariable(PrivateVariablePrefix + "_" + (hint ?? " ") + "_" + (_privateVariableCount += 1));
         }
-        
+
         public Variable CreateVariable(string name) {
             if (_variables.TryGetValue(name, out var rv)) return rv;
+
             return _variables[name] = Variable.Create(this, name);
         }
 
         public Variable CreateVariable(string name, int argId) {
             if (_variables.TryGetValue(name, out var rv)) return rv;
+
             return _variables[name] = Variable.CreateArgument(this, name, argId);
         }
 
         public Variable CreateDynamicVariable(string name) {
             if (_variables.TryGetValue(name, out var rv)) return rv;
+
             return _variables[name] = Variable.CreateDynamic(this, name);
         }
-        
+
         public void DetermineVariablePlace() {
             foreach (var variable in _variables.Values) variable.DeterminePlace();
         }
