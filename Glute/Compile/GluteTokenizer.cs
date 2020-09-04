@@ -114,8 +114,8 @@ namespace GeminiLab.Glute.Compile {
 
         public GlugToken Next() {
             var tok = _stream.Next();
-            tok.Source = "";
-            tok.Column = tok.Row = 0;
+            tok.Position.Source = "";
+            tok.Position.Column = tok.Position.Row = 0;
             return tok;
         }
 

@@ -226,7 +226,7 @@ namespace GeminiLab.Glug.Tokenizer {
                 while (ptr < len && line[ptr].IsWhitespace()) ++ptr;
                 if (ptr >= len) return null;
 
-                var rv = new GlugToken { Source = source, Row = row, Column = ptr + 1 };
+                var rv = new GlugToken { Position = { Source = source, Row = row, Column = ptr + 1 } };
 
                 var type = Trie.Read(line, len, ref ptr);
                 if (type != GlugTokenType.NotAToken) {

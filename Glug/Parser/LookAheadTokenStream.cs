@@ -1,18 +1,9 @@
-using System;
-using System.Runtime.Serialization;
+using GeminiLab.Glos;
 using GeminiLab.Glug.Tokenizer;
 
 namespace GeminiLab.Glug.Parser {
-    [Serializable]
-    public class UnexpectedEndOfTokenStreamException : Exception {
-        public UnexpectedEndOfTokenStreamException() { }
-        public UnexpectedEndOfTokenStreamException(string message) : base(message) { }
-        public UnexpectedEndOfTokenStreamException(string message, Exception innerException) : base(message, innerException) { }
-        protected UnexpectedEndOfTokenStreamException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext) { }
-    }
-
-    public class LookAheadTokenStream {
-        private IGlugTokenStream _source;
+    public class LookAheadTokenStream : IGlugTokenStream {
+        private readonly IGlugTokenStream _source;
 
         public LookAheadTokenStream(IGlugTokenStream source) {
             _source = source;
@@ -28,16 +19,30 @@ namespace GeminiLab.Glug.Parser {
             return _buff ??= GetToken();
         }
 
+        private GlugToken? _last = null;
+
         public GlugToken GetToken() {
             if (_buff != null) {
-                var rv = _buff;
+                var result = _buff;
                 _buff = null;
-                return rv;
+                return result;
             }
 
-            if (NextEof()) throw new ArgumentOutOfRangeException();
+            if (!NextEof()) {
+                return _last = _source.Next();
+            }
 
-            return _source.Next();
+            if (_last != null) {
+                throw new GlugUnexpectedEndOfTokenStreamException(_last.Position);
+            }
+
+            throw new GlugUnexpectedEndOfTokenStreamException();
         }
+
+        public void Dispose() => _source?.Dispose();
+
+        public bool HasNext() => !NextEof();
+
+        public GlugToken Next() => GetToken();
     }
 }

@@ -7,35 +7,31 @@ using GeminiLab.Glug.Tokenizer;
 
 namespace GeminiLab.Glug.Parser {
     public class GlugParser {
-        protected virtual string DefaultLambdaName(List<string> paramList, GlugToken tok) => $"<lambda[{paramList.JoinBy(", ")}] at {tok.Source}:{tok.Row}:{tok.Column}>";
+        protected virtual string DefaultLambdaName(List<string> paramList, GlugToken tok) => $"<lambda[{paramList.JoinBy(", ")}] at {tok.Position.ToString()}>";
 
-        protected virtual bool LikelyExpr(GlugTokenType type) {
-            return type.GetCategory() == GlugTokenTypeCategory.Literal
-                || IsSymbolUnOp(type)
-                || type == GlugTokenType.Identifier
-                || type == GlugTokenType.SymbolLParen
-                || type == GlugTokenType.KeywordIf
-                || type == GlugTokenType.KeywordWhile
-                || type == GlugTokenType.KeywordFor
-                || type == GlugTokenType.KeywordReturn
-                || type == GlugTokenType.KeywordFn
-                || type == GlugTokenType.SymbolLBracket
-                || type == GlugTokenType.SymbolLBrace
-                || type == GlugTokenType.SymbolBang
-                || type == GlugTokenType.SymbolBangBang
-                || type == GlugTokenType.SymbolBackquote
-                || type == GlugTokenType.SymbolVecBegin
-                || type == GlugTokenType.SymbolBra
-                || type == GlugTokenType.SymbolKet
-                ;
-        }
+        protected virtual bool LikelyExpr(GlugTokenType type) =>
+            type.GetCategory() == GlugTokenTypeCategory.Literal
+         || IsSymbolUnOp(type)
+         || type == GlugTokenType.Identifier
+         || type == GlugTokenType.SymbolLParen
+         || type == GlugTokenType.KeywordIf
+         || type == GlugTokenType.KeywordWhile
+         || type == GlugTokenType.KeywordFor
+         || type == GlugTokenType.KeywordReturn
+         || type == GlugTokenType.KeywordFn
+         || type == GlugTokenType.SymbolLBracket
+         || type == GlugTokenType.SymbolLBrace
+         || type == GlugTokenType.SymbolBang
+         || type == GlugTokenType.SymbolBangBang
+         || type == GlugTokenType.SymbolBackquote
+         || type == GlugTokenType.SymbolVecBegin
+         || type == GlugTokenType.SymbolBra
+         || type == GlugTokenType.SymbolKet;
 
-        protected virtual bool LikelyVarRef(GlugTokenType type) {
-            return type == GlugTokenType.Identifier
-                || type == GlugTokenType.SymbolBang
-                || type == GlugTokenType.SymbolBangBang
-                ;
-        }
+        protected virtual bool LikelyVarRef(GlugTokenType type) =>
+            type == GlugTokenType.Identifier
+         || type == GlugTokenType.SymbolBang
+         || type == GlugTokenType.SymbolBangBang;
 
         protected virtual GlugBiOpType BiOpFromTokenType(GlugTokenType op) =>
             op switch {
@@ -134,7 +130,10 @@ namespace GeminiLab.Glug.Parser {
                 _                              => throw new ArgumentOutOfRangeException(),
             };
 
-        protected virtual bool IsSymbolUnOp(GlugTokenType op) => op == GlugTokenType.SymbolSub || op == GlugTokenType.SymbolNot || op == GlugTokenType.SymbolQuery;
+        protected virtual bool IsSymbolUnOp(GlugTokenType op) =>
+            op == GlugTokenType.SymbolSub
+         || op == GlugTokenType.SymbolNot
+         || op == GlugTokenType.SymbolQuery;
 
         protected virtual GlugUnOpType UnOpFromToken(GlugTokenType op) =>
             op switch {
@@ -146,7 +145,7 @@ namespace GeminiLab.Glug.Parser {
 
         protected virtual void Consume(GlugTokenType expected) {
             var tok = Stream.GetToken();
-            if (expected != tok.Type) throw new GlugParserUnexpectedTokenException(tok, expected);
+            if (expected != tok.Type) throw new GlugUnexpectedTokenException(tok.Type, new[] { expected }, tok.Position);
         }
 
 
@@ -285,6 +284,7 @@ namespace GeminiLab.Glug.Parser {
                     "isnil" => new UnOp(GlugUnOpType.IsNil, ReadExprItem()),
                     "neg"   => new UnOp(GlugUnOpType.Neg, ReadExprItem()),
                     "not"   => new UnOp(GlugUnOpType.Not, ReadExprItem()),
+                    // TODO: add a custom exception class
                     _       => throw new ArgumentOutOfRangeException(),
                 };
             }
@@ -315,6 +315,7 @@ namespace GeminiLab.Glug.Parser {
                 GlugTokenType.SymbolLBracket => ReadOnStackList(),
                 GlugTokenType.SymbolLBrace   => ReadTableDef(),
                 GlugTokenType.SymbolVecBegin => ReadVectorDef(),
+                // TODO: custom exception
                 _                            => throw new ArgumentOutOfRangeException(),
             };
         }
@@ -338,7 +339,7 @@ namespace GeminiLab.Glug.Parser {
         protected virtual string ReadIdentifier() {
             var tok = Stream.GetToken();
 
-            return tok.Type == GlugTokenType.Identifier ? tok.ValueString! : throw new ArgumentOutOfRangeException();
+            return tok.Type == GlugTokenType.Identifier ? tok.ValueString! : throw new GlugUnexpectedTokenException(tok.Type, new[] { GlugTokenType.Identifier }, tok.Position);
         }
 
         protected virtual Block ReadBlockInParen() {

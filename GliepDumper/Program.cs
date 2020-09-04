@@ -91,7 +91,7 @@ namespace GeminiLab.Gliep.Dumper {
                 ip = len;
             }
 
-            sb.Append($"{opText,-25}");
+            sb.Append($"{opText,-25};");
             foreach (var x in ops[b..ip]) {
                 sb.Append($" {x:x2}");
             }
@@ -134,7 +134,7 @@ namespace GeminiLab.Gliep.Dumper {
         public static void DumpTokenStream(IGlugTokenStream stream) {
             while (stream.HasNext()) {
                 var tok = stream.Next();
-                var output = string.Format($"{{0,-{tok.Source.Length + 10}}}", $"({tok.Source}:{tok.Row}:{tok.Column})");
+                var output = string.Format($"{{0,-{tok.Position.Source.Length + 10}}}", $"({tok.Position})");
 
                 output += ((GlugTokenType[])typeof(GlugTokenType).GetEnumValues()).Contains(tok.Type) ? tok.Type.ToString() : $"0x{(uint)(tok.Type):x8}";
                 if (tok.Type.HasInteger()) output += $", {tok.ValueInt}(0x{tok.ValueInt:x16})";
