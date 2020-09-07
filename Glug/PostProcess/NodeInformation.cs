@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-
 using GeminiLab.Glug.AST;
 
 namespace GeminiLab.Glug.PostProcess {
@@ -12,7 +11,7 @@ namespace GeminiLab.Glug.PostProcess {
 
         public Dictionary<Function, VariableTable> VariableTable { get; set; } = new Dictionary<Function, VariableTable>();
         public Dictionary<Node, Variable> Variable { get; set; } = new Dictionary<Node, Variable>();
-        
+
         public Dictionary<Node, Dictionary<string, Variable>> PrivateVariables { get; set; } = new Dictionary<Node, Dictionary<string, Variable>>();
     }
 }

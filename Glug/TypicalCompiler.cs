@@ -14,28 +14,20 @@ namespace GeminiLab.Glug {
         public static IGlugTokenStream Tokenize(string value, string? sourceName = null) => new GlugTokenizer(new StringReader(value), sourceName);
 
         public static Expr Parse(IGlugTokenStream stream) => new GlugParser(stream).Parse();
-        
+
         public static GlosUnit PostProcessAndCodeGen(Expr root) {
             root = new Function("<root>", false, new List<string>(), root);
 
-            var it = new NodeInformation();
+            var pass = new Pass();
+            pass.AppendVisitor(new BreakTargetVisitor());
+            pass.AppendVisitor(new NodeGenericInfoVisitor());
+            pass.AppendVisitor(new VarDefVisitor());
+            pass.AppendVisitor(new VarRefVisitor());
+            pass.AppendVisitor(new CodeGenVisitor());
 
-            new BreakTargetVisitor(it).Visit(root, null);
-            new IsOnStackListVisitor(it).Visit(root);
-            new IsAssignableVisitor(it).Visit(root);
+            pass.Visit(root);
             
-            var vdv = new VarDefVisitor(it);
-            vdv.Visit(root, vdv.RootTable);
-
-            var vcv = new VarRefVisitor(vdv.RootTable, it);
-            vcv.Visit(root, vdv.RootTable, false);
-
-            vdv.DetermineVariablePlace();
-
-            var gen = new CodeGenVisitor(it);
-            gen.Visit(root, null!, false);
-
-            return gen.Builder.GetResult();
+            return pass.GetVisitor<CodeGenVisitor>().Builder.GetResult();
         }
 
         public static GlosUnit Compile(TextReader input, string? sourceName = null) {

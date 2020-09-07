@@ -7,16 +7,17 @@ using GeminiLab.Core2.Yielder;
 
 namespace GeminiLab.Glute.Compile {
     public enum GlugTokenTypeGluteExtension {
-        GlutePlainText              = GluteTokenizer.GlutePrivateTokenCategory << 20 | 0x000_01,
-        GluteInterpolationBegin     = GluteTokenizer.GlutePrivateTokenCategory << 20 | 0x001_00,
-        GluteInterpolationEnd       = GluteTokenizer.GlutePrivateTokenCategory << 20 | 0x002_00,
+        GlutePlainText          = GluteTokenizer.GlutePrivateTokenCategory << 20 | 0x000_01,
+        GluteInterpolationBegin = GluteTokenizer.GlutePrivateTokenCategory << 20 | 0x001_00,
+        GluteInterpolationEnd   = GluteTokenizer.GlutePrivateTokenCategory << 20 | 0x002_00,
     }
 
     public class GluteTokenizer : IGlugTokenStream {
         public const GlugTokenTypeCategory GlutePrivateTokenCategory = GlugTokenTypeCategory.PrivateUseHead + 0x6e;
 
-        private readonly TextReader _source;
+        private readonly TextReader                _source;
         private readonly IFiniteYielder<GlugToken> _stream;
+
         public GluteTokenizer(TextReader source) {
             _source = source;
             _stream = FragmentsToStream(SourceToFragments(_source)).AsFiniteYielder().Concat();
@@ -98,12 +99,13 @@ namespace GeminiLab.Glute.Compile {
                 yield return frag.Type switch {
                     FragmentType.Text => FiniteYielderG.SingleYielder(new GlugToken { Type = (GlugTokenType)GlugTokenTypeGluteExtension.GlutePlainText, ValueString = frag.Content }),
                     FragmentType.Code => new[] {
-                        FiniteYielderG.SingleYielder(new GlugToken { Type = (GlugTokenType)GlugTokenTypeGluteExtension.GluteInterpolationBegin }),
-                        new GlugTokenizer(new StringReader(frag.Content)),
-                        FiniteYielderG.SingleYielder(new GlugToken { Type = (GlugTokenType)GlugTokenTypeGluteExtension.GluteInterpolationEnd }),
-                    }.AsFiniteYielder().Concat(),
+                            FiniteYielderG.SingleYielder(new GlugToken { Type = (GlugTokenType)GlugTokenTypeGluteExtension.GluteInterpolationBegin }),
+                            new GlugTokenizer(new StringReader(frag.Content)),
+                            FiniteYielderG.SingleYielder(new GlugToken { Type = (GlugTokenType)GlugTokenTypeGluteExtension.GluteInterpolationEnd }),
+                        }.AsFiniteYielder()
+                         .Concat(),
                     FragmentType.SuppressedCode => new GlugTokenizer(new StringReader(frag.Content)),
-                    _ => throw new ArgumentOutOfRangeException()
+                    _                           => throw new ArgumentOutOfRangeException()
                 };
             }
         }
@@ -112,12 +114,13 @@ namespace GeminiLab.Glute.Compile {
 
         public GlugToken Next() {
             var tok = _stream.Next();
-            tok.Source = "";
-            tok.Column = tok.Row = 0;
+            tok.Position.Source = "";
+            tok.Position.Column = tok.Position.Row = 0;
             return tok;
         }
 
-        #region IDisposable Support
+#region IDisposable Support
+
         private bool _disposed = false;
 
         protected virtual void Dispose(bool disposing) {
@@ -134,7 +137,8 @@ namespace GeminiLab.Glute.Compile {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        #endregion
+
+#endregion
     }
 
     internal static class FiniteYielderG {
@@ -145,7 +149,7 @@ namespace GeminiLab.Glute.Compile {
             }
 
             private readonly IFiniteYielder<IFiniteYielder<T>> _source;
-            private IFiniteYielder<T>? _current;
+            private          IFiniteYielder<T>?                _current;
 
             public bool HasNext() {
                 if (_current == null || !_current.HasNext()) {
@@ -167,7 +171,7 @@ namespace GeminiLab.Glute.Compile {
                 return _current.Next();
             }
         }
-        
+
         public static IFiniteYielder<T> Concat<T>(this IFiniteYielder<IFiniteYielder<T>> source) {
             return new FiniteYielderConcat<T>(source);
         }

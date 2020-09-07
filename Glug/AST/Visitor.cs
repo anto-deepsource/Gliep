@@ -2,7 +2,20 @@ using System;
 using GeminiLab.Core2.Collections;
 
 namespace GeminiLab.Glug.AST {
-    public abstract class Visitor {
+    public abstract class VisitorBase {
+        protected Pass Pass { get; set; } = null!;
+
+        protected abstract void VisitRoot(Node root);
+
+        public virtual void Visit(Node root, Pass parentPass) {
+            Pass = parentPass;
+            VisitRoot(root);
+            // keep it or remove it?
+            // Pass = null!;
+        }
+    }
+
+    public abstract class Visitor : VisitorBase {
         public abstract void VisitLiteralInteger(LiteralInteger val);
         public abstract void VisitLiteralFloat(LiteralFloat val);
         public abstract void VisitLiteralBool(LiteralBool val);
@@ -31,18 +44,19 @@ namespace GeminiLab.Glug.AST {
         public abstract void VisitMetatable(Metatable val);
 
         public abstract void VisitPseudoIndex(PseudoIndex val);
-        
+
         public abstract void VisitSysCall(SysCall val);
         public abstract void VisitToValue(ToValue val);
 
 
         protected virtual void PreVisit(Node node) { }
         protected virtual void PostVisit(Node node) { }
+
         protected virtual void OnUnknownNode(Node node) {
             throw new ArgumentOutOfRangeException();
         }
 
-        public void Visit(Node node) {
+        public void VisitNode(Node node) {
             PreVisit(node);
 
             switch (node) {
@@ -119,6 +133,10 @@ namespace GeminiLab.Glug.AST {
 
             PostVisit(node);
         }
+
+        protected override void VisitRoot(Node root) {
+            VisitNode(root);
+        }
     }
 
     public class RecursiveVisitor : Visitor {
@@ -134,80 +152,80 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitIf(If val) {
             foreach (var (cond, expr) in val.Branches) {
-                Visit(cond);
-                Visit(expr);
+                VisitNode(cond);
+                VisitNode(expr);
             }
 
-            if (val.ElseBranch != null) Visit(val.ElseBranch);
+            if (val.ElseBranch != null) VisitNode(val.ElseBranch);
         }
 
         public override void VisitWhile(While val) {
-            Visit(val.Condition);
-            Visit(val.Body);
+            VisitNode(val.Condition);
+            VisitNode(val.Body);
         }
 
         public override void VisitFor(For val) {
-            val.IteratorVariables.ForEach(Visit);
-            Visit(val.Expression);
-            Visit(val.Body);
+            val.IteratorVariables.ForEach(VisitNode);
+            VisitNode(val.Expression);
+            VisitNode(val.Body);
         }
 
         public override void VisitReturn(Return val) {
-            Visit(val.Expr);
+            VisitNode(val.Expr);
         }
 
         public override void VisitBreak(Break val) {
-            Visit(val.Expr);
+            VisitNode(val.Expr);
         }
 
         public override void VisitFunction(Function val) {
-            Visit(val.Body);
+            VisitNode(val.Body);
         }
 
         public override void VisitOnStackList(OnStackList val) {
-            val.List.ForEach(Visit);
+            val.List.ForEach(VisitNode);
         }
 
         public override void VisitBlock(Block val) {
-            val.List.ForEach(Visit);
+            val.List.ForEach(VisitNode);
         }
 
         public override void VisitUnOp(UnOp val) {
-            Visit(val.Expr);
+            VisitNode(val.Expr);
         }
 
         public override void VisitBiOp(BiOp val) {
-            Visit(val.ExprL);
-            Visit(val.ExprR);
+            VisitNode(val.ExprL);
+            VisitNode(val.ExprR);
         }
 
         public override void VisitTableDef(TableDef val) {
             foreach (var (key, value) in val.Pairs) {
-                Visit(key);
-                Visit(value);
+                VisitNode(key);
+                VisitNode(value);
             }
         }
 
         public override void VisitVectorDef(VectorDef val) {
             foreach (var item in val.Items) {
-                Visit(item);
+                VisitNode(item);
             }
         }
 
         public override void VisitMetatable(Metatable val) {
-            Visit(val.Table);
+            VisitNode(val.Table);
         }
 
         public override void VisitSysCall(SysCall val) {
-            val.Inputs.ForEach(Visit);
+            val.Inputs.ForEach(VisitNode);
         }
 
         public override void VisitToValue(ToValue val) {
-            Visit(val.Child);
+            VisitNode(val.Child);
         }
     }
 
-    public abstract class InVisitor<T0> {
+    public abstract class InVisitor<T0> : VisitorBase {
         public abstract void VisitLiteralInteger(LiteralInteger val, T0 arg);
         public abstract void VisitLiteralFloat(LiteralFloat val, T0 arg);
         public abstract void VisitLiteralBool(LiteralBool val, T0 arg);
@@ -232,23 +250,24 @@ namespace GeminiLab.Glug.AST {
 
         public abstract void VisitTableDef(TableDef val, T0 arg);
         public abstract void VisitVectorDef(VectorDef val, T0 arg);
-        
+
         public abstract void VisitMetatable(Metatable val, T0 arg);
 
         public abstract void VisitPseudoIndex(PseudoIndex val, T0 arg);
-        
+
         public abstract void VisitSysCall(SysCall val, T0 arg);
         public abstract void VisitToValue(ToValue val, T0 arg);
-        
 
-        protected virtual void PreVisit(Node node) { }
-        protected virtual void PostVisit(Node node) { }
-        protected virtual void OnUnknownNode(Node node) {
+
+        protected virtual void PreVisit(Node node, T0 arg) { }
+        protected virtual void PostVisit(Node node, T0 arg) { }
+
+        protected virtual void OnUnknownNode(Node node, T0 arg) {
             throw new ArgumentOutOfRangeException();
         }
-        
-        public void Visit(Node node, T0 arg) {
-            PreVisit(node);
+
+        public void VisitNode(Node node, T0 arg) {
+            PreVisit(node, arg);
 
             switch (node) {
             case LiteralInteger li:
@@ -318,11 +337,15 @@ namespace GeminiLab.Glug.AST {
                 VisitToValue(tv, arg);
                 break;
             default:
-                OnUnknownNode(node);
+                OnUnknownNode(node, arg);
                 break;
             }
 
-            PostVisit(node);
+            PostVisit(node, arg);
+        }
+
+        protected override void VisitRoot(Node root) {
+            VisitNode(root, default!);
         }
     }
 
@@ -343,89 +366,88 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitIf(If val, T0 arg) {
             foreach (var (cond, expr) in val.Branches) {
-                Visit(cond, arg);
-                Visit(expr, arg);
+                VisitNode(cond, arg);
+                VisitNode(expr, arg);
             }
 
-            if (val.ElseBranch != null) Visit(val.ElseBranch, arg);
+            if (val.ElseBranch != null) VisitNode(val.ElseBranch, arg);
         }
 
         public override void VisitWhile(While val, T0 arg) {
-            Visit(val.Condition, arg);
-            Visit(val.Body, arg);
+            VisitNode(val.Condition, arg);
+            VisitNode(val.Body, arg);
         }
 
         public override void VisitFor(For val, T0 arg) {
             foreach (var varRef in val.IteratorVariables) {
-                Visit(varRef, arg);
+                VisitNode(varRef, arg);
             }
-            
-            Visit(val.Expression, arg);
-            Visit(val.Body, arg);
+            VisitNode(val.Expression, arg);
+            VisitNode(val.Body, arg);
         }
 
         public override void VisitReturn(Return val, T0 arg) {
-            Visit(val.Expr, arg);
+            VisitNode(val.Expr, arg);
         }
 
         public override void VisitBreak(Break val, T0 arg) {
-            Visit(val.Expr, arg);
+            VisitNode(val.Expr, arg);
         }
 
         public override void VisitFunction(Function val, T0 arg) {
-            Visit(val.Body, arg);
+            VisitNode(val.Body, arg);
         }
 
         public override void VisitOnStackList(OnStackList val, T0 arg) {
             foreach (var expr in val.List) {
-                Visit(expr, arg);
+                VisitNode(expr, arg);
             }
         }
 
         public override void VisitBlock(Block val, T0 arg) {
             foreach (var expr in val.List) {
-                Visit(expr, arg);
+                VisitNode(expr, arg);
             }
         }
 
         public override void VisitUnOp(UnOp val, T0 arg) {
-            Visit(val.Expr, arg);
+            VisitNode(val.Expr, arg);
         }
 
         public override void VisitBiOp(BiOp val, T0 arg) {
-            Visit(val.ExprL, arg);
-            Visit(val.ExprR, arg);
+            VisitNode(val.ExprL, arg);
+            VisitNode(val.ExprR, arg);
         }
 
         public override void VisitTableDef(TableDef val, T0 arg) {
             foreach (var (key, value) in val.Pairs) {
-                Visit(key, arg);
-                Visit(value, arg);
+                VisitNode(key, arg);
+                VisitNode(value, arg);
             }
         }
 
         public override void VisitVectorDef(VectorDef val, T0 arg) {
             foreach (var item in val.Items) {
-                Visit(item, arg);
+                VisitNode(item, arg);
             }
         }
 
         public override void VisitMetatable(Metatable val, T0 arg) {
-            Visit(val.Table, arg);
+            VisitNode(val.Table, arg);
         }
 
         public override void VisitSysCall(SysCall val, T0 arg) {
             foreach (var input in val.Inputs) {
-                Visit(input, arg);
+                VisitNode(input, arg);
             }
         }
 
         public override void VisitToValue(ToValue val, T0 arg) {
-            Visit(val.Child, arg);
+            VisitNode(val.Child, arg);
         }
     }
-    
-    public abstract class InVisitor<T0, T1> {
+
+    public abstract class InVisitor<T0, T1> : VisitorBase {
         public abstract void VisitLiteralInteger(LiteralInteger val, T0 arg0, T1 arg1);
         public abstract void VisitLiteralFloat(LiteralFloat val, T0 arg0, T1 arg1);
         public abstract void VisitLiteralBool(LiteralBool val, T0 arg0, T1 arg1);
@@ -450,23 +472,24 @@ namespace GeminiLab.Glug.AST {
 
         public abstract void VisitTableDef(TableDef val, T0 arg0, T1 arg1);
         public abstract void VisitVectorDef(VectorDef val, T0 arg0, T1 arg1);
-        
+
         public abstract void VisitMetatable(Metatable val, T0 arg0, T1 arg1);
 
         public abstract void VisitPseudoIndex(PseudoIndex val, T0 arg0, T1 arg1);
-        
+
         public abstract void VisitSysCall(SysCall val, T0 arg0, T1 arg1);
         public abstract void VisitToValue(ToValue val, T0 arg0, T1 arg1);
-        
 
-        protected virtual void PreVisit(Node node) { }
-        protected virtual void PostVisit(Node node) { }
-        protected virtual void OnUnknownNode(Node node) {
+
+        protected virtual void PreVisit(Node node, T0 arg0, T1 arg1) { }
+        protected virtual void PostVisit(Node node, T0 arg0, T1 arg1) { }
+
+        protected virtual void OnUnknownNode(Node node, T0 arg0, T1 arg1) {
             throw new ArgumentOutOfRangeException();
         }
-        
-        public void Visit(Node node, T0 arg0, T1 arg1) {
-            PreVisit(node);
+
+        public void VisitNode(Node node, T0 arg0, T1 arg1) {
+            PreVisit(node, arg0, arg1);
 
             switch (node) {
             case LiteralInteger li:
@@ -536,11 +559,15 @@ namespace GeminiLab.Glug.AST {
                 VisitToValue(tv, arg0, arg1);
                 break;
             default:
-                OnUnknownNode(node);
+                OnUnknownNode(node, arg0, arg1);
                 break;
             }
 
-            PostVisit(node);
+            PostVisit(node, arg0, arg1);
+        }
+
+        protected override void VisitRoot(Node root) {
+            VisitNode(root, default!, default!);
         }
     }
 
@@ -561,85 +588,84 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitIf(If val, T0 arg0, T1 arg1) {
             foreach (var (cond, expr) in val.Branches) {
-                Visit(cond, arg0, arg1);
-                Visit(expr, arg0, arg1);
+                VisitNode(cond, arg0, arg1);
+                VisitNode(expr, arg0, arg1);
             }
 
-            if (val.ElseBranch != null) Visit(val.ElseBranch, arg0, arg1);
+            if (val.ElseBranch != null) VisitNode(val.ElseBranch, arg0, arg1);
         }
 
         public override void VisitWhile(While val, T0 arg0, T1 arg1) {
-            Visit(val.Condition, arg0, arg1);
-            Visit(val.Body, arg0, arg1);
+            VisitNode(val.Condition, arg0, arg1);
+            VisitNode(val.Body, arg0, arg1);
         }
 
         public override void VisitFor(For val, T0 arg0, T1 arg1) {
             foreach (var varRef in val.IteratorVariables) {
-                Visit(varRef, arg0, arg1);
+                VisitNode(varRef, arg0, arg1);
             }
-            
-            Visit(val.Expression, arg0, arg1);
-            Visit(val.Body, arg0, arg1);
+            VisitNode(val.Expression, arg0, arg1);
+            VisitNode(val.Body, arg0, arg1);
         }
 
         public override void VisitReturn(Return val, T0 arg0, T1 arg1) {
-            Visit(val.Expr, arg0, arg1);
+            VisitNode(val.Expr, arg0, arg1);
         }
 
         public override void VisitBreak(Break val, T0 arg0, T1 arg1) {
-            Visit(val.Expr, arg0, arg1);
+            VisitNode(val.Expr, arg0, arg1);
         }
 
         public override void VisitFunction(Function val, T0 arg0, T1 arg1) {
-            Visit(val.Body, arg0, arg1);
+            VisitNode(val.Body, arg0, arg1);
         }
 
         public override void VisitOnStackList(OnStackList val, T0 arg0, T1 arg1) {
             foreach (var expr in val.List) {
-                Visit(expr, arg0, arg1);
+                VisitNode(expr, arg0, arg1);
             }
         }
 
         public override void VisitBlock(Block val, T0 arg0, T1 arg1) {
             foreach (var expr in val.List) {
-                Visit(expr, arg0, arg1);
+                VisitNode(expr, arg0, arg1);
             }
         }
 
         public override void VisitUnOp(UnOp val, T0 arg0, T1 arg1) {
-            Visit(val.Expr, arg0, arg1);
+            VisitNode(val.Expr, arg0, arg1);
         }
 
         public override void VisitBiOp(BiOp val, T0 arg0, T1 arg1) {
-            Visit(val.ExprL, arg0, arg1);
-            Visit(val.ExprR, arg0, arg1);
+            VisitNode(val.ExprL, arg0, arg1);
+            VisitNode(val.ExprR, arg0, arg1);
         }
 
         public override void VisitTableDef(TableDef val, T0 arg0, T1 arg1) {
             foreach (var (key, value) in val.Pairs) {
-                Visit(key, arg0, arg1);
-                Visit(value, arg0, arg1);
+                VisitNode(key, arg0, arg1);
+                VisitNode(value, arg0, arg1);
             }
         }
 
         public override void VisitVectorDef(VectorDef val, T0 arg0, T1 arg1) {
             foreach (var item in val.Items) {
-                Visit(item, arg0, arg1);
+                VisitNode(item, arg0, arg1);
             }
         }
 
         public override void VisitMetatable(Metatable val, T0 arg0, T1 arg1) {
-            Visit(val.Table, arg0, arg1);
+            VisitNode(val.Table, arg0, arg1);
         }
 
         public override void VisitSysCall(SysCall val, T0 arg0, T1 arg1) {
             foreach (var input in val.Inputs) {
-                Visit(input, arg0, arg1);
+                VisitNode(input, arg0, arg1);
             }
         }
 
         public override void VisitToValue(ToValue val, T0 arg0, T1 arg1) {
-            Visit(val.Child, arg0, arg1);
+            VisitNode(val.Child, arg0, arg1);
         }
     }
 }

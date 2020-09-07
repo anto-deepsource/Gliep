@@ -117,10 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DefaultMessageGlugParserUnexpectedTokenExceptionLong" xml:space="preserve">
-    <value>Unexpected token: {0}, {1} expected. </value>
+  <data name="DefaultMessageGlugCompilingException" xml:space="preserve">
+    <value>Compilation error at {0}</value>
   </data>
-  <data name="DefaultMessageGlugParserUnexpectedTokenExceptionShort" xml:space="preserve">
-    <value>Unexpected token: {0}.</value>
+  <data name="DefaultMessageGlugUnexpectedTokenException" xml:space="preserve">
+    <value>Unexpected token: {0}, [{1}] expected</value>
+  </data>
+  <data name="DefaultMessageGlugUnexpectedEndOfTokenStreamException" xml:space="preserve">
+    <value>Unexpected end of token stream, last token at {0}</value>
+  </data>
+  <data name="DefaultMessageGlugUnexpectedEndOfTokenStreamExceptionNoLastToken" xml:space="preserve">
+    <value>Unexpected end of token stream</value>
   </data>
 </root>
