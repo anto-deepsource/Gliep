@@ -8,36 +8,43 @@ namespace GeminiLab.Glug.AST {
     public class Pass {
 #region information
 
-        private static class TypewiseStorage<T> where T : class, new() {
-            public static T?                   GlobalInformation;
-            public static Dictionary<Node, T>? NodeInformation;
-        }
+        private Dictionary<Type, object> _globalInformation = new Dictionary<Type, object>();
+        private Dictionary<Type, Dictionary<Node, object>> _nodeInformation = new Dictionary<Type, Dictionary<Node, object>>();
 
         public T GlobalInformation<T>() where T : class, new() {
-            return TypewiseStorage<T>.GlobalInformation ??= new T();
+            if (TryGetGlobalInformation<T>(out var result)) return result;
+
+            return (T) (_globalInformation[typeof(T)] = new T());
         }
 
         public bool TryGetGlobalInformation<T>([NotNullWhen(true)] out T? info) where T : class, new() {
-            return (info = TypewiseStorage<T>.GlobalInformation) != null;
+            if (_globalInformation.TryGetValue(typeof(T), out var result)) {
+                info = (T) result;
+                return true;
+            }
+
+            info = null;
+            return false;
         }
 
         public T NodeInformation<T>(Node node) where T : class, new() {
-            if (!(TypewiseStorage<T>.NodeInformation is {} dict)) {
-                dict = TypewiseStorage<T>.NodeInformation = new Dictionary<Node, T>();
-            }
+            if (TryGetNodeInformation<T>(node, out var result)) return result;
 
-            if (dict.TryGetValue(node, out T v)) return v;
-
-            return dict[node] = new T();
+            return (T) (_nodeInformation[typeof(T)][node] = new T());
         }
 
         public bool TryGetNodeInformation<T>(Node node, [NotNullWhen(true)] out T? info) where T : class, new() {
-            if (!(TypewiseStorage<T>.NodeInformation is {} dict)) {
-                info = null;
-                return false;
+            if (!_nodeInformation.TryGetValue(typeof(T), out var dict)) {
+                dict = _nodeInformation[typeof(T)] = new Dictionary<Node, object>();
             }
 
-            return dict.TryGetValue(node, out info);
+            if (dict.TryGetValue(node, out var result)) {
+                info = (T) result;
+                return true;
+            }
+
+            info = null;
+            return false;
         }
 
 #endregion
@@ -59,7 +66,7 @@ namespace GeminiLab.Glug.AST {
         public TVisitor GetVisitor<TVisitor>() where TVisitor : VisitorBase {
             return _visitors.OfType<TVisitor>().First();
         }
-        
+
 #endregion
     }
 }

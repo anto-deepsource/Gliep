@@ -10,7 +10,8 @@ namespace GeminiLab.Glug.AST {
         public virtual void Visit(Node root, Pass parentPass) {
             Pass = parentPass;
             VisitRoot(root);
-            Pass = null!;
+            // keep it or remove it?
+            // Pass = null!;
         }
     }
 
@@ -342,7 +343,7 @@ namespace GeminiLab.Glug.AST {
 
             PostVisit(node, arg);
         }
-        
+
         protected override void VisitRoot(Node root) {
             VisitNode(root, default!);
         }
