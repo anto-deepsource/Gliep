@@ -2,59 +2,63 @@ using System.Collections.Generic;
 using GeminiLab.Glug.AST;
 
 namespace GeminiLab.Glug.PostProcess {
-    public class VarDefVisitor : RecursiveInVisitor<VariableTable> {
-        private readonly NodeInformation _info;
+    public class VariableAllocationGlobalInfo {
+        public VariableTable   RootTable = null!;
+        public IList<Function> Functions = null!;
+    }
 
-        public VarDefVisitor(NodeInformation info) {
-            _info = info;
+    public class VariableAllocationInfo {
+        public Variable?                    Variable         = null!;
+        public VariableTable                VariableTable    = null!;
+        public Dictionary<string, Variable> PrivateVariables = null!;
+    }
+
+    public class VarDefVisitor : RecursiveInVisitor<VariableTable> {
+        protected override void VisitRoot(Node root) {
+            var gInfo = Pass.GlobalInformation<VariableAllocationGlobalInfo>();
+            _rootTable = gInfo.RootTable = new VariableTable(null!, null!);
+            gInfo.Functions = new List<Function>();
+
+            VisitNode(root, _rootTable);
         }
 
-        public VariableTable RootTable { get; } = new VariableTable(null!, null!);
-        public IList<Function> Functions { get; } = new List<Function>();
+        private VariableTable _rootTable = null!;
 
         public override void VisitFunction(Function val, VariableTable currentScope) {
-            Functions.Add(val);
+            Pass.GlobalInformation<VariableAllocationGlobalInfo>().Functions.Add(val);
 
-            _info.Variable[val] = val.ExplicitlyNamed ? currentScope.CreateVariable(val.Name) : null!;
-
-            var table = _info.VariableTable[val] = new VariableTable(val, currentScope);
+            var info = Pass.NodeInformation<VariableAllocationInfo>(val);
+            
+            info.Variable = val.ExplicitlyNamed ? currentScope.CreateVariable(val.Name) : null!;
+            info.VariableTable = new VariableTable(val, currentScope);
 
             for (int i = 0; i < val.Parameters.Count; ++i) {
-                table.CreateVariable(val.Parameters[i], i);
+                info.VariableTable.CreateVariable(val.Parameters[i], i);
             }
 
-            base.VisitFunction(val, table);
+            base.VisitFunction(val, info.VariableTable);
         }
 
         public override void VisitVarRef(VarRef val, VariableTable currentScope) {
             base.VisitVarRef(val, currentScope);
 
             if (val.IsDef) {
-                _info.Variable[val] = currentScope.CreateVariable(val.Id);
+                Pass.NodeInformation<VariableAllocationInfo>(val).Variable = currentScope.CreateVariable(val.Id);
             } else if (val.IsGlobal) {
-                _info.Variable[val] = RootTable.CreateVariable(val.Id);
+                Pass.NodeInformation<VariableAllocationInfo>(val).Variable = _rootTable.CreateVariable(val.Id);
             }
         }
 
         public override void VisitFor(For val, VariableTable currentScope) {
-            if (!_info.PrivateVariables.ContainsKey(val)) {
-                _info.PrivateVariables[val] = new Dictionary<string, Variable>();
-            }
+            var info = Pass.NodeInformation<VariableAllocationInfo>(val);
 
-            _info.PrivateVariables[val][For.PrivateVariableNameIterateFunction] = currentScope.CreatePrivateVariable(For.PrivateVariableNameIterateFunction);
-            _info.PrivateVariables[val][For.PrivateVariableNameStatus] = currentScope.CreatePrivateVariable(For.PrivateVariableNameStatus);
-            _info.PrivateVariables[val][For.PrivateVariableNameIterator] = currentScope.CreatePrivateVariable(For.PrivateVariableNameIterator);
+            info.PrivateVariables = new Dictionary<string, Variable>();
+
+            info.PrivateVariables[For.PrivateVariableNameIterateFunction] = currentScope.CreatePrivateVariable(For.PrivateVariableNameIterateFunction);
+            info.PrivateVariables[For.PrivateVariableNameStatus] = currentScope.CreatePrivateVariable(For.PrivateVariableNameStatus);
+            info.PrivateVariables[For.PrivateVariableNameIterator] = currentScope.CreatePrivateVariable(For.PrivateVariableNameIterator);
 
             base.VisitFor(val, currentScope);
-        }
-
-        // place this function here temporarily, TODO: find a better place for it
-        public void DetermineVariablePlace() {
-            foreach (var function in Functions) {
-                _info.VariableTable[function].DetermineVariablePlace();
-            }
-
-            RootTable.DetermineVariablePlace();
         }
     }
 }

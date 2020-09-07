@@ -3,26 +3,25 @@ using System.Collections.Generic;
 using GeminiLab.Glug.AST;
 
 namespace GeminiLab.Glug.PostProcess {
+    public class BreakableInfo {
+        public Breakable   Target = null!;
+        public List<Break> Breaks = null!;
+    }
+
     public class BreakTargetVisitor : RecursiveInVisitor<Stack<Breakable>> {
-        private readonly NodeInformation _info;
-
-        public BreakTargetVisitor(NodeInformation info) {
-            _info = info;
-        }
-
         public override void VisitFunction(Function val, Stack<Breakable> arg) {
             base.VisitFunction(val, new Stack<Breakable>());
         }
 
         public override void VisitWhile(While val, Stack<Breakable> arg) {
-            _info.Breaks[val] = new List<Break>();
+            Pass.NodeInformation<BreakableInfo>(val).Breaks = new List<Break>();
             arg.Push(val);
             base.VisitWhile(val, arg);
             arg.Pop();
         }
 
         public override void VisitFor(For val, Stack<Breakable> arg) {
-            _info.Breaks[val] = new List<Break>();
+            Pass.NodeInformation<BreakableInfo>(val).Breaks = new List<Break>();
             arg.Push(val);
             base.VisitFor(val, arg);
             arg.Pop();
@@ -44,8 +43,8 @@ namespace GeminiLab.Glug.PostProcess {
 
             if (w == null) throw new ArgumentOutOfRangeException();
 
-            _info.BreakParent[val] = w;
-            _info.Breaks[w].Add(val);
+            Pass.NodeInformation<BreakableInfo>(val).Target = w;
+            Pass.NodeInformation<BreakableInfo>(w).Breaks.Add(val);
             base.VisitBreak(val, arg);
         }
     }

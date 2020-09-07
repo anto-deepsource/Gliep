@@ -165,7 +165,7 @@ namespace GeminiLab.Gliep.Dumper {
             var root = TypicalCompiler.Parse(tok);
 
             if (options.DumpAST || options.DumpASTAndExit) {
-                new DumpVisitor(new IndentedWriter(Console.Out)).Visit(root);
+                new DumpVisitor(new IndentedWriter(Console.Out)).VisitNode(root);
 
                 if (options.DumpASTAndExit) return;
             }

@@ -3,40 +3,54 @@ using GeminiLab.Glug.AST;
 
 namespace GeminiLab.Glug.PostProcess {
     public class VarRefVisitor : RecursiveInVisitor<VariableTable, bool> {
-        protected readonly NodeInformation _info;
+        // place this function here temporarily, TODO: find a better place for it
+        private void DetermineVariablePlace() {
+            foreach (var function in Pass.GlobalInformation<VariableAllocationGlobalInfo>().Functions) {
+                Pass.NodeInformation<VariableAllocationInfo>(function).VariableTable.DetermineVariablePlace();
+            }
 
-        public VarRefVisitor(VariableTable root, NodeInformation info) {
-            _info = info;
-            RootTable = root;
+            _rootTable.DetermineVariablePlace();
+        }
+        
+        protected override void VisitRoot(Node root) {
+            _rootTable = Pass.GlobalInformation<VariableAllocationGlobalInfo>().RootTable;
+            
+            base.VisitRoot(root);
+            
+            DetermineVariablePlace();
         }
 
-        public VariableTable RootTable { get; }
+        private VariableTable _rootTable = null!;
 
         public override void VisitFunction(Function val, VariableTable currentScope, bool allowImplicitDeclaration) {
-            _info.Variable[val]?.MarkAssigned();
+            var info = Pass.NodeInformation<VariableAllocationInfo>(val);
+            
+            info.Variable?.MarkAssigned();
 
-            base.VisitFunction(val, _info.VariableTable[val], false);
+            base.VisitFunction(val, info.VariableTable, false);
         }
 
         public override void VisitFor(For val, VariableTable currentScope, bool allowImplicitDeclaration) {
             foreach (var varRef in val.IteratorVariables) {
-                Visit(varRef, currentScope, true);
+                VisitNode(varRef, currentScope, true);
             }
 
-            Visit(val.Expression, currentScope, false);
-            Visit(val.Body, currentScope, false);
+            VisitNode(val.Expression, currentScope, false);
+            VisitNode(val.Body, currentScope, false);
         }
 
         public override void VisitBiOp(BiOp val, VariableTable currentScope, bool allowImplicitDeclaration) {
+            var info = Pass.NodeInformation<VariableAllocationInfo>(val);
+            
             if (val.Op == GlugBiOpType.Assign) {
-                Visit(val.ExprL, currentScope, true);
-                Visit(val.ExprR, currentScope, false);
+                VisitNode(val.ExprL, currentScope, true);
+                VisitNode(val.ExprR, currentScope, false);
 
                 if (val.ExprL is VarRef vr) {
-                    _info.Variable[vr].MarkAssigned();
+                    info.Variable?.MarkAssigned();
                 } else if (val.ExprL is OnStackList osl) {
                     foreach (var item in osl.List.OfType<VarRef>()) {
-                        _info.Variable[item].MarkAssigned();
+                        Pass.NodeInformation<VariableAllocationInfo>(item).Variable?.MarkAssigned();
                     }
                 }
             } else {
@@ -45,15 +59,17 @@ namespace GeminiLab.Glug.PostProcess {
         }
 
         public override void VisitVarRef(VarRef val, VariableTable currentScope, bool allowImplicitDeclaration) {
-            if (!_info.Variable.TryGetValue(val, out _)) {
+            var info = Pass.NodeInformation<VariableAllocationInfo>(val);
+            
+            if (info.Variable == null) {
                 if (!currentScope.TryLookupVariable(val.Id, out var v)) {
-                    v = (allowImplicitDeclaration ? currentScope : RootTable).CreateVariable(val.Id);
+                    v = (allowImplicitDeclaration ? currentScope : _rootTable).CreateVariable(val.Id);
                 }
 
-                _info.Variable[val] = v;
+                info.Variable = v;
             }
 
-            _info.Variable[val].MarkUsedIn(currentScope);
+            info.Variable.MarkUsedIn(currentScope);
         }
 
         public override void VisitMetatable(Metatable val, VariableTable currentScope, bool allowImplicitDeclaration) {

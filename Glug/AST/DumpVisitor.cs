@@ -49,11 +49,11 @@ namespace GeminiLab.Glug.AST {
                 Writer.IncreaseIndent();
                 Writer.WriteLine("<cond>");
                 Writer.IncreaseIndent();
-                Visit(cond);
+                VisitNode(cond);
                 Writer.DecreaseIndent();
                 Writer.WriteLine("<expr>");
                 Writer.IncreaseIndent();
-                Visit(expr);
+                VisitNode(expr);
                 Writer.DecreaseIndent();
                 Writer.DecreaseIndent();
             }
@@ -61,7 +61,7 @@ namespace GeminiLab.Glug.AST {
             if (val.ElseBranch != null) {
                 Writer.WriteLine("<else>");
                 Writer.IncreaseIndent();
-                Visit(val.ElseBranch);
+                VisitNode(val.ElseBranch);
                 Writer.DecreaseIndent();
             }
 
@@ -73,11 +73,11 @@ namespace GeminiLab.Glug.AST {
             Writer.IncreaseIndent();
             Writer.WriteLine("<cond>");
             Writer.IncreaseIndent();
-            Visit(val.Condition);
+            VisitNode(val.Condition);
             Writer.DecreaseIndent();
             Writer.WriteLine("<expr>");
             Writer.IncreaseIndent();
-            Visit(val.Body);
+            VisitNode(val.Body);
             Writer.DecreaseIndent();
             Writer.DecreaseIndent();
         }
@@ -87,15 +87,15 @@ namespace GeminiLab.Glug.AST {
             Writer.IncreaseIndent();
             Writer.WriteLine("<iter-vals>");
             Writer.IncreaseIndent();
-            foreach (var varRef in val.IteratorVariables) { Visit(varRef); }
+            foreach (var varRef in val.IteratorVariables) { VisitNode(varRef); }
             Writer.DecreaseIndent();
             Writer.WriteLine("<expr>");
             Writer.IncreaseIndent();
-            Visit(val.Expression);
+            VisitNode(val.Expression);
             Writer.DecreaseIndent();
             Writer.WriteLine("<body>");
             Writer.IncreaseIndent();
-            Visit(val.Body);
+            VisitNode(val.Body);
             Writer.DecreaseIndent();
             Writer.DecreaseIndent();
         }
@@ -103,35 +103,35 @@ namespace GeminiLab.Glug.AST {
         public override void VisitReturn(Return val) {
             Writer.WriteLine("<return>");
             Writer.IncreaseIndent();
-            Visit(val.Expr);
+            VisitNode(val.Expr);
             Writer.DecreaseIndent();
         }
 
         public override void VisitBreak(Break val) {
             Writer.WriteLine("<break>");
             Writer.IncreaseIndent();
-            Visit(val.Expr);
+            VisitNode(val.Expr);
             Writer.DecreaseIndent();
         }
 
         public override void VisitFunction(Function val) {
             Writer.WriteLine($"function \"{val.Name}\" {(val.Parameters.Count > 0 ? $"[{val.Parameters.Select(x => $"\"{x}\"").JoinBy(", ")}]" : "[]")}");
             Writer.IncreaseIndent();
-            Visit(val.Body);
+            VisitNode(val.Body);
             Writer.DecreaseIndent();
         }
 
         public override void VisitOnStackList(OnStackList val) {
             Writer.WriteLine("<on-stack-list>");
             Writer.IncreaseIndent();
-            val.List.ForEach(Visit);
+            val.List.ForEach(VisitNode);
             Writer.DecreaseIndent();
         }
 
         public override void VisitBlock(Block val) {
             Writer.WriteLine("<block>");
             Writer.IncreaseIndent();
-            val.List.ForEach(Visit);
+            val.List.ForEach(VisitNode);
             Writer.DecreaseIndent();
         }
 
@@ -144,7 +144,7 @@ namespace GeminiLab.Glug.AST {
                 _                   => throw new ArgumentOutOfRangeException(),
             });
             Writer.IncreaseIndent();
-            Visit(val.Expr);
+            VisitNode(val.Expr);
             Writer.DecreaseIndent();
         }
 
@@ -177,8 +177,8 @@ namespace GeminiLab.Glug.AST {
                 _                            => throw new ArgumentOutOfRangeException(),
             });
             Writer.IncreaseIndent();
-            Visit(val.ExprL);
-            Visit(val.ExprR);
+            VisitNode(val.ExprL);
+            VisitNode(val.ExprR);
             Writer.DecreaseIndent();
         }
 
@@ -188,8 +188,8 @@ namespace GeminiLab.Glug.AST {
             foreach (var (key, value) in val.Pairs) {
                 Writer.WriteLine("<pair>");
                 Writer.IncreaseIndent();
-                Visit(key);
-                Visit(value);
+                VisitNode(key);
+                VisitNode(value);
                 Writer.DecreaseIndent();
             }
 
@@ -199,7 +199,7 @@ namespace GeminiLab.Glug.AST {
         public override void VisitVectorDef(VectorDef val) {
             Writer.WriteLine("<vector-def>");
             Writer.IncreaseIndent();
-            foreach (var item in val.Items) { Visit(item); }
+            foreach (var item in val.Items) { VisitNode(item); }
             Writer.DecreaseIndent();
         }
 
@@ -210,21 +210,21 @@ namespace GeminiLab.Glug.AST {
         public override void VisitMetatable(Metatable val) {
             Writer.WriteLine("<metatable>");
             Writer.IncreaseIndent();
-            Visit(val.Table);
+            VisitNode(val.Table);
             Writer.DecreaseIndent();
         }
 
         public override void VisitSysCall(SysCall val) {
             Writer.WriteLine($"<syscall 0x{val.Id:x} result: {val.Result}>");
             Writer.IncreaseIndent();
-            val.Inputs.ForEach(Visit);
+            val.Inputs.ForEach(VisitNode);
             Writer.DecreaseIndent();
         }
 
         public override void VisitToValue(ToValue val) {
             Writer.WriteLine("to-value");
             Writer.IncreaseIndent();
-            Visit(val.Child);
+            VisitNode(val.Child);
             Writer.DecreaseIndent();
         }
     }
