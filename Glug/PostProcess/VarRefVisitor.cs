@@ -47,7 +47,7 @@ namespace GeminiLab.Glug.PostProcess {
                 VisitNode(val.ExprR, currentScope, false);
 
                 if (val.ExprL is VarRef vr) {
-                    info.Variable?.MarkAssigned();
+                    Pass.NodeInformation<VariableAllocationInfo>(vr).Variable?.MarkAssigned();
                 } else if (val.ExprL is OnStackList osl) {
                     foreach (var item in osl.List.OfType<VarRef>()) {
                         Pass.NodeInformation<VariableAllocationInfo>(item).Variable?.MarkAssigned();
