@@ -5,7 +5,7 @@ using GeminiLab.XUnitTester.Gliep.Misc;
 using Xunit;
 
 namespace GeminiLab.XUnitTester.Gliep.Glug {
-    public class ASTTest : GlugTest {
+    public class ASTTest : GlugExecutionTestBase {
         [Fact]
         public void SysCallAndToValueTest() {
             var root = new Block(new Expr[] {

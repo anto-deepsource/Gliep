@@ -15,7 +15,7 @@ namespace GeminiLab.Glug {
 
         public static Expr Parse(IGlugTokenStream stream) => new GlugParser(stream).Parse();
 
-        public static GlosUnit PostProcessAndCodeGen(Expr root) {
+        public static IGlosUnit PostProcessAndCodeGen(Expr root) {
             root = new Function("<root>", false, new List<string>(), root);
 
             var pass = new Pass();
@@ -30,13 +30,13 @@ namespace GeminiLab.Glug {
             return pass.GetVisitor<CodeGenVisitor>().Builder.GetResult();
         }
 
-        public static GlosUnit Compile(TextReader input, string? sourceName = null) {
+        public static IGlosUnit Compile(TextReader input, string? sourceName = null) {
             using var tok = Tokenize(input, sourceName);
             var ast = Parse(tok);
             return PostProcessAndCodeGen(ast);
         }
 
-        public static GlosUnit Compile(string code) {
+        public static IGlosUnit Compile(string code) {
             using var tok = Tokenize(code);
             var ast = Parse(tok);
             return PostProcessAndCodeGen(ast);

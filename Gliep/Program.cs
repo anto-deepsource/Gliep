@@ -69,7 +69,7 @@ namespace GeminiLab.Gliep {
             _um = new UnitManager(_fs = fs, viMa, global);
         }
 
-        public void AddEntryManually(string entry, string entryLoc, GlosUnit unit) {
+        public void AddEntryManually(string entry, string entryLoc, IGlosUnit unit) {
             _um.AddUnit(new LoadedUnit(entry, _fs.FileInfo.FromFileName(entryLoc), unit, GlosValue.NewNil()));
         }
         
@@ -85,7 +85,7 @@ namespace GeminiLab.Gliep {
             vm.WorkingDirectory = Environment.CurrentDirectory;
             var entryLoc = "";
 
-            GlosUnit unit;
+            IGlosUnit unit;
             if (args.Length <= 0 || args[0] == "-") {
                 unit = TypicalCompiler.Compile(Console.In, @"<stdin>");
                 entryLoc = "./.1";

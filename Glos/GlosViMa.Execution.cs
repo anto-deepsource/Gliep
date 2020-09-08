@@ -71,7 +71,7 @@ namespace GeminiLab.Glos {
             public GlosFunctionPrototype Prototype;
             public ReadOnlySpan<byte> Code;
             public int Length;
-            public GlosUnit Unit;
+            public IGlosUnit Unit;
             public GlosContext Context;
             public GlosContext Global;
         }
@@ -107,7 +107,7 @@ namespace GeminiLab.Glos {
             ref GlosFunctionPrototype proto = ref execCtx.Prototype!;
             ref var code = ref execCtx.Code;
             ref var len = ref execCtx.Length;
-            ref GlosUnit unit = ref execCtx.Unit!;
+            ref IGlosUnit unit = ref execCtx.Unit!;
             ref GlosContext ctx = ref execCtx.Context!;
             ref GlosContext global = ref execCtx.Global!;
 
@@ -458,11 +458,11 @@ namespace GeminiLab.Glos {
         }
 
         // though ViMa shouldn't manage units, this function is necessary
-        public GlosValue[] ExecuteUnit(GlosUnit unit, GlosValue[]? args = null, GlosContext? parentContext = null) {
+        public GlosValue[] ExecuteUnit(IGlosUnit unit, GlosValue[]? args = null, GlosContext? parentContext = null) {
             return ExecuteFunction(new GlosFunction(unit.FunctionTable[unit.Entry], parentContext ?? new GlosContext(null)), args);
         }
 
-        public GlosValue[] ExecuteUnitWithProvidedContextForRootFunction(GlosUnit unit, GlosContext context, GlosValue[]? args = null) {
+        public GlosValue[] ExecuteUnitWithProvidedContextForRootFunction(IGlosUnit unit, GlosContext context, GlosValue[]? args = null) {
             return ExecuteFunctionWithProvidedContext(new GlosFunction(unit.FunctionTable[unit.Entry], context.Parent!), context, args);
         }
     }

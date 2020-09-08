@@ -18,7 +18,7 @@ namespace GeminiLab.Glute.Compile {
     }
 
     public class GlutePostProcess {
-        public static GlosUnit PostProcessAndCodeGen(Expr root) {
+        public static IGlosUnit PostProcessAndCodeGen(Expr root) {
             root = new Function("<root>", false, new List<string>(), root);
 
             var pass = new Pass();

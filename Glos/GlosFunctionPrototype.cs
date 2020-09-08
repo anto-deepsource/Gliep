@@ -4,14 +4,16 @@ using System.Collections.Generic;
 namespace GeminiLab.Glos {
     public class GlosFunctionPrototype {
         // making this ctor internal here is not quite a good choice. TODO: reconsider it 
-        internal GlosFunctionPrototype(string name, ReadOnlySpan<byte> code, int localVariableSize, IReadOnlyCollection<string> variableInContext) {
+        internal GlosFunctionPrototype(string name, ReadOnlySpan<byte> code, int localVariableSize, IReadOnlyCollection<string> variableInContext, IGlosUnit unit) {
             Name = name;
             _code = code.ToArray();
             LocalVariableSize = localVariableSize;
             VariableInContext = new HashSet<string>(variableInContext);
+
+            Unit = unit;
         }
 
-        public GlosUnit Unit { get; internal set; } = null!;
+        public IGlosUnit Unit { get; }
 
         public string Name { get; }
 

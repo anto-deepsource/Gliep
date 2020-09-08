@@ -9,10 +9,10 @@ namespace GeminiLab.Gliep {
     public class LoadedUnit {
         public string Key { get; }
         public IFileInfo? Location { get; }
-        public GlosUnit Unit { get; }
+        public IGlosUnit Unit { get; }
         public GlosValue Result { get; }
 
-        public LoadedUnit(string key, IFileInfo location, GlosUnit unit, GlosValue result) {
+        public LoadedUnit(string key, IFileInfo location, IGlosUnit unit, GlosValue result) {
             Key = key;
             Location = location;
             Unit = unit;
@@ -22,7 +22,7 @@ namespace GeminiLab.Gliep {
 
     public class UnitManager {
         private readonly Dictionary<string, LoadedUnit> _units = new Dictionary<string, LoadedUnit>();
-        private readonly Dictionary<GlosUnit, IFileInfo?> _unit2Location = new Dictionary<GlosUnit, IFileInfo?>();
+        private readonly Dictionary<IGlosUnit, IFileInfo?> _unit2Location = new Dictionary<IGlosUnit, IFileInfo?>();
 
         private IFileSystem _fs;
         private GlosViMa _viMa;

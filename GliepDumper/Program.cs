@@ -110,7 +110,7 @@ namespace GeminiLab.Gliep.Dumper {
             return s.ToLower();
         }
 
-        public static void DumpUnit(GlosUnit unit) {
+        public static void DumpUnit(IGlosUnit unit) {
             Console.WriteLine(@"= Glos Unit");
             Console.WriteLine(@"== overview");
             Console.WriteLine($@"{unit.FunctionTable.Count} function(s), {unit.StringTable.Count} string constant(s), entry #{unit.Entry}");

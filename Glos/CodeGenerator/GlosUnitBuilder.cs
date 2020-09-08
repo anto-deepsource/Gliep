@@ -3,49 +3,56 @@ using System.Collections.Generic;
 
 namespace GeminiLab.Glos.CodeGenerator {
     public class GlosUnitBuilder {
-        #region string table
+        private readonly GlosUnitInternalImpl _impl = new GlosUnitInternalImpl();
+
+#region string table
+
         private readonly Dictionary<string, int> _stringTable = new Dictionary<string, int>();
-        private readonly List<string> _stringList = new List<string>();
 
         public bool TryGetStringId(string str, out int id) => _stringTable.TryGetValue(str, out id);
 
         public int AddOrGetString(string str) {
             if (_stringTable.TryGetValue(str, out var id)) return id;
-            _stringList.Add(str);
+            _impl.RealStringTable.Add(str);
             return _stringTable[str] = _stringTable.Count;
         }
 
         public int StringCount => _stringTable.Count;
-        #endregion
 
-        #region function table
+#endregion
+
+#region function table
+
         private int _func = 0;
         private readonly List<GlosFunctionBuilder> _builders = new List<GlosFunctionBuilder>();
-        private readonly List<GlosFunctionPrototype> _functions = new List<GlosFunctionPrototype>();
-        
+
         public GlosFunctionBuilder AddFunction() {
             var fun = new GlosFunctionBuilder(this, _func++);
             _builders.Add(fun);
-            _functions.Add(null!);
+            _impl.RealFunctionTable.Add(null!);
             return fun;
         }
 
         public int AddFunctionRaw(ReadOnlySpan<byte> op, int localVariableSize, IReadOnlyCollection<string>? variableInContext = null, string? name = null) {
-            _functions.Add(new GlosFunctionPrototype(name ?? $"function#{_func}", op, localVariableSize, variableInContext ?? Array.Empty<string>()));
+            _impl.RealFunctionTable.Add(new GlosFunctionPrototype(name ?? $"function#{_func}", op, localVariableSize, variableInContext ?? Array.Empty<string>(), _impl));
             return _func++;
         }
 
-        public int Entry { get; set; }
+        public int Entry {
+            get => _impl.Entry;
+            set => _impl.Entry = value;
+        }
 
         public int FunctionCount => _func;
-        #endregion
-        
-        public GlosUnit GetResult() {
+
+#endregion
+
+        public IGlosUnit GetResult() {
             foreach (var builder in _builders) {
-                _functions[builder.Id] = new GlosFunctionPrototype(builder.Name, builder.GetOpArray(), builder.LocalVariableCount, builder.VariableInContext ?? Array.Empty<string>());
+                _impl.RealFunctionTable[builder.Id] = new GlosFunctionPrototype(builder.Name, builder.GetOpArray(), builder.LocalVariableCount, builder.VariableInContext ?? Array.Empty<string>(), _impl);
             }
 
-            return new GlosUnit(_functions, Entry, _stringList);
+            return _impl;
         }
     }
 }
