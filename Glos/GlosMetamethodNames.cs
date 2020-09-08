@@ -12,12 +12,8 @@ namespace GeminiLab.Glos {
         public static readonly string Orr = "__orr";
         public static readonly string Xor = "__xor";
 
-        // public static readonly string Gtr = "__gtr";
         public static readonly string Lss = "__lss";
-        // public static readonly string Geq = "__geq";
-        // public static readonly string Leq = "__leq";
         public static readonly string Equ = "__equ";
-        // public static readonly string Neq = "__neq";
 
         public static readonly string Ren = "__ren";
         public static readonly string Uen = "__uen";

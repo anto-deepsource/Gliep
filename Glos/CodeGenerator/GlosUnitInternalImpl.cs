@@ -8,7 +8,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         public IReadOnlyList<string> StringTable => RealStringTable;
 
         public readonly List<GlosFunctionPrototype> RealFunctionTable = new List<GlosFunctionPrototype>();
-        public readonly List<string> RealStringTable = new List<string>();
+        public readonly List<string>                RealStringTable   = new List<string>();
 
         protected virtual void Dispose(bool disposing) {
             if (disposing) { }

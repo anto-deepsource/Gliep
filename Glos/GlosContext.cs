@@ -12,19 +12,19 @@ namespace GeminiLab.Glos {
         }
 
         private readonly Dictionary<string, GlosValueReferenceWrapper> _variables = new Dictionary<string, GlosValueReferenceWrapper>();
-        private readonly Dictionary<string, GlosContext> _location = new Dictionary<string, GlosContext>();
+        private readonly Dictionary<string, GlosContext>               _location  = new Dictionary<string, GlosContext>();
 
         private GlosContext(GlosContext? parent, GlosContext? global) {
             Parent = parent;
             Global = global ?? this;
         }
 
-        public GlosContext(GlosContext? parent) 
+        public GlosContext(GlosContext? parent)
             : this(parent, parent?.Global) { }
-        
+
         public GlosContext? Parent { get; }
         public GlosContext Global { get; }
-        
+
         public IReadOnlyDictionary<string, GlosValueReferenceWrapper> Variables => _variables;
 
         private GlosValueReferenceWrapper getWrapper(string name) => getWrapper(name, out _);

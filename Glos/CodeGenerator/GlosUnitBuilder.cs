@@ -23,7 +23,7 @@ namespace GeminiLab.Glos.CodeGenerator {
 
 #region function table
 
-        private int _func = 0;
+        private          int                       _func     = 0;
         private readonly List<GlosFunctionBuilder> _builders = new List<GlosFunctionBuilder>();
 
         public GlosFunctionBuilder AddFunction() {

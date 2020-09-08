@@ -18,7 +18,7 @@ namespace GeminiLab.Glos {
         }
 
         public static bool TryGetMetamethodOfOperand(in GlosValue x, in GlosValue y, string name,
-            bool lookupMetatableOfLatterFirst, out GlosValue fun) {
+                                                     bool lookupMetatableOfLatterFirst, out GlosValue fun) {
             fun = default;
             fun.SetNil();
 
@@ -34,7 +34,7 @@ namespace GeminiLab.Glos {
         }
 
         public static bool TryInvokeMetamethod(ref GlosValue dest, in GlosValue x, in GlosValue y, GlosViMa viMa,
-            string name, bool lookupMetatableOfLatterFirst) {
+                                               string name, bool lookupMetatableOfLatterFirst) {
             if (!TryGetMetamethodOfOperand(x, y, name, lookupMetatableOfLatterFirst, out var fun)) return false;
 
             var res = fun.Invoke(viMa, new[] { x, y });

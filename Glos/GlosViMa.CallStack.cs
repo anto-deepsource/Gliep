@@ -2,15 +2,15 @@ using System;
 
 namespace GeminiLab.Glos {
     public struct GlosStackFrame {
-        public int StackBase;
-        public int ArgumentsBase;
-        public int ArgumentsCount;
-        public int LocalVariablesBase;
-        public int PrivateStackBase;
-        public int InstructionPointer;
-        public int DelimiterStackBase;
+        public int          StackBase;
+        public int          ArgumentsBase;
+        public int          ArgumentsCount;
+        public int          LocalVariablesBase;
+        public int          PrivateStackBase;
+        public int          InstructionPointer;
+        public int          DelimiterStackBase;
         public GlosFunction Function;
-        public GlosContext Context;
+        public GlosContext  Context;
     }
 
     public partial class GlosViMa {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace GeminiLab.Glos {
     public partial struct GlosValue {
         public class EqualityComparer : IEqualityComparer<GlosValue> {
-            private readonly GlosViMa _vm;
+            private readonly GlosViMa   _vm;
             private readonly Calculator _cal;
 
             public EqualityComparer(GlosViMa vm) {
@@ -17,7 +17,7 @@ namespace GeminiLab.Glos {
                 return cache.Truthy();
             }
 
-            public int GetHashCode(GlosValue obj) => unchecked((int)obj.getHash(_vm));
+            public int GetHashCode(GlosValue obj) => unchecked((int) obj.getHash(_vm));
         }
     }
 }

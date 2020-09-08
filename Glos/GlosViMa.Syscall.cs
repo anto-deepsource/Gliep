@@ -6,6 +6,7 @@ namespace GeminiLab.Glos {
 
     public partial class GlosViMa {
         private const int MaxSyscallCount = 8;
+
         private readonly GlosSyscall?[] _syscalls = new GlosSyscall[MaxSyscallCount];
 
         public void SetSyscall(int index, GlosSyscall? syscall) {

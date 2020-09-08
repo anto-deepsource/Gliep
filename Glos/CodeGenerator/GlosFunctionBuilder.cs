@@ -18,12 +18,13 @@ namespace GeminiLab.Glos.CodeGenerator {
 
         public string Name { get; set; }
 
-        #region instruction buffer
+#region instruction buffer
+
         private class Instruction {
             public GlosOp OpCode;
-            public long Immediate;
+            public long   Immediate;
             public Label? Target;
-            public int Offset;
+            public int    Offset;
 
             public void Deconstruct(out GlosOp opCode, out long immediate, out Label? target, out int offset) {
                 opCode = OpCode;
@@ -32,10 +33,13 @@ namespace GeminiLab.Glos.CodeGenerator {
                 offset = Offset;
             }
         }
-        private readonly List<Instruction> _instructions = new List<Instruction>(); 
-        #endregion
 
-        #region label
+        private readonly List<Instruction> _instructions = new List<Instruction>();
+
+#endregion
+
+#region label
+
         private readonly Dictionary<Label, List<int>> _labels = new Dictionary<Label, List<int>>();
 
         public Label AllocateLabel() {
@@ -55,15 +59,19 @@ namespace GeminiLab.Glos.CodeGenerator {
             if (label.Builder != this) throw new InvalidOperationException();
             label.TargetCounter = _instructions.Count;
         }
-        #endregion
 
-        #region local variable
+#endregion
+
+#region local variable
+
         public int LocalVariableCount { get; private set; } = 0;
 
         public LocalVariable AllocateLocalVariable() => new LocalVariable(this, LocalVariableCount++);
-        #endregion
 
-        #region instruction appender
+#endregion
+
+#region instruction appender
+
         public void AppendInstruction(GlosOp opCode, long immediate = 0, Label? target = null) =>
             _instructions.Add(new Instruction { OpCode = opCode, Immediate = immediate, Target = target!, Offset = -1 });
 
@@ -117,11 +125,11 @@ namespace GeminiLab.Glos.CodeGenerator {
 
         // load (integer)
         public void AppendLd(long imm) => AppendInstruction(GlosOp.Ld, immediate: imm);
-        public void AppendLd(ulong imm) => AppendInstruction(GlosOp.Ld, immediate: unchecked((long)imm));
+        public void AppendLd(ulong imm) => AppendInstruction(GlosOp.Ld, immediate: unchecked((long) imm));
 
         // load (float)
-        public unsafe void AppendLdFlt(double value) => AppendInstruction(GlosOp.LdFlt, immediate: *(long*)&value);
-        public void AppendLdFltRaw(ulong value) => AppendInstruction(GlosOp.LdFlt, immediate: unchecked((long)value));
+        public unsafe void AppendLdFlt(double value) => AppendInstruction(GlosOp.LdFlt, immediate: *(long*) &value);
+        public void AppendLdFltRaw(ulong value) => AppendInstruction(GlosOp.LdFlt, immediate: unchecked((long) value));
 
         // load string and function
         public void AppendLdStr(int id) => AppendInstruction(GlosOp.LdStr, immediate: id);
@@ -178,7 +186,8 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendRetIfNone() {
             if (_instructions[^1].OpCode != GlosOp.Ret) AppendRet();
         }
-        #endregion
+
+#endregion
 
         public void SetEntry() => Parent.Entry = Id;
 
@@ -189,8 +198,8 @@ namespace GeminiLab.Glos.CodeGenerator {
             foreach (var instr in _instructions) {
                 var (op, imm, target, _) = instr;
                 instr.Offset = buff.Count;
-                if (GlosOpInfo.Immediates[(byte)op] == GlosOpImmediate.None || GlosOpInfo.Immediates[(byte)op] == GlosOpImmediate.OnStack) {
-                    buff.Add((byte)op);
+                if (GlosOpInfo.Immediates[(byte) op] == GlosOpImmediate.None || GlosOpInfo.Immediates[(byte) op] == GlosOpImmediate.OnStack) {
+                    buff.Add((byte) op);
                     continue;
                 }
 
@@ -198,22 +207,22 @@ namespace GeminiLab.Glos.CodeGenerator {
                     if (op == GlosOp.LdStr || op == GlosOp.LdFun) {
                         if (imm <= sbyte.MaxValue) {
                             buff.AddOp(op + 4);
-                            buff.Add((byte)(sbyte)imm);
+                            buff.Add((byte) (sbyte) imm);
                         } else {
                             buff.AddOp(op);
-                            buff.AddInteger32((int)imm);
+                            buff.AddInteger32((int) imm);
                         }
                     } else if (op == GlosOp.Ld) {
                         if (imm == -1) {
                             buff.AddOp(GlosOp.LdNeg1);
                         } else if (imm >= 0 && imm < 4) {
-                            buff.AddOp(GlosOp.Ld0 + (byte)imm);
+                            buff.AddOp(GlosOp.Ld0 + (byte) imm);
                         } else if (imm >= sbyte.MinValue && imm <= sbyte.MaxValue) {
                             buff.AddOp(GlosOp.LdS);
-                            buff.Add((byte)(sbyte)imm);
+                            buff.Add((byte) (sbyte) imm);
                         } else if (imm >= int.MinValue && imm <= int.MaxValue) {
                             buff.AddOp(GlosOp.Ld);
-                            buff.AddInteger32((int)imm);
+                            buff.AddInteger32((int) imm);
                         } else {
                             buff.AddOp(GlosOp.LdQ);
                             buff.AddInteger64(imm);
@@ -223,47 +232,47 @@ namespace GeminiLab.Glos.CodeGenerator {
                         buff.AddInteger64(imm);
                     } else if (op == GlosOp.LdLoc) {
                         if (imm >= 0 && imm < 8) {
-                            buff.AddOp(GlosOp.LdLoc0 + (byte)imm);
+                            buff.AddOp(GlosOp.LdLoc0 + (byte) imm);
                         } else if (imm >= sbyte.MinValue && imm <= sbyte.MaxValue) {
                             buff.AddOp(GlosOp.LdLocS);
-                            buff.Add((byte)(sbyte)imm);
+                            buff.Add((byte) (sbyte) imm);
                         } else {
                             buff.AddOp(GlosOp.LdLoc);
-                            buff.AddInteger32((int)imm);
+                            buff.AddInteger32((int) imm);
                         }
                     } else if (op == GlosOp.StLoc) {
                         if (imm >= 0 && imm < 8) {
-                            buff.AddOp(GlosOp.StLoc0 + (byte)imm);
+                            buff.AddOp(GlosOp.StLoc0 + (byte) imm);
                         } else if (imm >= sbyte.MinValue && imm <= sbyte.MaxValue) {
                             buff.AddOp(GlosOp.StLocS);
-                            buff.Add((byte)(sbyte)imm);
+                            buff.Add((byte) (sbyte) imm);
                         } else {
                             buff.AddOp(GlosOp.StLoc);
-                            buff.AddInteger32((int)imm);
+                            buff.AddInteger32((int) imm);
                         }
                     } else if (op == GlosOp.LdArg) {
                         if (imm >= 0 && imm < 4) {
-                            buff.AddOp(GlosOp.LdArg0 + (byte)imm);
+                            buff.AddOp(GlosOp.LdArg0 + (byte) imm);
                         } else if (imm >= sbyte.MinValue && imm <= sbyte.MaxValue) {
                             buff.AddOp(GlosOp.LdArgS);
-                            buff.Add((byte)(sbyte)imm);
+                            buff.Add((byte) (sbyte) imm);
                         } else {
                             buff.AddOp(GlosOp.LdArg);
-                            buff.AddInteger32((int)imm);
+                            buff.AddInteger32((int) imm);
                         }
                     } else if (op == GlosOp.ShpRv) {
                         if (imm >= 0 && imm < 4) {
-                            buff.AddOp(GlosOp.ShpRv0 + (byte)imm);
+                            buff.AddOp(GlosOp.ShpRv0 + (byte) imm);
                         } else if (imm >= sbyte.MinValue && imm <= sbyte.MaxValue) {
                             buff.AddOp(GlosOp.ShpRvS);
-                            buff.Add((byte)(sbyte)imm);
+                            buff.Add((byte) (sbyte) imm);
                         } else {
                             buff.AddOp(GlosOp.ShpRv);
-                            buff.AddInteger32((int)imm);
+                            buff.AddInteger32((int) imm);
                         }
                     } else if (op == GlosOp.SysC0) {
-                        buff.AddOp(GlosOp.SysC0 + (byte)(0x07 & imm));
-                    } else if (GlosOpInfo.Categories[(byte)op] == GlosOpCategory.Branch) {
+                        buff.AddOp(GlosOp.SysC0 + (byte) (0x07 & imm));
+                    } else if (GlosOpInfo.Categories[(byte) op] == GlosOpCategory.Branch) {
                         buff.AddOp(op);
                         _labels[target!].Add(buff.Count);
                         buff.AddInteger32(int.MaxValue);

@@ -5,11 +5,11 @@ namespace GeminiLab.Glos {
 
             GlosValue v = default;
             _hashCode = TryInvokeMetamethod(ref v, this, viMa, GlosMetamethodNames.Hash) ? v.getHash(viMa) : ValueObject!.GetHashCode();
-            
+
             _hashCodeCalculated = true;
             return _hashCode;
         }
-        
+
         private void preEvalHash() {
             if (_type == GlosValueType.Table) {
                 _hashCodeCalculated = false;
@@ -17,15 +17,15 @@ namespace GeminiLab.Glos {
             }
 
             _hashCode = _type switch {
-                GlosValueType.Nil => 0,
-                GlosValueType.Integer => ValueNumber.Integer,
-                GlosValueType.Float => ValueNumber.Integer,
-                GlosValueType.Boolean => ValueNumber.Integer,
-                GlosValueType.String => StringHash((string)ValueObject!),
-                GlosValueType.Function => FunctionHash((GlosFunction)ValueObject!),
+                GlosValueType.Nil              => 0,
+                GlosValueType.Integer          => ValueNumber.Integer,
+                GlosValueType.Float            => ValueNumber.Integer,
+                GlosValueType.Boolean          => ValueNumber.Integer,
+                GlosValueType.String           => StringHash((string) ValueObject!),
+                GlosValueType.Function         => FunctionHash((GlosFunction) ValueObject!),
                 GlosValueType.ExternalFunction => ValueObject!.GetHashCode(),
-                GlosValueType.Vector => ValueObject!.GetHashCode(),
-                _ => 0,
+                GlosValueType.Vector           => ValueObject!.GetHashCode(),
+                _                              => 0,
             };
 
             _hashCodeCalculated = true;
@@ -33,7 +33,7 @@ namespace GeminiLab.Glos {
 
         private static long Combine(int hi, int lo) {
             unchecked {
-                return (long)(((ulong)(uint)hi) << 32 | (uint)lo);
+                return (long) (((ulong) (uint) hi) << 32 | (uint) lo);
             }
         }
 

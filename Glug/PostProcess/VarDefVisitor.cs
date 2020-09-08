@@ -28,7 +28,7 @@ namespace GeminiLab.Glug.PostProcess {
             Pass.GlobalInformation<VariableAllocationGlobalInfo>().Functions.Add(val);
 
             var info = Pass.NodeInformation<VariableAllocationInfo>(val);
-            
+
             info.Variable = val.ExplicitlyNamed ? currentScope.CreateVariable(val.Name) : null!;
             info.VariableTable = new VariableTable(val, currentScope);
 

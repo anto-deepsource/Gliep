@@ -8,7 +8,6 @@ namespace GeminiLab.Glug {
             return $"{Source}:{Row}:{Column}";
         }
 
-
         public static PositionInSource NotAPosition() => new PositionInSource { Source = null!, Row = 0, Column = 0 };
     }
 }

@@ -11,12 +11,12 @@ namespace GeminiLab.Glug.PostProcess {
 
             _rootTable.DetermineVariablePlace();
         }
-        
+
         protected override void VisitRoot(Node root) {
             _rootTable = Pass.GlobalInformation<VariableAllocationGlobalInfo>().RootTable;
-            
+
             base.VisitRoot(root);
-            
+
             DetermineVariablePlace();
         }
 
@@ -24,7 +24,7 @@ namespace GeminiLab.Glug.PostProcess {
 
         public override void VisitFunction(Function val, VariableTable currentScope, bool allowImplicitDeclaration) {
             var info = Pass.NodeInformation<VariableAllocationInfo>(val);
-            
+
             info.Variable?.MarkAssigned();
 
             base.VisitFunction(val, info.VariableTable, false);
@@ -41,7 +41,7 @@ namespace GeminiLab.Glug.PostProcess {
 
         public override void VisitBiOp(BiOp val, VariableTable currentScope, bool allowImplicitDeclaration) {
             var info = Pass.NodeInformation<VariableAllocationInfo>(val);
-            
+
             if (val.Op == GlugBiOpType.Assign) {
                 VisitNode(val.ExprL, currentScope, true);
                 VisitNode(val.ExprR, currentScope, false);
@@ -60,7 +60,7 @@ namespace GeminiLab.Glug.PostProcess {
 
         public override void VisitVarRef(VarRef val, VariableTable currentScope, bool allowImplicitDeclaration) {
             var info = Pass.NodeInformation<VariableAllocationInfo>(val);
-            
+
             if (info.Variable == null) {
                 if (!currentScope.TryLookupVariable(val.Id, out var v)) {
                     v = (allowImplicitDeclaration ? currentScope : _rootTable).CreateVariable(val.Id);

@@ -29,7 +29,7 @@ namespace GeminiLab.Glos {
         protected T[] _items;
 
         public Memory<T> AsMemory() => _items.AsMemory(0, Count);
-        
+
         public Span<T> AsSpan() => _items.AsSpan(0, Count);
 
         public Span<T> AsSpan(Index startIndex) => _items.AsSpan(startIndex..Count);
@@ -51,7 +51,7 @@ namespace GeminiLab.Glos {
         }
 
         public Span<T> AsSpan(int start, int length) => AsSpan(new Range(start, start + length));
-        
+
         public void EnsureCapacity(int cap) {
             if (Capacity > cap) return;
 
@@ -63,7 +63,7 @@ namespace GeminiLab.Glos {
         public void PreparePush(int count) {
             EnsureCapacity(Count + count);
         }
-        
+
         // Warning: push to stack may invalid existing references.
         public ref T PushStack() {
             EnsureCapacity(Count + 1);

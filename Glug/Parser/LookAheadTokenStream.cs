@@ -1,4 +1,3 @@
-using GeminiLab.Glos;
 using GeminiLab.Glug.Tokenizer;
 
 namespace GeminiLab.Glug.Parser {

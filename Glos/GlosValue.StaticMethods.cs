@@ -38,7 +38,7 @@ namespace GeminiLab.Glos {
             rv.SetExternalFunction(value);
             return rv;
         }
-        
+
         public static GlosValue NewTable(GlosTable value) {
             var rv = new GlosValue();
             rv.SetTable(value);

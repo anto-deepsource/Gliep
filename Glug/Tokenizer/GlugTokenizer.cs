@@ -52,7 +52,7 @@ namespace GeminiLab.Glug.Tokenizer {
                 if (c < Occupied || c >= MaxAscii) throw new ArgumentOutOfRangeException(nameof(str));
 
                 if (_nodes[ptr][c] == 0) {
-                    _nodes[ptr][c] = (short)_nodes.Count;
+                    _nodes[ptr][c] = (short) _nodes.Count;
                     ref var nxt = ref _nodes.PushStack();
                     nxt.Type = GlugTokenType.NotAToken;
                     nxt.Parent = ptr;

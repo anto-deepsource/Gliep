@@ -60,8 +60,9 @@ namespace GeminiLab.Glos {
             return false;
         }
 
-        public static bool BothString(in GlosValue x, in GlosValue y, [NotNullWhen(true)] out string? xv,
-            [NotNullWhen(true)] out string? yv) {
+        public static bool BothString(in GlosValue x, in GlosValue y,
+                                      [NotNullWhen(true)] out string? xv,
+                                      [NotNullWhen(true)] out string? yv) {
             if (x.Type == GlosValueType.String && y.Type == GlosValueType.String) {
                 xv = x.AssumeString();
                 yv = y.AssumeString();
@@ -73,8 +74,9 @@ namespace GeminiLab.Glos {
             return false;
         }
 
-        public static bool BothFunction(in GlosValue x, in GlosValue y, [NotNullWhen(true)] out GlosFunction? xv,
-            [NotNullWhen(true)] out GlosFunction? yv) {
+        public static bool BothFunction(in GlosValue x, in GlosValue y,
+                                        [NotNullWhen(true)] out GlosFunction? xv,
+                                        [NotNullWhen(true)] out GlosFunction? yv) {
             if (x.Type == GlosValueType.Function && y.Type == GlosValueType.Function) {
                 xv = x.AssumeFunction();
                 yv = y.AssumeFunction();
@@ -87,7 +89,8 @@ namespace GeminiLab.Glos {
         }
 
         public static bool BothExternalFunction(in GlosValue x, in GlosValue y,
-            [NotNullWhen(true)] out GlosExternalFunction? xv, [NotNullWhen(true)] out GlosExternalFunction? yv) {
+                                                [NotNullWhen(true)] out GlosExternalFunction? xv,
+                                                [NotNullWhen(true)] out GlosExternalFunction? yv) {
             if (x.Type == GlosValueType.Function && y.Type == GlosValueType.Function) {
                 xv = x.AssumeExternalFunction();
                 yv = y.AssumeExternalFunction();

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace GeminiLab.Glos.CodeGenerator {
     internal static class ListExtensions {
-        internal static void AddOp(this IList<byte> list, GlosOp op) => list.Add((byte)op);
+        internal static void AddOp(this IList<byte> list, GlosOp op) => list.Add((byte) op);
 
         internal static void AddInteger32(this IList<byte> list, int item) {
             int i = item;
             unsafe {
-                byte* b = (byte*)&i;
+                byte* b = (byte*) &i;
                 list.Add(b[0]);
                 list.Add(b[1]);
                 list.Add(b[2]);
@@ -19,7 +19,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         internal static void AddInteger64(this IList<byte> list, long item) {
             long l = item;
             unsafe {
-                byte* b = (byte*)&l;
+                byte* b = (byte*) &l;
                 list.Add(b[0]);
                 list.Add(b[1]);
                 list.Add(b[2]);
@@ -36,7 +36,7 @@ namespace GeminiLab.Glos.CodeGenerator {
 
             int i = item;
             unsafe {
-                byte* b = (byte*)&i;
+                byte* b = (byte*) &i;
                 list[offset] = b[0];
                 list[offset + 1] = b[1];
                 list[offset + 2] = b[2];

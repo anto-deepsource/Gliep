@@ -254,7 +254,7 @@ namespace GeminiLab.Glug.Parser {
                 tok = Stream.GetToken();
 
                 return tok.Type switch {
-                    GlugTokenType.LiteralTrue    => (Expr)new LiteralBool(true),
+                    GlugTokenType.LiteralTrue    => (Expr) new LiteralBool(true),
                     GlugTokenType.LiteralFalse   => new LiteralBool(false),
                     GlugTokenType.LiteralInteger => new LiteralInteger(tok.ValueInt),
                     GlugTokenType.LiteralFloat   => new LiteralFloat(tok.ValueInt),
@@ -284,8 +284,7 @@ namespace GeminiLab.Glug.Parser {
                     "isnil" => new UnOp(GlugUnOpType.IsNil, ReadExprItem()),
                     "neg"   => new UnOp(GlugUnOpType.Neg, ReadExprItem()),
                     "not"   => new UnOp(GlugUnOpType.Not, ReadExprItem()),
-                    // TODO: add a custom exception class
-                    _       => throw new ArgumentOutOfRangeException(),
+                    _       => throw new ArgumentOutOfRangeException(), // TODO: add a custom exception class
                 };
             }
 
@@ -305,7 +304,7 @@ namespace GeminiLab.Glug.Parser {
             }
 
             return tok.Type switch {
-                GlugTokenType.SymbolLParen   => (Expr)ReadBlockInParen(),
+                GlugTokenType.SymbolLParen   => (Expr) ReadBlockInParen(),
                 GlugTokenType.KeywordIf      => ReadIf(),
                 GlugTokenType.KeywordWhile   => ReadWhile(),
                 GlugTokenType.KeywordFor     => ReadFor(),
@@ -315,8 +314,7 @@ namespace GeminiLab.Glug.Parser {
                 GlugTokenType.SymbolLBracket => ReadOnStackList(),
                 GlugTokenType.SymbolLBrace   => ReadTableDef(),
                 GlugTokenType.SymbolVecBegin => ReadVectorDef(),
-                // TODO: custom exception
-                _                            => throw new ArgumentOutOfRangeException(),
+                _                            => throw new ArgumentOutOfRangeException(), // TODO: custom exception
             };
         }
 

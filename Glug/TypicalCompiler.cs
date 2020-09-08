@@ -26,7 +26,7 @@ namespace GeminiLab.Glug {
             pass.AppendVisitor(new CodeGenVisitor());
 
             pass.Visit(root);
-            
+
             return pass.GetVisitor<CodeGenVisitor>().Builder.GetResult();
         }
 

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace GeminiLab.Glos {
     public class GlosTable {
-        private readonly GlosViMa _vm;
+        private readonly GlosViMa                         _vm;
         private readonly Dictionary<GlosValue, GlosValue> _values;
 
         public GlosTable(GlosViMa vm) {

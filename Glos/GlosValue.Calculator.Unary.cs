@@ -4,7 +4,7 @@ namespace GeminiLab.Glos {
     public partial struct GlosValue {
         public partial class Calculator {
             public void Not(ref GlosValue dest, in GlosValue v) {
-                if (v.Type == GlosValueType.Integer) dest.SetInteger(unchecked((long)~(ulong)v.AssumeInteger()));
+                if (v.Type == GlosValueType.Integer) dest.SetInteger(unchecked((long) ~(ulong) v.AssumeInteger()));
                 else if (v.Type == GlosValueType.Boolean) dest.SetBoolean(!v.AssumeBoolean());
                 else if (TryInvokeMetamethod(ref dest, v, _viMa, GlosMetamethodNames.Not)) ;
                 else throw new GlosInvalidUnaryOperandTypeException(GlosOp.Not, v);

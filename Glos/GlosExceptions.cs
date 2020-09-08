@@ -40,8 +40,7 @@ namespace GeminiLab.Glos {
 
     public class GlosUnexpectedEndOfCodeException : GlosException {
         public GlosUnexpectedEndOfCodeException(string? message = null)
-            : base(message ?? i18n.Strings.DefaultMessageGlosUnexpectedEndOfCodeException) {
-        }
+            : base(message ?? i18n.Strings.DefaultMessageGlosUnexpectedEndOfCodeException) { }
     }
 
     public class GlosLocalVariableIndexOutOfRangeException : GlosException {
@@ -58,23 +57,22 @@ namespace GeminiLab.Glos {
             : base(message ?? "") { // TODO: add exception message here
             Index = index;
         }
-        
+
         public int Index { get; }
     }
-    
+
     public class GlosFunctionIndexOutOfRangeException : GlosException {
         public GlosFunctionIndexOutOfRangeException(int index, string? message = null)
             : base(message ?? "") { // TODO: add exception message here
             Index = index;
         }
-        
+
         public int Index { get; }
     }
 
     public class GlosInvalidInstructionPointerException : GlosException {
         public GlosInvalidInstructionPointerException(string? message = null)
-            : base(message ?? string.Format(i18n.Strings.DefaultMessageGlosInvalidInstructionPointerException)) {
-        }
+            : base(message ?? string.Format(i18n.Strings.DefaultMessageGlosInvalidInstructionPointerException)) { }
     }
 
     public class GlosInvalidBinaryOperandTypeException : GlosException {
@@ -113,7 +111,7 @@ namespace GeminiLab.Glos {
     }
 
     public class GlosValueNotCallableException : GlosException {
-        public GlosValueNotCallableException(GlosValue value, string? message = null) 
+        public GlosValueNotCallableException(GlosValue value, string? message = null)
             : base(message ?? string.Format(i18n.Strings.DefaultMessageGlosValueNotCallableException, value.ToString())) {
             Value = value;
         }

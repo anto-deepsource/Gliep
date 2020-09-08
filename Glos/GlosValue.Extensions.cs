@@ -14,7 +14,7 @@ namespace GeminiLab.Glos {
             v.ValueNumber.Integer = value;
             v.ValueObject = null;
             v.Type = GlosValueType.Integer;
-            
+
             return ref v;
         }
 
@@ -27,7 +27,7 @@ namespace GeminiLab.Glos {
         }
 
         public static ref GlosValue SetFloatByBinaryPresentation(this ref GlosValue v, ulong representation) {
-            v.ValueNumber.Integer = unchecked((long)representation);
+            v.ValueNumber.Integer = unchecked((long) representation);
             v.ValueObject = null;
             v.Type = GlosValueType.Float;
 
@@ -41,7 +41,7 @@ namespace GeminiLab.Glos {
 
             return ref v;
         }
-        
+
         public static ref GlosValue SetTable(this ref GlosValue v, GlosTable value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
@@ -129,20 +129,27 @@ namespace GeminiLab.Glos {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long AssumeInteger(this in GlosValue v) => v.ValueNumber.Integer;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double AssumeFloat(this in GlosValue v) => v.ValueNumber.Float;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool AssumeBoolean(this in GlosValue v) => v.ValueNumber.Integer != 0;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GlosTable AssumeTable(this in GlosValue v) => (GlosTable)v.ValueObject!;
+        public static GlosTable AssumeTable(this in GlosValue v) => (GlosTable) v.ValueObject!;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string AssumeString(this in GlosValue v) => (string)v.ValueObject!;
+        public static string AssumeString(this in GlosValue v) => (string) v.ValueObject!;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GlosFunction AssumeFunction(this in GlosValue v) => (GlosFunction)v.ValueObject!;
+        public static GlosFunction AssumeFunction(this in GlosValue v) => (GlosFunction) v.ValueObject!;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GlosExternalFunction AssumeExternalFunction(this in GlosValue v) => (GlosExternalFunction)v.ValueObject!;
+        public static GlosExternalFunction AssumeExternalFunction(this in GlosValue v) => (GlosExternalFunction) v.ValueObject!;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GlosVector AssumeVector(this in GlosValue v) => (GlosVector)v.ValueObject!;
+        public static GlosVector AssumeVector(this in GlosValue v) => (GlosVector) v.ValueObject!;
 
         public static double ToFloat(this in GlosValue v) {
             if (v.Type == GlosValueType.Float) return v.ValueNumber.Float;

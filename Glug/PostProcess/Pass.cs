@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Serialization.Formatters;
+using GeminiLab.Glug.AST;
 
-namespace GeminiLab.Glug.AST {
+namespace GeminiLab.Glug.PostProcess {
     public class Pass {
 #region information
 
-        private Dictionary<Type, object> _globalInformation = new Dictionary<Type, object>();
-        private Dictionary<Type, Dictionary<Node, object>> _nodeInformation = new Dictionary<Type, Dictionary<Node, object>>();
+        private readonly Dictionary<Type, object>                   _globalInformation = new Dictionary<Type, object>();
+        private readonly Dictionary<Type, Dictionary<Node, object>> _nodeInformation   = new Dictionary<Type, Dictionary<Node, object>>();
 
         public T GlobalInformation<T>() where T : class, new() {
             if (TryGetGlobalInformation<T>(out var result)) return result;

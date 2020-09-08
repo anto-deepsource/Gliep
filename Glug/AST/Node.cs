@@ -17,7 +17,7 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class LiteralFloat : Literal {
-        public unsafe LiteralFloat(long b) : this(*(double*)&b) { }
+        public unsafe LiteralFloat(long b) : this(*(double*) &b) { }
 
         public LiteralFloat(double value) {
             Value = value;

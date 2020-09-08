@@ -87,7 +87,9 @@ namespace GeminiLab.Glug.AST {
             Writer.IncreaseIndent();
             Writer.WriteLine("<iter-vals>");
             Writer.IncreaseIndent();
-            foreach (var varRef in val.IteratorVariables) { VisitNode(varRef); }
+            foreach (var varRef in val.IteratorVariables) {
+                VisitNode(varRef);
+            }
             Writer.DecreaseIndent();
             Writer.WriteLine("<expr>");
             Writer.IncreaseIndent();
@@ -199,7 +201,9 @@ namespace GeminiLab.Glug.AST {
         public override void VisitVectorDef(VectorDef val) {
             Writer.WriteLine("<vector-def>");
             Writer.IncreaseIndent();
-            foreach (var item in val.Items) { VisitNode(item); }
+            foreach (var item in val.Items) {
+                VisitNode(item);
+            }
             Writer.DecreaseIndent();
         }
 
