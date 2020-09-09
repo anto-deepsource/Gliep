@@ -101,6 +101,30 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
         }
         
         [Fact]
+        public void ForLoop() {
+            var code = @"
+                fn range[max] (
+                    !x = -1;
+                    return fn[] if (x + 1 < max) x = x + 1
+                );
+
+                fn range2[max] (
+                    !x = -1;
+                    return fn[] if (x + 1 < max) [x + 1, (x = x + 1) * 2]
+                );
+
+                (for (v: range[16]) v) .. for (x, y, z: range2[16]) [x, y, z]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(15)
+                .MoveNext().AssertInteger(15)
+                .MoveNext().AssertInteger(30)
+                .MoveNext().AssertNil()
+                .MoveNext().AssertEnd();
+        }
+        
+        [Fact]
         public void AwfulBreak() {
             var code = $@"
                 fn range[max] (
@@ -295,22 +319,6 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .Create(ViMa.ExecuteUnitWithProvidedContextForRootFunction(TypicalCompiler.Compile(code), new GlosContext(null)))
                 .FirstOne().AssertInteger(2)
                 .MoveNext().AssertInteger(2)
-                .MoveNext().AssertEnd();
-        }
-        
-        [Fact]
-        public void ForLoop() {
-            var code = @"
-                fn range[max] (
-                    !x = -1;
-                    return fn[] if (x + 1 < max) x = x + 1
-                );
-
-                for (v: range[16]) v;
-            ";
-
-            GlosValueArrayChecker.Create(Execute(code))
-                .FirstOne().AssertInteger(15)
                 .MoveNext().AssertEnd();
         }
         

@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using GeminiLab.Core2;
+using GeminiLab.Core2.Random;
+using GeminiLab.Core2.Random.RNG;
 using GeminiLab.Glos;
 using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.XUnitTester.Gliep.Misc;
@@ -606,6 +609,43 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 GlosValueArrayChecker.Create(res)
                     .FirstOne().AssertInteger(idx)
                     .MoveNext().AssertInteger(val)
+                    .MoveNext().AssertEnd();
+            }
+        }
+
+        [Fact]
+        public void MassiveLdArg() {
+            var fgen = Builder.AddFunction();
+
+            const int argc = 1;
+            
+            fgen.AppendLdArg(0);
+            for (int i = 1; i < argc; ++i) {
+                fgen.AppendLdArg(i);
+                fgen.AppendAdd();
+            }
+            
+            fgen.SetEntry();
+
+            var ran = new U64ToI64PRNG<Mt19937X64>();
+            for (int i = 0; i < 16; ++i) {
+                var len = argc;
+
+                var args = new List<GlosValue>();
+                var list = new List<long>();
+
+                for (int j = 0; j < len; ++j) {
+                    var v = ran.Next();
+
+                    args.Add(v);
+                    list.Add(v);
+                }
+
+                var res = Execute(args.ToArray());
+                var sum = list.Aggregate(0L, (a, b) => unchecked(a + b));
+
+                GlosValueArrayChecker.Create(res)
+                    .FirstOne().AssertInteger(sum)
                     .MoveNext().AssertEnd();
             }
         }

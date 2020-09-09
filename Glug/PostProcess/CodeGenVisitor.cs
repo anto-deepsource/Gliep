@@ -353,6 +353,10 @@ namespace GeminiLab.Glug.PostProcess {
                 visitForValue(indexee, fun);
                 fun.AppendPshv();
                 break;
+            case BiOp { Op: GlugBiOpType.IndexLocal, ExprL: var indexee, ExprR: PseudoIndex { IsTail: var isTail } }:
+                visitForValue(indexee, fun);
+                fun.AppendPshv();
+                break;
             case BiOp { Op: GlugBiOpType.Index, ExprL: var indexee, ExprR: var index }:
                 visitForValue(indexee, fun);
                 visitForValue(index, fun);
