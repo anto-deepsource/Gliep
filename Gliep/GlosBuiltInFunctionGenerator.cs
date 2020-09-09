@@ -34,14 +34,13 @@ namespace GeminiLab.Gliep {
                     var args = new List<object>();
 
                     for (int i = 0; i < paramLen; ++i) {
-                        ref var pi = ref p[i];
-                        
                         if (i == paramLen - 1 && hasParamArray) {
                             // only params GlosValue[] supported now
                             args.Add(i >= len ? Array.Empty<GlosValue>() : p[i..]);
                         } else if (i >= len) {
                             args.Add(null!);
                         } else {
+                            ref var pi = ref p[i];
                             var paramType = param[i].ParameterType;
                             
                             if (paramType == typeof(GlosValue)) {
