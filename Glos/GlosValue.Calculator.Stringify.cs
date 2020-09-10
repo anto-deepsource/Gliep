@@ -18,7 +18,7 @@ namespace GeminiLab.Glos {
                     GlosValueType.String           => $"\"{EscapeSequenceConverter.Encode(v.AssumeString())}\"",
                     GlosValueType.Function         => $"<function \"{v.AssumeFunction().Prototype.Name} {(v.AssumeFunction().ParentContext is {} ctx ? $"at {RuntimeHelpers.GetHashCode(ctx):x8}" : "unbound")}\">",
                     GlosValueType.ExternalFunction => $"<external function: {RuntimeHelpers.GetHashCode(v.AssumeExternalFunction()):x8}>",
-                    GlosValueType.Vector           => $"<vector: {RuntimeHelpers.GetHashCode(v.AssumeTable()):x8}>",
+                    GlosValueType.Vector           => $"<vector: {RuntimeHelpers.GetHashCode(v.AssumeVector()):x8}>",
                     _                              => throw new ArgumentOutOfRangeException()
                 };
             }
