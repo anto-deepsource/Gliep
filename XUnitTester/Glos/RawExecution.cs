@@ -269,20 +269,26 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
         public void VectorUnpack() {
             var fid = Builder.AddFunctionRaw(new[] {
                 (byte)GlosOp.LdNVec,
+                (byte)GlosOp.StLoc0,
+                (byte)GlosOp.LdDel,
                 (byte)GlosOp.Ld0,
-                (byte)GlosOp.Iniv,
+                (byte)GlosOp.LdLoc0,
+                (byte)GlosOp.Pshv,
                 (byte)GlosOp.Ld1,
-                (byte)GlosOp.Iniv,
+                (byte)GlosOp.LdLoc0,
+                (byte)GlosOp.Pshv,
                 (byte)GlosOp.Ld3,
-                (byte)GlosOp.Iniv,
+                (byte)GlosOp.LdLoc0,
+                (byte)GlosOp.Pshv,
                 (byte)GlosOp.LdS,
                 (byte)0x77,
-                (byte)GlosOp.Iniv,
+                (byte)GlosOp.LdLoc0,
+                (byte)GlosOp.Pshv,
                 (byte)GlosOp.Upv,
                 (byte)GlosOp.LdArg0,
                 (byte)GlosOp.Call,
                 (byte)GlosOp.Ret,
-            }, 0);
+            }, 1);
 
             Builder.Entry = fid;
 

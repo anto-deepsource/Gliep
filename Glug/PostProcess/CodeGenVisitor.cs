@@ -517,14 +517,17 @@ namespace GeminiLab.Glug.PostProcess {
         }
 
         public override void VisitVectorDef(VectorDef val, GlosFunctionBuilder fun, bool ru) {
-            fun.AppendLdNVec();
+            if (ru) fun.AppendLdDel();
 
             foreach (var item in val.Items) {
-                visitForValue(item, fun);
-                fun.AppendIniv();
+                if (ru) {
+                    visitForValue(item, fun);
+                } else {
+                    visitForDiscard(item, fun);
+                }
             }
 
-            if (!ru) fun.AppendPop();
+            if (ru) fun.AppendPkv();
         }
 
         public override void VisitMetatable(Metatable val, GlosFunctionBuilder fun, bool ru) {

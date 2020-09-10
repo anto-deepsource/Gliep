@@ -234,10 +234,6 @@ namespace GeminiLab.Glos {
                         tail.SetNil();
                         break;
                     }
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Iniv:
-                        stackTop(1).AssertVector().Push(in stackTop());
-                        popStack();
-                        break;
                     case GlosOpCategory.UnaryOperator:
                         Calculator.ExecuteUnaryOperation(ref stackTop(), in stackTop(), op);
                         break;
