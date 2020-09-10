@@ -220,3 +220,5 @@
 - [ ] *(2020/09/10)* Better RE system
 
     Use debug info above to convert ip to location in file, etc.
+
+- [ ] *(2020/09/10)* *(Planning)* Use reflection to generate builtin functions, so they don't need to check parameters' types every time they're called.
