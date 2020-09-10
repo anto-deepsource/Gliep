@@ -181,3 +181,42 @@
 
     **WARNING**: do not use Trie here!!!
 
+- [ ] *(2020/09/10)* Choose another license
+
+    Candidates:
+    
+    - [ ] Apache 2.0
+    - [ ] MPL
+    
+    Candidates for text materials:
+    
+    - [ ] CC BY-NC-SA 4.0
+    - [ ] Same as above
+
+- [ ] *(2020/09/10)* Make projects separate repos
+
+    When:
+    
+    - When projects are stable enough for first preview release
+    - No longer tons of new features to implement
+    
+    Potential issues:
+    
+    - Project reference
+    
+        May be resolved by a private NuGet server and CD system.
+
+- [ ] *(2020/09/10)* Better CE system
+
+    - [ ] From exception to message
+    - [ ] Error recovery
+
+- [ ] *(2020/09/10)* GlosUnit serialization
+
+    - [ ] Text-based vs. Binary-based
+    - [ ] Debug info in serialized unit
+        - [ ] first of all, ip to location in file
+
+- [ ] *(2020/09/10)* Better RE system
+
+    Use debug info above to convert ip to location in file, etc.
