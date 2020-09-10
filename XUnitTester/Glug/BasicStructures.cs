@@ -37,6 +37,22 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
         }
 
         [Fact]
+        public void VarDefRef() {
+            var code = @"
+                !x = 1;
+                !x = 2;
+                !!x = 3;
+                !x = 4;
+                [x, !!x]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(4)
+                .MoveNext().AssertInteger(3)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
         public void String() {
             string strA = "strA", strB = "ユニコードイグザンプル";
             string strEscape = "\\n\\u4396";
@@ -160,7 +176,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 fn sum2[x, y] -> x + y;
                 fn sum3[x, y, z] x + y + z;
 
-                return [beide[], beide[] - 1, sum2$beide[], sum3$(beide[]..3)] .. beide[]
+                return [beide[], beide[] - 1, sum2$beide[], sum3$(beide[]..3)] .. beide[] .. [(fn fibo[x] if (x == 0 | x == 1) x else fibo[x - 1] + fibo[x - 2]) 20]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -170,6 +186,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .MoveNext().AssertInteger(6)
                 .MoveNext().AssertInteger(1)
                 .MoveNext().AssertInteger(2)
+                .MoveNext().AssertInteger(6765)
                 .MoveNext().AssertEnd();
         }
 
@@ -405,6 +422,31 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .FirstOne().AssertInteger(0)
                 .MoveNext().AssertInteger(2)
                 .MoveNext().AssertNil()
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void UnusedEvaluation() {
+            var code = @"
+                x = 0; y = 0;
+                t = {};
+                `meta t = {
+                    .__add: [a, b] -> ( x = b; a )
+                };
+                0 + 1;
+                t + 2;
+                `meta t;
+                [3, 4, 5] .. [6, 7, 8];
+                for (z: (fn [max] (
+                    !x = -1;
+                    return fn[] if (x + 1 < max) x = x + 1
+                )) 9) y = z;
+                ~10;
+                x + y # 2 + 8 expected
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(10)
                 .MoveNext().AssertEnd();
         }
     }
