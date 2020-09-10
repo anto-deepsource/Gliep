@@ -94,5 +94,9 @@ namespace GeminiLab.Glug.PostProcess {
 
             Pass.NodeInformation<NodeGenericInfo>(val).IsAssignable = true;
         }
+
+        public override void VisitDiscard(Discard val) {
+            Pass.NodeInformation<NodeGenericInfo>(val).IsAssignable = true;
+        }
     }
 }

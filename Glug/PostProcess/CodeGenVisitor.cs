@@ -371,6 +371,9 @@ namespace GeminiLab.Glug.PostProcess {
                 visitForValue(table, fun);
                 fun.AppendSmt();
                 break;
+            case Discard _:
+                fun.AppendPop();
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
             }
@@ -532,6 +535,10 @@ namespace GeminiLab.Glug.PostProcess {
         }
 
         public override void VisitPseudoIndex(PseudoIndex val, GlosFunctionBuilder fun, bool ru) {
+            throw new InvalidOperationException();
+        }
+
+        public override void VisitDiscard(Discard val, GlosFunctionBuilder arg0, bool arg1) {
             throw new InvalidOperationException();
         }
 

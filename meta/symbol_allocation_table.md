@@ -42,6 +42,7 @@
   - `||`: short-circuit or
 - `~`: not
   - `~=`: not equal to
+- `_`: discard
 
 ## Not used yet
 

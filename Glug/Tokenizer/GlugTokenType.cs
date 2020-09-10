@@ -70,6 +70,7 @@ namespace GeminiLab.Glug.Tokenizer {
         SymbolKet           = 0x001_02c_00,
         SymbolVecBegin      = 0x001_02d_00,
         SymbolVecEnd        = 0x001_02e_00,
+        SymbolDiscard       = 0x001_02f_00,
 
         OpCall              = 0x002_000_04,
         

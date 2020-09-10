@@ -172,11 +172,12 @@
 
     Which one is the best way?
 
-- [ ] *(2020/09/09)* Introducing *Discard* (_)
+- [x] *(2020/09/09)* Introducing *Discard* (`_`)
 
     
     ```
-    [x, _, y] = [1, 2, 3]
+    // [x, y] == 1, 3
+    [x, _, y] = [1, 2, 3];
     ```
 
     **WARNING**: do not use Trie here!!!

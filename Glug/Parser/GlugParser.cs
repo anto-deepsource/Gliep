@@ -303,6 +303,11 @@ namespace GeminiLab.Glug.Parser {
                 return new PseudoIndex(tok.Type == GlugTokenType.SymbolKet);
             }
 
+            if (tok.Type == GlugTokenType.SymbolDiscard) {
+                Stream.GetToken();
+                return new Discard();
+            }
+
             return tok.Type switch {
                 GlugTokenType.SymbolLParen   => (Expr) ReadBlockInParen(),
                 GlugTokenType.KeywordIf      => ReadIf(),

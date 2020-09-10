@@ -218,6 +218,10 @@ namespace GeminiLab.Glug.AST {
             Writer.DecreaseIndent();
         }
 
+        public override void VisitDiscard(Discard val) {
+            Writer.WriteLine("<discard>");
+        }
+
         public override void VisitSysCall(SysCall val) {
             Writer.WriteLine($"<syscall 0x{val.Id:x} result: {val.Result}>");
             Writer.IncreaseIndent();

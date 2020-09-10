@@ -99,7 +99,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .MoveNext().AssertInteger(5)
                 .MoveNext().AssertEnd();
         }
-        
+
         [Fact]
         public void ForLoop() {
             var code = @"
@@ -123,7 +123,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .MoveNext().AssertNil()
                 .MoveNext().AssertEnd();
         }
-        
+
         [Fact]
         public void AwfulBreak() {
             var code = $@"
@@ -244,7 +244,10 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
             ";
 
             var context = new GlosContext(null);
-            context.CreateVariable("ext", (GlosExternalFunction)((param) => { context.GetVariableReference("x") = 3; return new GlosValue[] { 3 }; }));
+            context.CreateVariable("ext", (GlosExternalFunction) ((param) => {
+                context.GetVariableReference("x") = 3;
+                return new GlosValue[] { 3 };
+            }));
 
             GlosValueArrayChecker.Create(Execute(code, context))
                 .FirstOne().AssertNil()
@@ -321,7 +324,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .MoveNext().AssertInteger(2)
                 .MoveNext().AssertEnd();
         }
-        
+
         [Fact]
         public void ShortCircuitOperators() {
             var code = @"
@@ -348,7 +351,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .MoveNext().AssertFalse()
                 .MoveNext().AssertEnd();
         }
-        
+
         [Fact]
         public void TableIndex() {
             var code = @"
@@ -388,6 +391,20 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .MoveNext().AssertString("y")
                 .MoveNext().AssertInteger(3)
                 .MoveNext().AssertInteger(8)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void Discard() {
+            var code = @"
+                [a, _, c, _, e] = 0 .. [1, 2, 3];
+                [a, c, e]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(0)
+                .MoveNext().AssertInteger(2)
+                .MoveNext().AssertNil()
                 .MoveNext().AssertEnd();
         }
     }

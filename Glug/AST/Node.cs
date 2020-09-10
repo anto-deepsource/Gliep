@@ -264,6 +264,10 @@ namespace GeminiLab.Glug.AST {
         public bool IsTail { get; }
     }
 
+    public class Discard : Expr {
+        public Discard() {}
+    }
+
     // Following are node types which are not used directly by Glug itself but critical for tools based on Glug.
 
     // A basic principle of Glug is "NOTHING BUT EXPRESSIONS" but syscalls somehow break this rule.

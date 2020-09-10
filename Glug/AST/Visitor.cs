@@ -45,6 +45,7 @@ namespace GeminiLab.Glug.AST {
         public abstract void VisitMetatable(Metatable val);
 
         public abstract void VisitPseudoIndex(PseudoIndex val);
+        public abstract void VisitDiscard(Discard val);
 
         public abstract void VisitSysCall(SysCall val);
         public abstract void VisitToValue(ToValue val);
@@ -121,6 +122,9 @@ namespace GeminiLab.Glug.AST {
             case PseudoIndex pi:
                 VisitPseudoIndex(pi);
                 break;
+            case Discard d:
+                VisitDiscard(d);
+                break;
             case SysCall sc:
                 VisitSysCall(sc);
                 break;
@@ -150,6 +154,7 @@ namespace GeminiLab.Glug.AST {
         public override void VisitVarRef(VarRef val) { }
 
         public override void VisitPseudoIndex(PseudoIndex val) { }
+        public override void VisitDiscard(Discard val) { }
 
         public override void VisitIf(If val) {
             foreach (var (cond, expr) in val.Branches) {
@@ -255,6 +260,7 @@ namespace GeminiLab.Glug.AST {
         public abstract void VisitMetatable(Metatable val, T0 arg);
 
         public abstract void VisitPseudoIndex(PseudoIndex val, T0 arg);
+        public abstract void VisitDiscard(Discard val, T0 arg);
 
         public abstract void VisitSysCall(SysCall val, T0 arg);
         public abstract void VisitToValue(ToValue val, T0 arg);
@@ -331,6 +337,9 @@ namespace GeminiLab.Glug.AST {
             case PseudoIndex pi:
                 VisitPseudoIndex(pi, arg);
                 break;
+            case Discard d:
+                VisitDiscard(d, arg);
+                break;
             case SysCall sc:
                 VisitSysCall(sc, arg);
                 break;
@@ -364,6 +373,8 @@ namespace GeminiLab.Glug.AST {
         public override void VisitVarRef(VarRef val, T0 arg) { }
 
         public override void VisitPseudoIndex(PseudoIndex val, T0 arg) { }
+
+        public override void VisitDiscard(Discard val, T0 arg) { }
 
         public override void VisitIf(If val, T0 arg) {
             foreach (var (cond, expr) in val.Branches) {
@@ -477,6 +488,7 @@ namespace GeminiLab.Glug.AST {
         public abstract void VisitMetatable(Metatable val, T0 arg0, T1 arg1);
 
         public abstract void VisitPseudoIndex(PseudoIndex val, T0 arg0, T1 arg1);
+        public abstract void VisitDiscard(Discard val, T0 arg0, T1 arg1);
 
         public abstract void VisitSysCall(SysCall val, T0 arg0, T1 arg1);
         public abstract void VisitToValue(ToValue val, T0 arg0, T1 arg1);
@@ -553,6 +565,9 @@ namespace GeminiLab.Glug.AST {
             case PseudoIndex pi:
                 VisitPseudoIndex(pi, arg0, arg1);
                 break;
+            case Discard d:
+                VisitDiscard(d, arg0, arg1);
+                break;
             case SysCall sc:
                 VisitSysCall(sc, arg0, arg1);
                 break;
@@ -586,6 +601,7 @@ namespace GeminiLab.Glug.AST {
         public override void VisitVarRef(VarRef val, T0 arg0, T1 arg1) { }
 
         public override void VisitPseudoIndex(PseudoIndex val, T0 arg0, T1 arg1) { }
+        public override void VisitDiscard(Discard val, T0 arg0, T1 arg1) { }
 
         public override void VisitIf(If val, T0 arg0, T1 arg1) {
             foreach (var (cond, expr) in val.Branches) {

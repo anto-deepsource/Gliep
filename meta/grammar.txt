@@ -41,6 +41,7 @@ ExprItem    : literal
             | NamedOperator ExprItem
             | VarRef
             | ( "<|" | "|>" )
+            | "_"
             | BlockInParen
             | If
             | While
