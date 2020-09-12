@@ -129,4 +129,7 @@
   <data name="DefaultMessageGlugUnexpectedEndOfTokenStreamExceptionNoLastToken" xml:space="preserve">
     <value>Unexpected end of token stream</value>
   </data>
+  <data name="DefaultMessageGlugDanglingBreakException" xml:space="preserve">
+    <value>Dangling break at {0}</value>
+  </data>
 </root>

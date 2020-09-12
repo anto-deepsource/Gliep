@@ -32,4 +32,9 @@ namespace GeminiLab.Glug {
         public GlugUnexpectedEndOfTokenStreamException(string? message = null, Exception? innerException = null)
             : base(PositionInSource.NotAPosition(), message ?? i18n.Strings.DefaultMessageGlugUnexpectedEndOfTokenStreamExceptionNoLastToken, innerException) { }
     }
+
+    public class GlugDanglingBreakException : GlugCompilingException {
+        public GlugDanglingBreakException(PositionInSource position, string? message = null, Exception? innerException = null)
+            : base(position, message ?? string.Format(i18n.Strings.DefaultMessageGlugDanglingBreakException, position), innerException) { }
+    }
 }

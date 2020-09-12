@@ -41,7 +41,7 @@ namespace GeminiLab.Glug.PostProcess {
                 w = arg.Count > 0 ? arg.Peek() : null;
             }
 
-            if (w == null) throw new ArgumentOutOfRangeException();
+            if (w == null) throw new GlugDanglingBreakException(val.Position);
 
             Pass.NodeInformation<BreakableInfo>(val).Target = w;
             Pass.NodeInformation<BreakableInfo>(w).Breaks.Add(val);
