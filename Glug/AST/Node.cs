@@ -1,8 +1,19 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace GeminiLab.Glug.AST {
-    public abstract class Node { }
+    public abstract class Node {
+        public PositionInSource Position { get; set; }
+    }
+
+    public static class NodeExtensions {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T WithPosition<T>(this T node, PositionInSource position) where T : Node {
+            node.Position = position;
+            return node;
+        }
+    }
 
     public abstract class Expr : Node { }
 

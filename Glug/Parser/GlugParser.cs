@@ -148,6 +148,13 @@ namespace GeminiLab.Glug.Parser {
             if (expected != tok.Type) throw new GlugUnexpectedTokenException(tok.Type, new[] { expected }, tok.Position);
         }
 
+        protected virtual PositionInSource ConsumeButPosition(GlugTokenType expected) {
+            var tok = Stream.GetToken();
+            if (expected != tok.Type) throw new GlugUnexpectedTokenException(tok.Type, new[] { expected }, tok.Position);
+
+            return tok.Position;
+        }
+
 
         protected readonly LookAheadTokenStream Stream;
 
@@ -169,11 +176,11 @@ namespace GeminiLab.Glug.Parser {
                 if (!Stream.NextEof() && Stream.PeekToken().Type == GlugTokenType.SymbolSemicolon) Consume(GlugTokenType.SymbolSemicolon);
             }
 
-            return new Block(statements);
+            return new Block(statements).WithPosition(statements.Count > 0 ? statements[0].Position : PositionInSource.NotAPosition());
         }
 
         protected virtual Expr ReadExprGreedily() {
-            var s = new List<(Expr expr, GlugTokenType op)>();
+            var s = new List<(Expr expr, GlugTokenType op, PositionInSource pos)>();
             Expr expr;
             int lastP = 0;
             bool lastDot = false;
@@ -184,6 +191,7 @@ namespace GeminiLab.Glug.Parser {
                 var op = Stream.NextEof() ? GlugTokenType.NotAToken : Stream.PeekToken().Type;
 
                 if (op == GlugTokenType.SymbolRArrow) {
+                    var arrow = Stream.GetToken();
                     var param = new List<string>();
 
                     if (expr is VarRef { IsDef: false, IsGlobal: false } vr) {
@@ -191,14 +199,14 @@ namespace GeminiLab.Glug.Parser {
                     } else if (expr is OnStackList osl && osl.List.All(x => x is VarRef { IsDef: false, IsGlobal: false })) {
                         param.AddRange(osl.List.Cast<VarRef>().Select(x => x.Id));
                     } else {
-                        break;
+                        throw new GlugUnexpectedTokenException(op, new List<GlugTokenType>(), arrow.Position);
                     }
 
-                    var arrow = Stream.GetToken();
-                    expr = new Function(DefaultLambdaName(param, arrow), false, param, ReadExprGreedily());
+                    expr = new Function(DefaultLambdaName(param, arrow), false, param, ReadExprGreedily()).WithPosition(arrow.Position);
                 }
 
                 int p = BiOpPrecedence(op);
+                var pos = PositionInSource.NotAPosition();
 
                 if (p < 0) {
                     if (LikelyExpr(op)) {
@@ -207,7 +215,7 @@ namespace GeminiLab.Glug.Parser {
                         break;
                     }
                 } else {
-                    Stream.GetToken();
+                    pos = Stream.GetToken().Position;
                 }
 
                 if (p < lastP) {
@@ -216,7 +224,7 @@ namespace GeminiLab.Glug.Parser {
 
                 lastP = p;
                 lastDot = op == GlugTokenType.SymbolDot || op == GlugTokenType.SymbolDotBang;
-                s.Add((expr, op));
+                s.Add((expr, op, pos)); // TODO: a position for call
             }
 
             PopUntil(0);
@@ -234,10 +242,10 @@ namespace GeminiLab.Glug.Parser {
 
                     if (BiOpLeftAssociativity(s[j].op)) {
                         var temp = s[j].expr;
-                        for (int k = j; k < i; ++k) temp = new BiOp(BiOpFromTokenType(s[k].op), temp, s[k + 1].expr);
-                        expr = new BiOp(BiOpFromTokenType(s[i].op), temp, expr);
+                        for (int k = j; k < i; ++k) temp = new BiOp(BiOpFromTokenType(s[k].op), temp, s[k + 1].expr).WithPosition(s[k].pos);
+                        expr = new BiOp(BiOpFromTokenType(s[i].op), temp, expr).WithPosition(s[i].pos);
                     } else {
-                        for (int k = i; k >= j; --k) expr = new BiOp(BiOpFromTokenType(s[k].op), s[k].expr, expr);
+                        for (int k = i; k >= j; --k) expr = new BiOp(BiOpFromTokenType(s[k].op), s[k].expr, expr).WithPosition(s[k].pos);
                     }
 
                     i = j - 1;
@@ -251,9 +259,9 @@ namespace GeminiLab.Glug.Parser {
             var tok = Stream.PeekToken();
 
             if (tok.Type.GetCategory() == GlugTokenTypeCategory.Literal) {
-                tok = Stream.GetToken();
+                Stream.GetToken();
 
-                return tok.Type switch {
+                return (tok.Type switch {
                     GlugTokenType.LiteralTrue    => (Expr) new LiteralBool(true),
                     GlugTokenType.LiteralFalse   => new LiteralBool(false),
                     GlugTokenType.LiteralInteger => new LiteralInteger(tok.ValueInt),
@@ -261,51 +269,49 @@ namespace GeminiLab.Glug.Parser {
                     GlugTokenType.LiteralString  => new LiteralString(tok.ValueString!),
                     GlugTokenType.LiteralNil     => new LiteralNil(),
                     _                            => throw new ArgumentOutOfRangeException()
-                };
+                }).WithPosition(tok.Position);
             }
 
             if (IsSymbolUnOp(tok.Type)) {
                 Stream.GetToken();
 
-                if (tok.Type != GlugTokenType.SymbolSub) return new UnOp(UnOpFromToken(tok.Type), ReadExprItem());
-
                 var item = ReadExprItem();
-                if (item is LiteralInteger li) return new LiteralInteger(unchecked(-li.Value));
 
-                return new UnOp(GlugUnOpType.Neg, item);
+                return (tok.Type switch {
+                    GlugTokenType.SymbolSub when item is LiteralInteger li => (Expr) new LiteralInteger(unchecked(-li.Value)),
+                    _                                                      => new UnOp(UnOpFromToken(tok.Type), item),
+                }).WithPosition(tok.Position);
             }
 
             if (tok.Type == GlugTokenType.SymbolBackquote) {
                 Stream.GetToken();
 
-                return ReadIdentifier() switch {
-                    "meta"  => new Metatable(ReadExprItem()),
+                return (ReadIdentifier() switch {
+                    "meta"  => (Expr) new Metatable(ReadExprItem()),
                     "type"  => new UnOp(GlugUnOpType.Typeof, ReadExprItem()),
                     "isnil" => new UnOp(GlugUnOpType.IsNil, ReadExprItem()),
                     "neg"   => new UnOp(GlugUnOpType.Neg, ReadExprItem()),
                     "not"   => new UnOp(GlugUnOpType.Not, ReadExprItem()),
                     _       => throw new ArgumentOutOfRangeException(), // TODO: add a custom exception class
-                };
+                }).WithPosition(tok.Position);
             }
 
             if (LikelyVarRef(tok.Type)) {
                 Expr rv = ReadVarRef();
                 while (!Stream.NextEof() && Stream.PeekToken().Type == GlugTokenType.SymbolDot) {
-                    Stream.GetToken();
-                    rv = new BiOp(GlugBiOpType.Index, rv, new LiteralString(ReadIdentifier()));
+                    tok = Stream.GetToken();
+                    rv = new BiOp(GlugBiOpType.Index, rv, new LiteralString(ReadIdentifier())).WithPosition(tok.Position);
                 }
 
                 return rv;
             }
 
             if (tok.Type == GlugTokenType.SymbolBra || tok.Type == GlugTokenType.SymbolKet) {
-                Stream.GetToken();
-                return new PseudoIndex(tok.Type == GlugTokenType.SymbolKet);
+                return new PseudoIndex(tok.Type == GlugTokenType.SymbolKet).WithPosition(Stream.GetToken().Position);
             }
 
             if (tok.Type == GlugTokenType.SymbolDiscard) {
-                Stream.GetToken();
-                return new Discard();
+                return new Discard().WithPosition(Stream.GetToken().Position);
             }
 
             return tok.Type switch {
@@ -326,17 +332,14 @@ namespace GeminiLab.Glug.Parser {
         protected virtual VarRef ReadVarRef() {
             var tok = Stream.PeekToken();
 
-            if (tok.Type == GlugTokenType.SymbolBang) {
-                Stream.GetToken();
-                return new VarRef(ReadIdentifier(), isDef: true);
-            } else if (tok.Type == GlugTokenType.SymbolBangBang) {
-                Stream.GetToken();
-                return new VarRef(ReadIdentifier(), isGlobal: true);
-            } else if (tok.Type == GlugTokenType.Identifier) {
-                return new VarRef(ReadIdentifier());
-            }
+            if (tok.Type != GlugTokenType.Identifier) Stream.GetToken();
 
-            throw new ArgumentOutOfRangeException();
+            return (tok.Type switch {
+                GlugTokenType.SymbolBang     => new VarRef(ReadIdentifier(), isDef: true),
+                GlugTokenType.SymbolBangBang => new VarRef(ReadIdentifier(), isGlobal: true),
+                GlugTokenType.Identifier     => new VarRef(ReadIdentifier()),
+                _                            => throw new ArgumentOutOfRangeException(),
+            }).WithPosition(tok.Position);
         }
 
         protected virtual string ReadIdentifier() {
@@ -354,8 +357,7 @@ namespace GeminiLab.Glug.Parser {
 
         protected virtual If ReadIf() {
             var branches = new List<IfBranch>();
-
-            Consume(GlugTokenType.KeywordIf);
+            var pos = ConsumeButPosition(GlugTokenType.KeywordIf);
             var expr = ReadBlockInParen();
             Expr? block = ReadExprGreedily();
             branches.Add(new IfBranch(expr, block));
@@ -374,17 +376,17 @@ namespace GeminiLab.Glug.Parser {
                 block = null;
             }
 
-            return new If(branches, block);
+            return new If(branches, block).WithPosition(pos);
         }
 
         protected virtual While ReadWhile() {
-            Consume(GlugTokenType.KeywordWhile);
+            var pos = ConsumeButPosition(GlugTokenType.KeywordWhile);
 
             var label = ReadOptionalControlFlowLabel();
             var expr = ReadBlockInParen();
             var block = ReadExprGreedily();
 
-            return new While(expr, block, label);
+            return new While(expr, block, label).WithPosition(pos);
         }
 
         protected virtual string? ReadOptionalControlFlowLabel() {
@@ -400,7 +402,7 @@ namespace GeminiLab.Glug.Parser {
             var iv = new List<VarRef>();
             Expr expr, body;
 
-            Consume(GlugTokenType.KeywordFor);
+            var pos = ConsumeButPosition(GlugTokenType.KeywordFor);
             var label = ReadOptionalControlFlowLabel();
             Consume(GlugTokenType.SymbolLParen);
 
@@ -415,18 +417,18 @@ namespace GeminiLab.Glug.Parser {
             Consume(GlugTokenType.SymbolRParen);
 
             body = ReadExprGreedily();
-            return new For(iv, expr, body, label);
+            return new For(iv, expr, body, label).WithPosition(pos);
         }
 
         protected virtual Return ReadReturn() {
-            Consume(GlugTokenType.KeywordReturn);
-            return new Return(ReadOptionalExpr() ?? new OnStackList(new List<Expr>()));
+            var pos = ConsumeButPosition(GlugTokenType.KeywordReturn);
+            return new Return(ReadOptionalExpr() ?? new OnStackList(new List<Expr>())).WithPosition(pos);
         }
 
         protected virtual Break ReadBreak() {
-            Consume(GlugTokenType.KeywordBreak);
+            var pos = ConsumeButPosition(GlugTokenType.KeywordBreak);
             var label = ReadOptionalControlFlowLabel();
-            return new Break(ReadOptionalExpr() ?? new OnStackList(new List<Expr>()), label);
+            return new Break(ReadOptionalExpr() ?? new OnStackList(new List<Expr>()), label).WithPosition(pos);
         }
 
         protected virtual Expr? ReadOptionalExpr() {
@@ -437,7 +439,7 @@ namespace GeminiLab.Glug.Parser {
 
         protected virtual Function ReadFunction() {
             var fn = Stream.PeekToken();
-            Consume(GlugTokenType.KeywordFn);
+            var pos = ConsumeButPosition(GlugTokenType.KeywordFn);
 
             string? name = Stream.PeekToken().Type == GlugTokenType.Identifier ? Stream.GetToken().ValueString : null;
 
@@ -449,7 +451,7 @@ namespace GeminiLab.Glug.Parser {
 
             var block = ReadExprGreedily();
 
-            return new Function(name ?? DefaultLambdaName(plist, fn), name != null, plist, block);
+            return new Function(name ?? DefaultLambdaName(plist, fn), name != null, plist, block).WithPosition(pos);
         }
 
         protected virtual List<string> ReadOptionalParamList() {
@@ -476,7 +478,7 @@ namespace GeminiLab.Glug.Parser {
         protected virtual OnStackList ReadOnStackList() {
             var rv = new List<Expr>();
 
-            Consume(GlugTokenType.SymbolLBracket);
+            var pos = ConsumeButPosition(GlugTokenType.SymbolLBracket);
 
             while (true) {
                 if (Stream.PeekToken().Type == GlugTokenType.SymbolRBracket) break;
@@ -488,13 +490,13 @@ namespace GeminiLab.Glug.Parser {
 
             Consume(GlugTokenType.SymbolRBracket);
 
-            return new OnStackList(rv);
+            return new OnStackList(rv).WithPosition(pos);
         }
 
         protected virtual TableDef ReadTableDef() {
             var rv = new List<TableDefPair>();
 
-            Consume(GlugTokenType.SymbolLBrace);
+            var pos = ConsumeButPosition(GlugTokenType.SymbolLBrace);
 
             while (true) {
                 var tok = Stream.PeekToken();
@@ -518,13 +520,13 @@ namespace GeminiLab.Glug.Parser {
 
             Consume(GlugTokenType.SymbolRBrace);
 
-            return new TableDef(rv);
+            return new TableDef(rv).WithPosition(pos);
         }
 
         protected virtual VectorDef ReadVectorDef() {
             var list = new List<Expr>();
 
-            Consume(GlugTokenType.SymbolVecBegin);
+            var pos = ConsumeButPosition(GlugTokenType.SymbolVecBegin);
 
             while (true) {
                 if (Stream.PeekToken().Type == GlugTokenType.SymbolVecEnd) break;
@@ -536,7 +538,7 @@ namespace GeminiLab.Glug.Parser {
 
             Consume(GlugTokenType.SymbolVecEnd);
 
-            return new VectorDef(list);
+            return new VectorDef(list).WithPosition(pos);
         }
     }
 }
