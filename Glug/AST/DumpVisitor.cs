@@ -16,32 +16,59 @@ namespace GeminiLab.Glug.AST {
 
         public IndentedWriter Writer { get; }
 
+        public enum PositionDisplayPolicy {
+            None,
+            Default,
+            Full,
+        }
+
+        public PositionDisplayPolicy PositionDisplay { get; set; } = PositionDisplayPolicy.None;
+        
+        PositionInSource _last = PositionInSource.NotAPosition();
+
+        private string GetPositionPrefix(PositionInSource position) {
+            if (PositionDisplay == PositionDisplayPolicy.None) return "";
+            
+            if (position.IsNotAPosition()) return " @ <unknown-position>";
+
+            var rv = " @ " + (position.Source != _last.Source || PositionDisplay == PositionDisplayPolicy.Full ? position.Source : "..") + ":" + position.Row + ":" + position.Column;
+            _last = position;
+            return rv;
+        }
+        
         public override void VisitLiteralInteger(LiteralInteger val) {
-            Writer.WriteLine(val.Value);
+            Writer.Write(val.Value);
+            Writer.WriteLine(GetPositionPrefix(val.Position));
         }
 
         public override void VisitLiteralFloat(LiteralFloat val) {
-            Writer.WriteLine(val.Value);
+            Writer.Write(val.Value);
+            Writer.WriteLine(GetPositionPrefix(val.Position));
         }
 
         public override void VisitLiteralString(LiteralString val) {
-            Writer.WriteLine($"\"{EscapeSequenceConverter.Encode(val.Value)}\"");
+            Writer.Write($"\"{EscapeSequenceConverter.Encode(val.Value)}\"");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
         }
 
         public override void VisitLiteralBool(LiteralBool val) {
-            Writer.WriteLine(val.Value ? "true" : "false");
+            Writer.Write(val.Value ? "true" : "false");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
         }
 
         public override void VisitLiteralNil(LiteralNil val) {
-            Writer.WriteLine("nil");
+            Writer.Write("nil");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
         }
 
         public override void VisitVarRef(VarRef val) {
-            Writer.WriteLine($"<var-{(val.IsDef ? "def" : "ref")}> {val.Id}");
+            Writer.Write($"<var-{(val.IsDef ? "def" : "ref")}> {val.Id}");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
         }
 
         public override void VisitIf(If val) {
-            Writer.WriteLine("if");
+            Writer.Write("if");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
 
             foreach (var (cond, expr) in val.Branches) {
@@ -69,7 +96,8 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitWhile(While val) {
-            Writer.WriteLine("while");
+            Writer.Write("while");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             Writer.WriteLine("<cond>");
             Writer.IncreaseIndent();
@@ -83,7 +111,8 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitFor(For val) {
-            Writer.WriteLine("for");
+            Writer.Write("for");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             Writer.WriteLine("<iter-vals>");
             Writer.IncreaseIndent();
@@ -103,55 +132,61 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitReturn(Return val) {
-            Writer.WriteLine("<return>");
+            Writer.Write("<return>");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             VisitNode(val.Expr);
             Writer.DecreaseIndent();
         }
 
         public override void VisitBreak(Break val) {
-            Writer.WriteLine("<break>");
+            Writer.Write("<break>");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             VisitNode(val.Expr);
             Writer.DecreaseIndent();
         }
 
         public override void VisitFunction(Function val) {
-            Writer.WriteLine($"function \"{val.Name}\" {(val.Parameters.Count > 0 ? $"[{val.Parameters.Select(x => $"\"{x}\"").JoinBy(", ")}]" : "[]")}");
+            Writer.Write($"function \"{val.Name}\" {(val.Parameters.Count > 0 ? $"[{val.Parameters.Select(x => $"\"{x}\"").JoinBy(", ")}]" : "[]")}");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             VisitNode(val.Body);
             Writer.DecreaseIndent();
         }
 
         public override void VisitOnStackList(OnStackList val) {
-            Writer.WriteLine("<on-stack-list>");
+            Writer.Write("<on-stack-list>");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             val.List.ForEach(VisitNode);
             Writer.DecreaseIndent();
         }
 
         public override void VisitBlock(Block val) {
-            Writer.WriteLine("<block>");
+            Writer.Write("<block>");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             val.List.ForEach(VisitNode);
             Writer.DecreaseIndent();
         }
 
         public override void VisitUnOp(UnOp val) {
-            Writer.WriteLine(val.Op switch {
+            Writer.Write(val.Op switch {
                 GlugUnOpType.Not    => "not",
                 GlugUnOpType.Neg    => "neg",
                 GlugUnOpType.Typeof => "typeof",
                 GlugUnOpType.IsNil  => "isnil",
                 _                   => throw new ArgumentOutOfRangeException(),
             });
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             VisitNode(val.Expr);
             Writer.DecreaseIndent();
         }
 
         public override void VisitBiOp(BiOp val) {
-            Writer.WriteLine(val.Op switch {
+            Writer.Write(val.Op switch {
                 GlugBiOpType.Add             => "add",
                 GlugBiOpType.Sub             => "sub",
                 GlugBiOpType.Mul             => "mul",
@@ -178,6 +213,7 @@ namespace GeminiLab.Glug.AST {
                 GlugBiOpType.NullCoalescing  => "coalescing",
                 _                            => throw new ArgumentOutOfRangeException(),
             });
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             VisitNode(val.ExprL);
             VisitNode(val.ExprR);
@@ -185,7 +221,8 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitTableDef(TableDef val) {
-            Writer.WriteLine("<table-def>");
+            Writer.Write("<table-def>");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             foreach (var (key, value) in val.Pairs) {
                 Writer.WriteLine("<pair>");
@@ -199,7 +236,8 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitVectorDef(VectorDef val) {
-            Writer.WriteLine("<vector-def>");
+            Writer.Write("<vector-def>");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             foreach (var item in val.Items) {
                 VisitNode(item);
@@ -208,29 +246,34 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitPseudoIndex(PseudoIndex val) {
-            Writer.WriteLine($"<pseudo-index-{(val.IsTail ? "tail" : "head")}>");
+            Writer.Write($"<pseudo-index-{(val.IsTail ? "tail" : "head")}>");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
         }
 
         public override void VisitMetatable(Metatable val) {
-            Writer.WriteLine("<metatable>");
+            Writer.Write("metatable");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             VisitNode(val.Table);
             Writer.DecreaseIndent();
         }
 
         public override void VisitDiscard(Discard val) {
-            Writer.WriteLine("<discard>");
+            Writer.Write("<discard>");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
         }
 
         public override void VisitSysCall(SysCall val) {
-            Writer.WriteLine($"<syscall 0x{val.Id:x} result: {val.Result}>");
+            Writer.Write($"<syscall 0x{val.Id:x} result: {val.Result}>");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             val.Inputs.ForEach(VisitNode);
             Writer.DecreaseIndent();
         }
 
         public override void VisitToValue(ToValue val) {
-            Writer.WriteLine("to-value");
+            Writer.Write("to-value");
+            Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
             VisitNode(val.Child);
             Writer.DecreaseIndent();
