@@ -216,6 +216,7 @@ namespace GeminiLab.Glug.Tokenizer {
                 ["|>"] = GlugTokenType.SymbolKet,
                 ["{|"] = GlugTokenType.SymbolVecBegin,
                 ["|}"] = GlugTokenType.SymbolVecEnd,
+                ["..."] = GlugTokenType.SymbolDotDotDot,
             });
         }
 
@@ -332,6 +333,7 @@ namespace GeminiLab.Glug.Tokenizer {
             do {
                 tok = ReadNextToken(_currLine!, ref _ptr, SourceName, _row);
             } while (tok == null && readNewLine());
+
             return tok;
         }
 

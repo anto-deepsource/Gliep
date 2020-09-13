@@ -344,6 +344,9 @@ namespace GeminiLab.Glug.PostProcess {
             case GlugUnOpType.IsNil:
                 fun.AppendIsNil();
                 break;
+            case GlugUnOpType.Unpack:
+                fun.AppendUpv();
+                break;
             }
 
             if (!ru) fun.AppendPop();

@@ -197,6 +197,7 @@ namespace GeminiLab.Glug.AST {
         Neg,
         Typeof,
         IsNil,
+        Unpack,
     }
 
     public class UnOp : Expr {

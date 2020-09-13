@@ -133,14 +133,16 @@ namespace GeminiLab.Glug.Parser {
         protected virtual bool IsSymbolUnOp(GlugTokenType op) =>
             op == GlugTokenType.SymbolSub
          || op == GlugTokenType.SymbolNot
-         || op == GlugTokenType.SymbolQuery;
+         || op == GlugTokenType.SymbolQuery
+         || op == GlugTokenType.SymbolDotDotDot;
 
         protected virtual GlugUnOpType UnOpFromToken(GlugTokenType op) =>
             op switch {
-                GlugTokenType.SymbolSub   => GlugUnOpType.Neg,
-                GlugTokenType.SymbolNot   => GlugUnOpType.Not,
-                GlugTokenType.SymbolQuery => GlugUnOpType.IsNil,
-                _                         => throw new ArgumentOutOfRangeException(),
+                GlugTokenType.SymbolSub       => GlugUnOpType.Neg,
+                GlugTokenType.SymbolNot       => GlugUnOpType.Not,
+                GlugTokenType.SymbolQuery     => GlugUnOpType.IsNil,
+                GlugTokenType.SymbolDotDotDot => GlugUnOpType.Unpack,
+                _                             => throw new ArgumentOutOfRangeException(),
             };
 
         protected virtual void Consume(GlugTokenType expected) {
@@ -197,7 +199,7 @@ namespace GeminiLab.Glug.Parser {
                     if (expr is VarRef { IsDef: false, IsGlobal: false } vr) {
                         param.Add(vr.Id);
                     } else if (expr is OnStackList osl && osl.List.All(x => x.Type == CommaExprListItemType.Plain && x.Expr is VarRef { IsDef: false, IsGlobal: false })) {
-                        param.AddRange(osl.List.Select(x => ((VarRef)x.Expr).Id));
+                        param.AddRange(osl.List.Select(x => ((VarRef) x.Expr).Id));
                     } else {
                         throw new GlugUnexpectedTokenException(op, new List<GlugTokenType>(), arrow.Position);
                     }
@@ -287,12 +289,13 @@ namespace GeminiLab.Glug.Parser {
                 Stream.GetToken();
 
                 return (ReadIdentifier() switch {
-                    "meta"  => (Expr) new Metatable(ReadExprItem()),
-                    "type"  => new UnOp(GlugUnOpType.Typeof, ReadExprItem()),
-                    "isnil" => new UnOp(GlugUnOpType.IsNil, ReadExprItem()),
-                    "neg"   => new UnOp(GlugUnOpType.Neg, ReadExprItem()),
-                    "not"   => new UnOp(GlugUnOpType.Not, ReadExprItem()),
-                    _       => throw new ArgumentOutOfRangeException(), // TODO: add a custom exception class
+                    "meta"   => (Expr) new Metatable(ReadExprItem()),
+                    "type"   => new UnOp(GlugUnOpType.Typeof, ReadExprItem()),
+                    "isnil"  => new UnOp(GlugUnOpType.IsNil, ReadExprItem()),
+                    "neg"    => new UnOp(GlugUnOpType.Neg, ReadExprItem()),
+                    "not"    => new UnOp(GlugUnOpType.Not, ReadExprItem()),
+                    "unpack" => new UnOp(GlugUnOpType.Unpack, ReadExprItem()),
+                    _        => throw new ArgumentOutOfRangeException(), // TODO: add a custom exception class
                 }).WithPosition(tok.Position);
             }
 

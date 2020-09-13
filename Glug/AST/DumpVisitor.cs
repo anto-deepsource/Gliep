@@ -191,6 +191,7 @@ namespace GeminiLab.Glug.AST {
                 GlugUnOpType.Neg    => "neg",
                 GlugUnOpType.Typeof => "typeof",
                 GlugUnOpType.IsNil  => "isnil",
+                GlugUnOpType.Unpack => "unpack",
                 _                   => throw new GlugInternalException(),
             });
             Writer.WriteLine(GetPositionPrefix(val.Position));

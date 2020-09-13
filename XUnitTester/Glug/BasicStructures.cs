@@ -300,6 +300,25 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
         }
 
         [Fact]
+        public void VectorUnpack() {
+            var code = @"
+                a = {| 1, 1, 2, 3, |};
+                a @ |> = 5;
+                a @ |> = 8;
+                ...a
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(1)
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(2)
+                .MoveNext().AssertInteger(3)
+                .MoveNext().AssertInteger(5)
+                .MoveNext().AssertInteger(8)
+                .MoveNext().AssertEnd();
+        }
+
+        [Fact]
         public void VectorBase() {
             var code = @"
                 a = {| 1, 1, 2, 3, 5, 8, 13 |};
