@@ -538,11 +538,11 @@ namespace GeminiLab.Glug.PostProcess {
         }
 
         public override void VisitPseudoIndex(PseudoIndex val, GlosFunctionBuilder fun, bool ru) {
-            throw new InvalidOperationException();
+            throw new GlugEvaluationOfPseudoExpressionException(val.IsTail ? PseudoExpressionType.VectorEnd : PseudoExpressionType.VectorHead, val.Position);
         }
 
         public override void VisitDiscard(Discard val, GlosFunctionBuilder arg0, bool arg1) {
-            throw new InvalidOperationException();
+            throw new GlugEvaluationOfPseudoExpressionException(PseudoExpressionType.Discard, val.Position);
         }
 
         public override void VisitSysCall(SysCall val, GlosFunctionBuilder fun, bool ru) {

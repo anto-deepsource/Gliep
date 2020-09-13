@@ -61,7 +61,16 @@ namespace GeminiLab.Glug.i18n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Compilation error at {0}.
+        ///   Looks up a localized string similar to Assignment to unassignable expression at {0}.
+        /// </summary>
+        internal static string DefaultMessageGlugAssignToUnassignableExpressionException {
+            get {
+                return ResourceManager.GetString("DefaultMessageGlugAssignToUnassignableExpressionException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Compilation error.
         /// </summary>
         internal static string DefaultMessageGlugCompilingException {
             get {
@@ -70,11 +79,20 @@ namespace GeminiLab.Glug.i18n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Dangling break at {0}.
+        ///   Looks up a localized string similar to Dangling break.
         /// </summary>
         internal static string DefaultMessageGlugDanglingBreakException {
             get {
                 return ResourceManager.GetString("DefaultMessageGlugDanglingBreakException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Evaluation of pseudo expression.
+        /// </summary>
+        internal static string DefaultMessageGlugEvaluationOfPseudoExpressionException {
+            get {
+                return ResourceManager.GetString("DefaultMessageGlugEvaluationOfPseudoExpressionException", resourceCulture);
             }
         }
         

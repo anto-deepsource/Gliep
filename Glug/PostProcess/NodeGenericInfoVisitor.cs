@@ -75,7 +75,7 @@ namespace GeminiLab.Glug.PostProcess {
              || (val.Op == GlugBiOpType.Assign && val.ExprL is OnStackList);
 
             if (val.Op == GlugBiOpType.Assign && !Pass.NodeInformation<NodeGenericInfo>(val.ExprL).IsAssignable) {
-                throw new ArgumentOutOfRangeException();
+                throw new GlugAssignToUnassignableExpressionException(val.ExprL.Position, val.Position);
             }
 
             info.IsAssignable =

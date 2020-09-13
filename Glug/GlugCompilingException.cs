@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using GeminiLab.Core2;
 using GeminiLab.Glug.Tokenizer;
@@ -9,13 +10,13 @@ namespace GeminiLab.Glug {
         public PositionInSource Position { get; }
 
         public GlugCompilingException(PositionInSource position, string? message = null, Exception? innerException = null)
-            : base(message ?? String.Format(i18n.Strings.DefaultMessageGlugCompilingException, position), innerException) {
+            : base(message ?? i18n.Strings.DefaultMessageGlugCompilingException, innerException) {
             Position = position;
         }
     }
 
     public class GlugUnexpectedTokenException : GlugCompilingException {
-        public GlugTokenType Actual { get; }
+        public GlugTokenType        Actual   { get; }
         public IList<GlugTokenType> Expected { get; }
 
         public GlugUnexpectedTokenException(GlugTokenType actual, IList<GlugTokenType> expected, PositionInSource position, string? message = null, Exception? innerException = null)
@@ -35,6 +36,33 @@ namespace GeminiLab.Glug {
 
     public class GlugDanglingBreakException : GlugCompilingException {
         public GlugDanglingBreakException(PositionInSource position, string? message = null, Exception? innerException = null)
-            : base(position, message ?? string.Format(i18n.Strings.DefaultMessageGlugDanglingBreakException, position), innerException) { }
+            : base(position, message ?? i18n.Strings.DefaultMessageGlugDanglingBreakException, innerException) { }
     }
+
+    public enum PseudoExpressionType {
+        VectorHead,
+        VectorEnd,
+        Discard,
+    }
+
+    public class GlugEvaluationOfPseudoExpressionException : GlugCompilingException {
+        public PseudoExpressionType Expression { get; }
+
+        public GlugEvaluationOfPseudoExpressionException(PseudoExpressionType expression, PositionInSource position, string? message = null, Exception? innerException = null)
+            : base(position, message ?? i18n.Strings.DefaultMessageGlugEvaluationOfPseudoExpressionException, innerException) {
+            Expression = expression;
+        }
+    }
+
+    public class GlugAssignToUnassignableExpressionException : GlugCompilingException {
+        public PositionInSource AssigneePosition { get; }
+
+        public GlugAssignToUnassignableExpressionException(PositionInSource assignee, PositionInSource assignment, string? message = null, Exception? innerException = null)
+            : base(assignment, message ?? string.Format(i18n.Strings.DefaultMessageGlugAssignToUnassignableExpressionException, assignee), innerException) {
+            AssigneePosition = assignee;
+        }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class GlugInternalException : Exception { }
 }

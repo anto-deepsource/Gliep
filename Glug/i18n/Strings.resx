@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="DefaultMessageGlugCompilingException" xml:space="preserve">
-    <value>Compilation error at {0}</value>
+      <value>Compilation error</value>
   </data>
   <data name="DefaultMessageGlugUnexpectedTokenException" xml:space="preserve">
     <value>Unexpected token: {0}, [{1}] expected</value>
@@ -130,6 +130,12 @@
     <value>Unexpected end of token stream</value>
   </data>
   <data name="DefaultMessageGlugDanglingBreakException" xml:space="preserve">
-    <value>Dangling break at {0}</value>
+      <value>Dangling break</value>
+  </data>
+  <data name="DefaultMessageGlugEvaluationOfPseudoExpressionException" xml:space="preserve">
+      <value>Evaluation of pseudo expression</value>
+  </data>
+  <data name="DefaultMessageGlugAssignToUnassignableExpressionException" xml:space="preserve">
+      <value>Assignment to unassignable expression at {0}</value>
   </data>
 </root>
