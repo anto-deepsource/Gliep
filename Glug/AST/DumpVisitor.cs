@@ -159,7 +159,21 @@ namespace GeminiLab.Glug.AST {
             Writer.Write("<on-stack-list>");
             Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
-            val.List.ForEach(VisitNode);
+            foreach (var (type, expr) in val.List) {
+                if (type == CommaExprListItemType.Plain) {
+                    VisitNode(expr);
+                } else if (type == CommaExprListItemType.OnStackListUnpack) {
+                    Writer.WriteLine("<unpack-osl>");
+                    Writer.IncreaseIndent();
+                    VisitNode(expr);
+                    Writer.DecreaseIndent();
+                } else if (type == CommaExprListItemType.VectorUnpack) {
+                    Writer.WriteLine("<unpack-vector>");
+                    Writer.IncreaseIndent();
+                    VisitNode(expr);
+                    Writer.DecreaseIndent();
+                }
+            }
             Writer.DecreaseIndent();
         }
 
@@ -239,8 +253,20 @@ namespace GeminiLab.Glug.AST {
             Writer.Write("<vector-def>");
             Writer.WriteLine(GetPositionPrefix(val.Position));
             Writer.IncreaseIndent();
-            foreach (var item in val.Items) {
-                VisitNode(item);
+            foreach (var (type, expr) in val.Items) {
+                if (type == CommaExprListItemType.Plain) {
+                    VisitNode(expr);
+                } else if (type == CommaExprListItemType.OnStackListUnpack) {
+                    Writer.WriteLine("<unpack-osl>");
+                    Writer.IncreaseIndent();
+                    VisitNode(expr);
+                    Writer.DecreaseIndent();
+                } else if (type == CommaExprListItemType.VectorUnpack) {
+                    Writer.WriteLine("<unpack-vector>");
+                    Writer.IncreaseIndent();
+                    VisitNode(expr);
+                    Writer.DecreaseIndent();
+                }
             }
             Writer.DecreaseIndent();
         }

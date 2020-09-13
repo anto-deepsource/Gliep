@@ -62,9 +62,9 @@ namespace GeminiLab.Glug.AST {
             IsGlobal = isGlobal;
         }
 
-        public string Id { get; }
-        public bool IsDef { get; }
-        public bool IsGlobal { get; }
+        public string Id       { get; }
+        public bool   IsDef    { get; }
+        public bool   IsGlobal { get; }
     }
 
     public struct IfBranch {
@@ -85,8 +85,8 @@ namespace GeminiLab.Glug.AST {
             ElseBranch = elseBranch;
         }
 
-        public IList<IfBranch> Branches { get; }
-        public Expr? ElseBranch { get; }
+        public IList<IfBranch> Branches   { get; }
+        public Expr?           ElseBranch { get; }
     }
 
     public abstract class Breakable : Expr {
@@ -104,7 +104,7 @@ namespace GeminiLab.Glug.AST {
         }
 
         public Expr Condition { get; }
-        public Expr Body { get; }
+        public Expr Body      { get; }
     }
 
     public class For : Breakable {
@@ -119,8 +119,8 @@ namespace GeminiLab.Glug.AST {
         }
 
         public IList<VarRef> IteratorVariables { get; }
-        public Expr Expression { get; }
-        public Expr Body { get; }
+        public Expr          Expression        { get; }
+        public Expr          Body              { get; }
     }
 
     public class Return : Expr {
@@ -137,7 +137,7 @@ namespace GeminiLab.Glug.AST {
             Label = label;
         }
 
-        public Expr Expr { get; }
+        public Expr    Expr  { get; }
         public string? Label { get; }
     }
 
@@ -149,18 +149,39 @@ namespace GeminiLab.Glug.AST {
             Body = body;
         }
 
-        public string Name { get; }
-        public bool ExplicitlyNamed { get; }
-        public List<string> Parameters { get; }
-        public Expr Body { get; }
+        public string       Name            { get; }
+        public bool         ExplicitlyNamed { get; }
+        public List<string> Parameters      { get; }
+        public Expr         Body            { get; }
+    }
+
+    public enum CommaExprListItemType {
+        Plain,
+        OnStackListUnpack,
+        VectorUnpack,
+    }
+
+    public struct CommaExprListItem {
+        public CommaExprListItem(CommaExprListItemType type, Expr expr) {
+            Type = type;
+            Expr = expr;
+        }
+        
+        public CommaExprListItemType Type;
+        public Expr                  Expr;
+
+        public void Deconstruct(out CommaExprListItemType type, out Expr expr) => (type, expr) = (Type, Expr);
     }
 
     public class OnStackList : Expr {
-        public OnStackList(IList<Expr> list) {
+        public OnStackList()
+            : this(new List<CommaExprListItem>()){ }
+        
+        public OnStackList(IList<CommaExprListItem> list) {
             List = list;
         }
 
-        public IList<Expr> List { get; }
+        public IList<CommaExprListItem> List { get; }
     }
 
     public class Block : Expr {
@@ -184,8 +205,8 @@ namespace GeminiLab.Glug.AST {
             Expr = expr;
         }
 
-        public GlugUnOpType Op { get; }
-        public Expr Expr { get; }
+        public GlugUnOpType Op   { get; }
+        public Expr         Expr { get; }
     }
 
     public enum GlugBiOpType {
@@ -222,9 +243,9 @@ namespace GeminiLab.Glug.AST {
             ExprR = exprR;
         }
 
-        public GlugBiOpType Op { get; }
-        public Expr ExprL { get; }
-        public Expr ExprR { get; }
+        public GlugBiOpType Op    { get; }
+        public Expr         ExprL { get; }
+        public Expr         ExprR { get; }
 
         public static bool IsShortCircuitOp(GlugBiOpType type) {
             return type == GlugBiOpType.ShortCircuitAnd || type == GlugBiOpType.ShortCircuitOrr || type == GlugBiOpType.NullCoalescing;
@@ -252,11 +273,11 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class VectorDef : Expr {
-        public VectorDef(IList<Expr> items) {
+        public VectorDef(IList<CommaExprListItem> items) {
             Items = items;
         }
 
-        public IList<Expr> Items { get; }
+        public IList<CommaExprListItem> Items { get; }
     }
 
     public class Metatable : Expr {
@@ -276,7 +297,7 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class Discard : Expr {
-        public Discard() {}
+        public Discard() { }
     }
 
     // Following are node types which are not used directly by Glug itself but critical for tools based on Glug.

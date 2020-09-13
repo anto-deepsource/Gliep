@@ -184,7 +184,7 @@ namespace GeminiLab.Glug.PostProcess {
             var pvFunc = valInfo.PrivateVariables[For.PrivateVariableNameIterateFunction]!;
             var pvStatus = valInfo.PrivateVariables[For.PrivateVariableNameStatus]!;
             var pvIterator = valInfo.PrivateVariables[For.PrivateVariableNameIterator]!;
-            var iterVarOsl = new OnStackList(new List<Expr>(val.IteratorVariables));
+            var iterVarOsl = new OnStackList(new List<CommaExprListItem>(val.IteratorVariables.Select(x => new CommaExprListItem(CommaExprListItemType.Plain, x))));
             Pass.NodeInformation<NodeGenericInfo>(iterVarOsl).IsPseudo = true;
 
             if (ru) {
@@ -279,16 +279,30 @@ namespace GeminiLab.Glug.PostProcess {
             fun.AppendB(_breakableEndLabel[breakInfo.Target]);
         }
 
+        protected virtual void VisitCommaExprList(IList<CommaExprListItem> list, GlosFunctionBuilder fun) {
+            fun.AppendLdDel();
+            ++_delCount[fun];
+
+            foreach (var (type, item) in list) {
+                if (type == CommaExprListItemType.Plain) {
+                    visitForValue(item, fun);
+                } else if (type == CommaExprListItemType.OnStackListUnpack) {
+                    visitForOsl(item, fun);
+                    fun.AppendPopDel();
+                    --_delCount[fun];
+                } else if (type == CommaExprListItemType.VectorUnpack) {
+                    visitForValue(item, fun);
+                    fun.AppendUpv();
+                    --_delCount[fun];
+                }
+            }
+        }
+        
         public override void VisitOnStackList(OnStackList val, GlosFunctionBuilder fun, bool ru) {
             if (ru) {
-                fun.AppendLdDel();
-                ++_delCount[fun];
-            }
-
-            foreach (var item in val.List) {
-                if (ru) {
-                    visitForValue(item, fun);
-                } else {
+                VisitCommaExprList(val.List, fun);
+            } else {
+                foreach (var (_, item) in val.List) {
                     visitForDiscard(item, fun);
                 }
             }
@@ -344,7 +358,7 @@ namespace GeminiLab.Glug.PostProcess {
                 var count = list.Count;
                 fun.AppendShpRv(count);
                 --_delCount[fun];
-                for (int i = count - 1; i >= 0; --i) createStoreInstr(list[i], fun);
+                for (int i = count - 1; i >= 0; --i) createStoreInstr(list[i].Expr, fun);
                 break;
             case VarRef vr:
                 valInfo.Variable!.CreateStoreInstr(fun);
@@ -517,17 +531,14 @@ namespace GeminiLab.Glug.PostProcess {
         }
 
         public override void VisitVectorDef(VectorDef val, GlosFunctionBuilder fun, bool ru) {
-            if (ru) fun.AppendLdDel();
-
-            foreach (var item in val.Items) {
-                if (ru) {
-                    visitForValue(item, fun);
-                } else {
+            if (ru) {
+                VisitCommaExprList(val.Items, fun);
+                fun.AppendPkv();
+            } else {
+                foreach (var (_, item) in val.Items) {
                     visitForDiscard(item, fun);
                 }
             }
-
-            if (ru) fun.AppendPkv();
         }
 
         public override void VisitMetatable(Metatable val, GlosFunctionBuilder fun, bool ru) {

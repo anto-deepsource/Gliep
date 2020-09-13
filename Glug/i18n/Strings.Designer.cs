@@ -70,7 +70,7 @@ namespace GeminiLab.Glug.i18n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Compilation error.
+        ///   Looks up a localized string similar to Compilation error at {0}.
         /// </summary>
         internal static string DefaultMessageGlugCompilingException {
             get {
@@ -79,7 +79,7 @@ namespace GeminiLab.Glug.i18n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Dangling break.
+        ///   Looks up a localized string similar to Dangling break at {0}.
         /// </summary>
         internal static string DefaultMessageGlugDanglingBreakException {
             get {
@@ -88,7 +88,7 @@ namespace GeminiLab.Glug.i18n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Evaluation of pseudo expression.
+        ///   Looks up a localized string similar to Evaluation of pseudo expression at {0}.
         /// </summary>
         internal static string DefaultMessageGlugEvaluationOfPseudoExpressionException {
             get {

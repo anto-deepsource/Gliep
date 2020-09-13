@@ -97,11 +97,17 @@ Lambda      : ( LambdaParamList | identifier ) "->" expr
 LambdaParamList : "[" ( identifier ("," identifier)* ","? )? "]"
                 ;
 
-OnStackList : "[" ( Expr ","? )* "]"
+OnStackList : "[" CommaExprList "]"
             ;
+
+CommaExprList   : ( ( Expr | "..." Expr | ".." Expr ) ","? )*
+                ;
 
 TableDef    : "{" ( TableDefItem ","? )* "}"
             ;
 
 TableDefItem    : ( ( "@"? Expr ) | ( "." identifier ) ) ":" Expr
                 ;
+
+VectorDef   : "{|" CommaExprList "|}"
+            ;

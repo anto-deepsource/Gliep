@@ -189,7 +189,9 @@ namespace GeminiLab.Glug.AST {
         }
 
         public override void VisitOnStackList(OnStackList val) {
-            val.List.ForEach(VisitNode);
+            foreach (var item in val.List) {
+                VisitNode(item.Expr);
+            }
         }
 
         public override void VisitBlock(Block val) {
@@ -214,7 +216,7 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitVectorDef(VectorDef val) {
             foreach (var item in val.Items) {
-                VisitNode(item);
+                VisitNode(item.Expr);
             }
         }
 
@@ -412,7 +414,7 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitOnStackList(OnStackList val, T0 arg) {
             foreach (var expr in val.List) {
-                VisitNode(expr, arg);
+                VisitNode(expr.Expr, arg);
             }
         }
 
@@ -440,7 +442,7 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitVectorDef(VectorDef val, T0 arg) {
             foreach (var item in val.Items) {
-                VisitNode(item, arg);
+                VisitNode(item.Expr, arg);
             }
         }
 
@@ -639,7 +641,7 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitOnStackList(OnStackList val, T0 arg0, T1 arg1) {
             foreach (var expr in val.List) {
-                VisitNode(expr, arg0, arg1);
+                VisitNode(expr.Expr, arg0, arg1);
             }
         }
 
@@ -667,7 +669,7 @@ namespace GeminiLab.Glug.AST {
 
         public override void VisitVectorDef(VectorDef val, T0 arg0, T1 arg1) {
             foreach (var item in val.Items) {
-                VisitNode(item, arg0, arg1);
+                VisitNode(item.Expr, arg0, arg1);
             }
         }
 

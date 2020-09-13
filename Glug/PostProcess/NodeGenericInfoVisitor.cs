@@ -55,7 +55,7 @@ namespace GeminiLab.Glug.PostProcess {
             var info = Pass.NodeInformation<NodeGenericInfo>(val);
 
             info.IsOnStackList = true;
-            info.IsAssignable = val.List.All(v => Pass.NodeInformation<NodeGenericInfo>(v).IsAssignable && !(v is OnStackList));
+            info.IsAssignable = val.List.All(v => v.Type == CommaExprListItemType.Plain && Pass.NodeInformation<NodeGenericInfo>(v.Expr).IsAssignable && !(v.Expr is OnStackList));
         }
 
         public override void VisitBlock(Block val) {

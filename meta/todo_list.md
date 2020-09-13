@@ -172,6 +172,25 @@
 
     Which one is the best way?
 
+    *Update (2020/09/13)*
+
+    Use `..` for osls.
+
+    ```
+    // it's [-2, -1, {| 0, 1, 2 |}, "noError"]
+    [-2, -1, .. returnAVector[]];
+    // it's [-2, -1, 0, 1, 2]
+    [-2, -1, ... returnAVector[]];
+    ```
+
+    Add a warning here:
+
+    ```
+    // warn: `..` is used to unpacking osls only
+    // it will be [-2, -1, 0, {| 1, 2 |}]
+    [-2, -1, 0, ..{| 1, 2 |}]
+    ```
+
 - [x] *(2020/09/09)* Introducing *Discard* (`_`)
 
     
