@@ -18,6 +18,7 @@ namespace GeminiLab.Glug.Parser {
          || type == GlugTokenType.KeywordWhile
          || type == GlugTokenType.KeywordFor
          || type == GlugTokenType.KeywordReturn
+         || type == GlugTokenType.KeywordBreak
          || type == GlugTokenType.KeywordFn
          || type == GlugTokenType.SymbolLBracket
          || type == GlugTokenType.SymbolLBrace
@@ -26,7 +27,9 @@ namespace GeminiLab.Glug.Parser {
          || type == GlugTokenType.SymbolBackquote
          || type == GlugTokenType.SymbolVecBegin
          || type == GlugTokenType.SymbolBra
-         || type == GlugTokenType.SymbolKet;
+         || type == GlugTokenType.SymbolKet
+         || type == GlugTokenType.SymbolDiscard
+         || type == GlugTokenType.SymbolDotDotDot;
 
         protected virtual bool LikelyVarRef(GlugTokenType type) =>
             type == GlugTokenType.Identifier
@@ -479,23 +482,39 @@ namespace GeminiLab.Glug.Parser {
         }
 
         protected virtual OnStackList ReadOnStackList() {
-            var rv = new List<CommaExprListItem>();
-
             var pos = ConsumeButPosition(GlugTokenType.SymbolLBracket);
 
-            while (true) {
-                if (Stream.PeekToken().Type == GlugTokenType.SymbolRBracket) break;
-
-                rv.Add(new CommaExprListItem(CommaExprListItemType.Plain, ReadExprGreedily()));
-
-                if (Stream.PeekToken().Type == GlugTokenType.SymbolComma) Consume(GlugTokenType.SymbolComma);
-            }
+            var rv = ReadCommaExprList();
 
             Consume(GlugTokenType.SymbolRBracket);
 
             return new OnStackList(rv).WithPosition(pos);
         }
 
+        protected virtual IList<CommaExprListItem> ReadCommaExprList() {
+            var rv = new List<CommaExprListItem>();
+
+            while (true) {
+                var tok = Stream.PeekToken();
+
+                if (tok.Type == GlugTokenType.SymbolDotDot) {
+                    Stream.GetToken();
+                    rv.Add(new CommaExprListItem(CommaExprListItemType.OnStackListUnpack, ReadExprGreedily()));
+                } else if (tok.Type == GlugTokenType.SymbolDotDotDot) {
+                    Stream.GetToken();
+                    rv.Add(new CommaExprListItem(CommaExprListItemType.VectorUnpack, ReadExprGreedily()));
+                } else {
+                    if (!LikelyExpr(tok.Type)) break;
+
+                    rv.Add(new CommaExprListItem(CommaExprListItemType.Plain, ReadExprGreedily()));
+                }
+                
+                if (Stream.PeekToken().Type == GlugTokenType.SymbolComma) Consume(GlugTokenType.SymbolComma);
+            }
+
+            return rv;
+        }
+        
         protected virtual TableDef ReadTableDef() {
             var rv = new List<TableDefPair>();
 
@@ -527,21 +546,13 @@ namespace GeminiLab.Glug.Parser {
         }
 
         protected virtual VectorDef ReadVectorDef() {
-            var list = new List<CommaExprListItem>();
-
             var pos = ConsumeButPosition(GlugTokenType.SymbolVecBegin);
-
-            while (true) {
-                if (Stream.PeekToken().Type == GlugTokenType.SymbolVecEnd) break;
-
-                list.Add(new CommaExprListItem(CommaExprListItemType.Plain, ReadExprGreedily()));
-
-                if (Stream.PeekToken().Type == GlugTokenType.SymbolComma) Consume(GlugTokenType.SymbolComma);
-            }
+            
+            var rv = ReadCommaExprList();
 
             Consume(GlugTokenType.SymbolVecEnd);
 
-            return new VectorDef(list).WithPosition(pos);
+            return new VectorDef(rv).WithPosition(pos);
         }
     }
 }

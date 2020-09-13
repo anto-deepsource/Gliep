@@ -293,7 +293,7 @@ namespace GeminiLab.Glug.PostProcess {
                 } else if (type == CommaExprListItemType.VectorUnpack) {
                     visitForValue(item, fun);
                     fun.AppendUpv();
-                    --_delCount[fun];
+                    fun.AppendPopDel();
                 }
             }
         }
@@ -346,6 +346,7 @@ namespace GeminiLab.Glug.PostProcess {
                 break;
             case GlugUnOpType.Unpack:
                 fun.AppendUpv();
+                ++_delCount[fun];
                 break;
             }
 
@@ -537,6 +538,7 @@ namespace GeminiLab.Glug.PostProcess {
             if (ru) {
                 VisitCommaExprList(val.Items, fun);
                 fun.AppendPkv();
+                --_delCount[fun];
             } else {
                 foreach (var (_, item) in val.Items) {
                     visitForDiscard(item, fun);

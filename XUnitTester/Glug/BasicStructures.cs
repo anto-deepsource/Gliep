@@ -344,6 +344,27 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .MoveNext().AssertInteger(34)
                 .MoveNext().AssertEnd();
         }
+        
+        [Fact]
+        public void Unpack() {
+            var code = @"
+                [0, 1, ..[2, 3], ...{| 4, 5, 6 |}, ...[{| 7 |}, {| 8, 9 |}], 10] .. while (true) [11, ..[12, 13], ...{| 14 |}, break ...{| 15, 16 |}]
+            ";
+
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(0)
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(2)
+                .MoveNext().AssertInteger(3)
+                .MoveNext().AssertInteger(4)
+                .MoveNext().AssertInteger(5)
+                .MoveNext().AssertInteger(6)
+                .MoveNext().AssertInteger(7)
+                .MoveNext().AssertInteger(10)
+                .MoveNext().AssertInteger(15)
+                .MoveNext().AssertInteger(16)
+                .MoveNext().AssertEnd();
+        }
 
         [Fact]
         public void ProvidedEnv() {

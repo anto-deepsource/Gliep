@@ -80,7 +80,7 @@
         for (x, y,: pairs {| 0, 1, 2 |}) x + y;
         ```
 
-- [ ] *(2020/09/09)* Add unpacking vector operator
+- [x] *(2020/09/09)* Add unpacking vector operator
 
     `...` may be a good choice:
 

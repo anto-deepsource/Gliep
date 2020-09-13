@@ -405,7 +405,7 @@ namespace GeminiLab.Glos {
                         break;
                     }
                     case GlosOpCategory.Others when op == GlosOp.Pkv: {
-                        var del = peekDelimiter();
+                        var del = popDelimiter();
                         var count = _sptr - del;
 
                         var vec = new GlosVector();
