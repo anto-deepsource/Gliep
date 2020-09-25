@@ -482,6 +482,8 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                     return fn[] if (x + 1 < max) x = x + 1
                 )) 9) y = z;
                 ~10;
+                {| 11, 12 |};
+                t @ ""__add"";
                 x + y # 2 + 8 expected
             ";
 
