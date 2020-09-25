@@ -34,7 +34,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         }
 
         public int AddFunctionRaw(ReadOnlySpan<byte> op, int localVariableSize, IReadOnlyCollection<string>? variableInContext = null, string? name = null) {
-            _impl.RealFunctionTable.Add(new GlosFunctionPrototype(name ?? $"function#{_func}", op, localVariableSize, variableInContext ?? Array.Empty<string>(), _impl));
+            _impl.RealFunctionTable.Add(new GlosFunctionPrototype(name ?? $"function#{_func}", op, localVariableSize, variableInContext ?? Array.Empty<string>()));
             return _func++;
         }
 
@@ -49,7 +49,7 @@ namespace GeminiLab.Glos.CodeGenerator {
 
         public IGlosUnit GetResult() {
             foreach (var builder in _builders) {
-                _impl.RealFunctionTable[builder.Id] = new GlosFunctionPrototype(builder.Name, builder.GetOpArray(), builder.LocalVariableCount, builder.VariableInContext ?? Array.Empty<string>(), _impl);
+                _impl.RealFunctionTable[builder.Id] = new GlosFunctionPrototype(builder.Name, builder.GetOpArray(), builder.LocalVariableCount, builder.VariableInContext ?? Array.Empty<string>());
             }
 
             return _impl;

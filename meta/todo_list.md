@@ -39,6 +39,10 @@
     - manage vm and units
     - etc
 
+    *Update (2020/09/25)*
+
+    - [x] Function prototypes should not record its parent unit itself. This reference broke too many things. It may be recorded in functions.
+
 - [x] *(2020/08/29)* Make it clear where trailing separators are allowed/prohibited and make parser more strict
 
     - [ ] **Prohibited** in function parameter list:

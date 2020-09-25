@@ -86,7 +86,7 @@ namespace GeminiLab.Glos {
             ctx.Prototype = frame.Function.Prototype;
             ctx.Code = ctx.Prototype.Code;
             ctx.Length = ctx.Code.Length;
-            ctx.Unit = ctx.Prototype.Unit;
+            ctx.Unit = frame.Function.Unit;
             ctx.Context = frame.Context;
             ctx.Global = ctx.Context.Global;
         }
@@ -254,7 +254,7 @@ namespace GeminiLab.Glos {
                     case GlosOpCategory.LoadFunction when imms > unit.FunctionTable.Count || imms < 0:
                         throw new GlosFunctionIndexOutOfRangeException((int) imms);
                     case GlosOpCategory.LoadFunction:
-                        pushStack().SetFunction(new GlosFunction(unit.FunctionTable[(int) imms]!, null!));
+                        pushStack().SetFunction(new GlosFunction(unit.FunctionTable[(int) imms]!, null!, unit));
                         break;
                     case GlosOpCategory.LoadString when imms > unit.StringTable.Count || imms < 0:
                         throw new GlosStringIndexOutOfRangeException((int) imms);
@@ -456,11 +456,11 @@ namespace GeminiLab.Glos {
 
         // though ViMa shouldn't manage units, this function is necessary
         public GlosValue[] ExecuteUnit(IGlosUnit unit, GlosValue[]? args = null, GlosContext? parentContext = null) {
-            return ExecuteFunction(new GlosFunction(unit.FunctionTable[unit.Entry], parentContext ?? new GlosContext(null)), args);
+            return ExecuteFunction(new GlosFunction(unit.FunctionTable[unit.Entry], parentContext ?? new GlosContext(null), unit), args);
         }
 
         public GlosValue[] ExecuteUnitWithProvidedContextForRootFunction(IGlosUnit unit, GlosContext context, GlosValue[]? args = null) {
-            return ExecuteFunctionWithProvidedContext(new GlosFunction(unit.FunctionTable[unit.Entry], context.Parent!), context, args);
+            return ExecuteFunctionWithProvidedContext(new GlosFunction(unit.FunctionTable[unit.Entry], context.Parent!, unit), context, args);
         }
     }
 }
