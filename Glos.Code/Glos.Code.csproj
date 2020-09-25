@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>GeminiLab.Glos</RootNamespace>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>0.0.1-dev</Version>
+    <Authors>Gemini Laboratory</Authors>
+    <Description>Glos, a stack-based virtual machine. This part contains essential types to storage and processing codes for Glos.</Description>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+    <Configurations>Develop;Preview;Release</Configurations>
+  </PropertyGroup>
+
+</Project>

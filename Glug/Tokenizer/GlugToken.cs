@@ -1,3 +1,5 @@
+using GeminiLab.Glos;
+
 namespace GeminiLab.Glug.Tokenizer {
     public class GlugToken {
         public GlugTokenType    Type;

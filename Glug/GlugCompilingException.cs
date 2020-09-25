@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using GeminiLab.Core2;
+using GeminiLab.Glos;
 using GeminiLab.Glug.Tokenizer;
 
 namespace GeminiLab.Glug {

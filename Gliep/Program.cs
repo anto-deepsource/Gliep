@@ -80,6 +80,12 @@ namespace GeminiLab.Gliep {
     }
 
     public static class Program {
+        public static string StringifyGlosCallStackFrame(GlosStackFrame frame) {
+            var ip = frame.InstructionPointer;
+            var fun = frame.Function.Prototype;
+            return $"   at {frame.Function.Prototype.Name}";
+        }
+
         public static void Main(string[] args) {
             var vm = new GlosViMa();
             vm.WorkingDirectory = Environment.CurrentDirectory;
@@ -113,7 +119,7 @@ namespace GeminiLab.Gliep {
                 Console.WriteLine(@"Host stacktrace:");
                 Console.WriteLine(gex.StackTrace);
                 Console.WriteLine(@"Stacktrace:");
-                rex.CallStack.Reverse().Select(frame => $"   at {frame.Function.Prototype.Name}").ForEach(Console.WriteLine);
+                rex.CallStack.Reverse().Select(StringifyGlosCallStackFrame).ForEach(Console.WriteLine);
             } catch (Exception ex) {
                 Console.WriteLine($@"{ex.GetType().Name}: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);

@@ -31,4 +31,8 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Glos.Code\Glos.Code.csproj" />
+  </ItemGroup>
+
 </Project>

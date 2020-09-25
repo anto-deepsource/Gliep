@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using GeminiLab.Glos;
 
 namespace GeminiLab.Glug.AST {
     public abstract class Node {

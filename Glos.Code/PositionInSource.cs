@@ -1,4 +1,4 @@
-namespace GeminiLab.Glug {
+namespace GeminiLab.Glos {
     public struct PositionInSource {
         public string Source;
         public int    Row;

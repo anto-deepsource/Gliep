@@ -27,6 +27,8 @@ namespace GeminiLab.Glos {
 
         private GlosStackFrame[]? _callStack = null;
         public GlosStackFrame[] CallStack => _callStack ??= ViMa.CallStackFrames.ToArray();
+        
+        
     }
 
     public class GlosUnknownOpException : GlosException {

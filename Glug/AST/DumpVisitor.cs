@@ -5,6 +5,7 @@ using GeminiLab.Core2;
 using GeminiLab.Core2.Collections;
 using GeminiLab.Core2.IO;
 using GeminiLab.Core2.Text;
+using GeminiLab.Glos;
 
 namespace GeminiLab.Glug.AST {
     // we do not test this class

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace GeminiLab.Glos {
     public interface IGlosFunctionDebugInfo {
-        public IReadOnlyList<string>            ParameterName { get; }
-        public IReadOnlyDictionary<int, string> OpPosition    { get; }
+        public IReadOnlyList<string>                      ParameterName { get; }
+        public IReadOnlyDictionary<int, PositionInSource> OpPosition    { get; }
     }
 
     public interface IGlosUnit : IDisposable {
