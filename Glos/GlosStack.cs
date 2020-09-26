@@ -76,6 +76,8 @@ namespace GeminiLab.Glos {
             throw new InvalidOperationException();
         }
 
+        public ref T this[Index index] => ref _items[index];
+        
         public ref T this[int index] => ref _items[index];
 
         public ref T StackTop() => ref _items[Count - 1];

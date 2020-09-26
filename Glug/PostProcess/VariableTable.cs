@@ -58,7 +58,7 @@ namespace GeminiLab.Glug.PostProcess {
             }
         }
 
-        public void CreateLoadInstr(GlosFunctionBuilder fgen) {
+        public void CreateLoadInstr(FunctionBuilder fgen) {
             switch (Place) {
             case VariablePlace.Argument:
                 fgen.AppendLdArg(ArgumentId);
@@ -83,7 +83,7 @@ namespace GeminiLab.Glug.PostProcess {
             }
         }
 
-        public void CreateStoreInstr(GlosFunctionBuilder fgen) {
+        public void CreateStoreInstr(FunctionBuilder fgen) {
             switch (Place) {
             case VariablePlace.LocalVariable:
                 fgen.AppendStLoc(LocalVariable!);

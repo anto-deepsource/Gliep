@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 
 namespace GeminiLab.Glos.CodeGenerator {
-    public class GlosFunctionBuilder {
-        internal GlosFunctionBuilder(GlosUnitBuilder parent, int id) {
+    public class FunctionBuilder {
+        internal FunctionBuilder(UnitBuilder parent, int id) {
             Parent = parent;
             Id = id;
             Name = $"function#{id}";
         }
 
-        public GlosUnitBuilder Parent { get; }
+        public UnitBuilder Parent { get; }
 
         public int Id { get; }
 
@@ -135,7 +135,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendLdStr(string str) => AppendLdStr(Parent.AddOrGetString(str));
 
         public void AppendLdFun(int id) => AppendInstruction(GlosOp.LdFun, immediate: id);
-        public void AppendLdFun(GlosFunctionBuilder fun) => AppendLdFun(fun.Id);
+        public void AppendLdFun(FunctionBuilder fun) => AppendLdFun(fun.Id);
 
         private long getIdFromLoc(LocalVariable loc) {
             if (loc.Builder != this) throw new ArgumentOutOfRangeException(nameof(loc));

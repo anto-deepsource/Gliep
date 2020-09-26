@@ -1,9 +1,9 @@
 namespace GeminiLab.Glos.CodeGenerator {
     public class LocalVariable {
-        public GlosFunctionBuilder Builder { get; }
+        public FunctionBuilder Builder { get; }
         public long LocalVariableId { get; }
 
-        internal LocalVariable(GlosFunctionBuilder builder, long localVariableId) {
+        internal LocalVariable(FunctionBuilder builder, long localVariableId) {
             Builder = builder;
             LocalVariableId = localVariableId;
         }

@@ -6,20 +6,20 @@ using GeminiLab.Glos.CodeGenerator;
 using GeminiLab.Glug.AST;
 
 namespace GeminiLab.Glug.PostProcess {
-    public class CodeGenVisitor : InVisitor<GlosFunctionBuilder, bool> {
+    public class CodeGenVisitor : InVisitor<FunctionBuilder, bool> {
         private readonly Dictionary<Breakable, Label> _breakableEndLabel            = new Dictionary<Breakable, Label>();
         private readonly Dictionary<Breakable, bool>  _breakableResultUsed          = new Dictionary<Breakable, bool>();
         private readonly Dictionary<Breakable, int>   _breakableGuardianDelimiterId = new Dictionary<Breakable, int>();
 
-        public GlosUnitBuilder Builder { get; } = new GlosUnitBuilder();
+        public UnitBuilder Builder { get; } = new UnitBuilder();
 
-        private Dictionary<GlosFunctionBuilder, int> _delCount = new Dictionary<GlosFunctionBuilder, int>();
+        private Dictionary<FunctionBuilder, int> _delCount = new Dictionary<FunctionBuilder, int>();
 
-        private void visitForDiscard(Expr expr, GlosFunctionBuilder fun) {
+        private void visitForDiscard(Expr expr, FunctionBuilder fun) {
             VisitNode(expr, fun, false);
         }
 
-        private void visitForValue(Expr expr, GlosFunctionBuilder fun) {
+        private void visitForValue(Expr expr, FunctionBuilder fun) {
             VisitNode(expr, fun, true);
 
             if (Pass.NodeInformation<NodeGenericInfo>(expr).IsOnStackList) {
@@ -28,7 +28,7 @@ namespace GeminiLab.Glug.PostProcess {
             }
         }
 
-        private void visitForOsl(Expr expr, GlosFunctionBuilder fun) {
+        private void visitForOsl(Expr expr, FunctionBuilder fun) {
             if (!Pass.NodeInformation<NodeGenericInfo>(expr).IsOnStackList) {
                 fun.AppendLdDel();
                 ++_delCount[fun];
@@ -37,12 +37,12 @@ namespace GeminiLab.Glug.PostProcess {
             VisitNode(expr, fun, true);
         }
 
-        private void visitForAny(Expr expr, GlosFunctionBuilder fun) {
+        private void visitForAny(Expr expr, FunctionBuilder fun) {
             VisitNode(expr, fun, true);
         }
 
 
-        public override void VisitFunction(Function val, GlosFunctionBuilder parent, bool ru) {
+        public override void VisitFunction(Function val, FunctionBuilder parent, bool ru) {
             var info = Pass.NodeInformation<VariableAllocationInfo>(val);
             var fun = Builder.AddFunction();
 
@@ -85,7 +85,7 @@ namespace GeminiLab.Glug.PostProcess {
             }
         }
 
-        public override void VisitIf(If val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitIf(If val, FunctionBuilder fun, bool ru) {
             var info = Pass.NodeInformation<NodeGenericInfo>(val);
             Label? nextLabel = null;
             var endLabel = fun.AllocateLabel();
@@ -128,7 +128,7 @@ namespace GeminiLab.Glug.PostProcess {
             fun.InsertLabel(endLabel);
         }
 
-        public override void VisitWhile(While val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitWhile(While val, FunctionBuilder fun, bool ru) {
             var info = Pass.NodeInformation<NodeGenericInfo>(val);
             var endLabel = _breakableEndLabel[val] = fun.AllocateLabel();
             _breakableResultUsed[val] = ru;
@@ -175,7 +175,7 @@ namespace GeminiLab.Glug.PostProcess {
             fun.InsertLabel(endLabel);
         }
 
-        public override void VisitFor(For val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitFor(For val, FunctionBuilder fun, bool ru) {
             var info = Pass.NodeInformation<NodeGenericInfo>(val);
             var valInfo = Pass.NodeInformation<VariableAllocationInfo>(val);
             var endLabel = _breakableEndLabel[val] = fun.AllocateLabel();
@@ -251,12 +251,12 @@ namespace GeminiLab.Glug.PostProcess {
             fun.InsertLabel(endLabel);
         }
 
-        public override void VisitReturn(Return val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitReturn(Return val, FunctionBuilder fun, bool ru) {
             visitForOsl(val.Expr, fun);
             fun.AppendRet();
         }
 
-        public override void VisitBreak(Break val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitBreak(Break val, FunctionBuilder fun, bool ru) {
             var info = Pass.NodeInformation<NodeGenericInfo>(val);
             var breakInfo = Pass.NodeInformation<BreakableInfo>(val);
             var target = breakInfo.Target;
@@ -279,7 +279,7 @@ namespace GeminiLab.Glug.PostProcess {
             fun.AppendB(_breakableEndLabel[breakInfo.Target]);
         }
 
-        protected virtual void VisitCommaExprList(IList<CommaExprListItem> list, GlosFunctionBuilder fun) {
+        protected virtual void VisitCommaExprList(IList<CommaExprListItem> list, FunctionBuilder fun) {
             fun.AppendLdDel();
             ++_delCount[fun];
 
@@ -298,7 +298,7 @@ namespace GeminiLab.Glug.PostProcess {
             }
         }
         
-        public override void VisitOnStackList(OnStackList val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitOnStackList(OnStackList val, FunctionBuilder fun, bool ru) {
             if (ru) {
                 VisitCommaExprList(val.List, fun);
             } else {
@@ -308,7 +308,7 @@ namespace GeminiLab.Glug.PostProcess {
             }
         }
 
-        public override void VisitBlock(Block val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitBlock(Block val, FunctionBuilder fun, bool ru) {
             var count = val.List.Count;
 
             if (count == 0) {
@@ -328,7 +328,7 @@ namespace GeminiLab.Glug.PostProcess {
             }
         }
 
-        public override void VisitUnOp(UnOp val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitUnOp(UnOp val, FunctionBuilder fun, bool ru) {
             visitForValue(val.Expr, fun);
 
             switch (val.Op) {
@@ -353,7 +353,7 @@ namespace GeminiLab.Glug.PostProcess {
             if (!ru) fun.AppendPop();
         }
 
-        private void createStoreInstr(Node node, GlosFunctionBuilder fun) {
+        private void createStoreInstr(Node node, FunctionBuilder fun) {
             var info = Pass.NodeInformation<NodeGenericInfo>(node);
             var valInfo = Pass.NodeInformation<VariableAllocationInfo>(node);
             switch (node) {
@@ -397,7 +397,7 @@ namespace GeminiLab.Glug.PostProcess {
             }
         }
 
-        public override void VisitBiOp(BiOp val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitBiOp(BiOp val, FunctionBuilder fun, bool ru) {
             if (val.Op == GlugBiOpType.Call) {
                 visitForOsl(val.ExprR, fun);
                 visitForValue(val.ExprL, fun);
@@ -496,33 +496,33 @@ namespace GeminiLab.Glug.PostProcess {
             }
         }
 
-        public override void VisitLiteralInteger(LiteralInteger val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitLiteralInteger(LiteralInteger val, FunctionBuilder fun, bool ru) {
             if (ru) fun.AppendLd(val.Value);
         }
 
-        public override void VisitLiteralFloat(LiteralFloat val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitLiteralFloat(LiteralFloat val, FunctionBuilder fun, bool ru) {
             if (ru) fun.AppendLdFlt(val.Value);
         }
 
-        public override void VisitLiteralBool(LiteralBool val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitLiteralBool(LiteralBool val, FunctionBuilder fun, bool ru) {
             if (ru) fun.AppendLdBool(val.Value);
         }
 
-        public override void VisitLiteralString(LiteralString val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitLiteralString(LiteralString val, FunctionBuilder fun, bool ru) {
             if (ru) fun.AppendLdStr(val.Value);
         }
 
-        public override void VisitLiteralNil(LiteralNil val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitLiteralNil(LiteralNil val, FunctionBuilder fun, bool ru) {
             if (ru) fun.AppendLdNil();
         }
 
-        public override void VisitVarRef(VarRef val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitVarRef(VarRef val, FunctionBuilder fun, bool ru) {
             var valInfo = Pass.NodeInformation<VariableAllocationInfo>(val);
             valInfo.Variable!.CreateLoadInstr(fun);
             if (!ru) fun.AppendPop();
         }
 
-        public override void VisitTableDef(TableDef val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitTableDef(TableDef val, FunctionBuilder fun, bool ru) {
             fun.AppendLdNTbl();
 
             foreach (var (key, value) in val.Pairs) {
@@ -534,7 +534,7 @@ namespace GeminiLab.Glug.PostProcess {
             if (!ru) fun.AppendPop();
         }
 
-        public override void VisitVectorDef(VectorDef val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitVectorDef(VectorDef val, FunctionBuilder fun, bool ru) {
             if (ru) {
                 VisitCommaExprList(val.Items, fun);
                 fun.AppendPkv();
@@ -546,22 +546,22 @@ namespace GeminiLab.Glug.PostProcess {
             }
         }
 
-        public override void VisitMetatable(Metatable val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitMetatable(Metatable val, FunctionBuilder fun, bool ru) {
             // TODO: when result not used, gmt is unnecessary
             visitForValue(val.Table, fun);
             fun.AppendGmt();
             if (!ru) fun.AppendPop();
         }
 
-        public override void VisitPseudoIndex(PseudoIndex val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitPseudoIndex(PseudoIndex val, FunctionBuilder fun, bool ru) {
             throw new GlugEvaluationOfPseudoExpressionException(val.IsTail ? PseudoExpressionType.VectorEnd : PseudoExpressionType.VectorHead, val.Position);
         }
 
-        public override void VisitDiscard(Discard val, GlosFunctionBuilder arg0, bool arg1) {
+        public override void VisitDiscard(Discard val, FunctionBuilder arg0, bool arg1) {
             throw new GlugEvaluationOfPseudoExpressionException(PseudoExpressionType.Discard, val.Position);
         }
 
-        public override void VisitSysCall(SysCall val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitSysCall(SysCall val, FunctionBuilder fun, bool ru) {
             foreach (var input in val.Inputs) {
                 visitForAny(input, fun);
             }
@@ -573,7 +573,7 @@ namespace GeminiLab.Glug.PostProcess {
             if (val.Result == SysCall.ResultType.None && ru) fun.AppendLdDel();
         }
 
-        public override void VisitToValue(ToValue val, GlosFunctionBuilder fun, bool ru) {
+        public override void VisitToValue(ToValue val, FunctionBuilder fun, bool ru) {
             visitForValue(val.Child, fun);
         }
     }

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace GeminiLab.Glos.CodeGenerator {
-    public class GlosUnitBuilder {
+    public class UnitBuilder {
         private readonly GlosUnitInternalImpl _impl = new GlosUnitInternalImpl();
 
 #region string table
@@ -24,10 +24,10 @@ namespace GeminiLab.Glos.CodeGenerator {
 #region function table
 
         private          int                       _func     = 0;
-        private readonly List<GlosFunctionBuilder> _builders = new List<GlosFunctionBuilder>();
+        private readonly List<FunctionBuilder> _builders = new List<FunctionBuilder>();
 
-        public GlosFunctionBuilder AddFunction() {
-            var fun = new GlosFunctionBuilder(this, _func++);
+        public FunctionBuilder AddFunction() {
+            var fun = new FunctionBuilder(this, _func++);
             _builders.Add(fun);
             _impl.RealFunctionTable.Add(null!);
             return fun;

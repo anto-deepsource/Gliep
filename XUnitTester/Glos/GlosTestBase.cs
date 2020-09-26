@@ -4,11 +4,11 @@ using GeminiLab.Glos.CodeGenerator;
 namespace GeminiLab.XUnitTester.Gliep.Glos {
     public abstract class GlosTestBase {
         protected readonly GlosViMa ViMa;
-        protected readonly GlosUnitBuilder Builder;
+        protected readonly UnitBuilder Builder;
 
         protected GlosTestBase() {
             ViMa = new GlosViMa();
-            Builder = new GlosUnitBuilder();
+            Builder = new UnitBuilder();
         }
 
         protected GlosValue[] Execute(GlosValue[]? args = null, GlosContext? parentContext = null) {

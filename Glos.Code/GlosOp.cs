@@ -1,5 +1,5 @@
 namespace GeminiLab.Glos {
-    public enum GlosOp: byte {
+    public enum GlosOp : byte {
         Add     = 0x00,
         Sub     = 0x01,
         Mul     = 0x02,
