@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using GeminiLab.Core2;
+using GeminiLab.Core2.Collections;
 using GeminiLab.Core2.CommandLineParser;
 using GeminiLab.Core2.IO;
 using GeminiLab.Core2.Markup.Json;
 using GeminiLab.Core2.Text;
+using GeminiLab.Core2.Yielder;
 using GeminiLab.Glos;
 using GeminiLab.Glos.Serialization;
 using GeminiLab.Glug;
@@ -19,48 +22,53 @@ namespace GeminiLab.Gliep.Dumper {
             var sb = new StringBuilder($"{ip:X6}: ");
 
             var b = ip;
-            var op = (GlosOp)ops[ip++];
+            var op = (GlosOp) ops[ip++];
             var len = ops.Length;
 
             ulong imm;
             long imms = 0;
             bool failed = false, hasImm = true;
-            switch (GlosOpInfo.Immediates[(int)op]) {
+            switch (GlosOpInfo.Immediates[(int) op]) {
             case GlosOpImmediate.Byte:
                 if (ip + 1 > len) {
                     failed = true;
                 } else {
                     imm = ops[ip++];
-                    imms = unchecked((sbyte)(byte)imm);
+                    imms = unchecked((sbyte) (byte) imm);
                 }
+
                 break;
             case GlosOpImmediate.Dword:
                 if (ip + 4 > len) {
                     failed = true;
                 } else {
-                    imm = (ulong)ops[ip]
-                          | ((ulong)ops[ip + 1] << 8)
-                          | ((ulong)ops[ip + 2] << 16)
-                          | ((ulong)ops[ip + 3] << 24);
-                    imms = unchecked((int)(uint)imm);
+                    imm = (ulong) ops[ip]
+                        | ((ulong) ops[ip + 1] << 8)
+                        | ((ulong) ops[ip + 2] << 16)
+                        | ((ulong) ops[ip + 3] << 24);
+
+                    imms = unchecked((int) (uint) imm);
                     ip += 4;
                 }
+
                 break;
             case GlosOpImmediate.Qword:
                 if (ip + 4 > len) {
                     failed = true;
                 } else {
-                    imm = (ulong)ops[ip]
-                          | ((ulong)ops[ip + 1] << 8)
-                          | ((ulong)ops[ip + 2] << 16)
-                          | ((ulong)ops[ip + 3] << 24)
-                          | ((ulong)ops[ip + 4] << 32)
-                          | ((ulong)ops[ip + 5] << 40)
-                          | ((ulong)ops[ip + 6] << 48)
-                          | ((ulong)ops[ip + 7] << 56);
-                    imms = unchecked((long)imm);
+                    imm = (ulong) ops[ip]
+                        | ((ulong) ops[ip + 1] << 8)
+                        | ((ulong) ops[ip + 2] << 16)
+                        | ((ulong) ops[ip + 3] << 24)
+                        | ((ulong) ops[ip + 4] << 32)
+                        | ((ulong) ops[ip + 5] << 40)
+                        | ((ulong) ops[ip + 6] << 48)
+                        | ((ulong) ops[ip + 7] << 56);
+
+                    imms = unchecked((long) imm);
                     ip += 8;
                 }
+
                 break;
             default:
                 imm = 0;
@@ -73,16 +81,27 @@ namespace GeminiLab.Gliep.Dumper {
             if (!failed) {
                 opText = OpToText(op);
                 if (hasImm) {
-                    if (op == GlosOp.LdFun || op == GlosOp.LdStr || op == GlosOp.LdFunS || op == GlosOp.LdStrS
-                        || op == GlosOp.LdQ || op == GlosOp.Ld || op == GlosOp.LdS || op == GlosOp.LdArg
-                        || op == GlosOp.LdLoc || op == GlosOp.StLoc || op == GlosOp.LdArgS || op == GlosOp.LdLocS
-                        || op == GlosOp.StLocS || op == GlosOp.ShpRv || op == GlosOp.ShpRvS) {
+                    if (op == GlosOp.LdFun
+                     || op == GlosOp.LdStr
+                     || op == GlosOp.LdFunS
+                     || op == GlosOp.LdStrS
+                     || op == GlosOp.LdQ
+                     || op == GlosOp.Ld
+                     || op == GlosOp.LdS
+                     || op == GlosOp.LdArg
+                     || op == GlosOp.LdLoc
+                     || op == GlosOp.StLoc
+                     || op == GlosOp.LdArgS
+                     || op == GlosOp.LdLocS
+                     || op == GlosOp.StLocS
+                     || op == GlosOp.ShpRv
+                     || op == GlosOp.ShpRvS) {
                         opText += $" {imms}";
                     } else if (op == GlosOp.LdFlt) {
                         IntegerFloatUnion ifu = default;
                         ifu.Integer = imms;
                         opText += $" {ifu.Float:E6}";
-                    } else if (GlosOpInfo.Categories[(int)op] == GlosOpCategory.Branch) {
+                    } else if (GlosOpInfo.Categories[(int) op] == GlosOpCategory.Branch) {
                         var target = ip + imms;
                         opText += $" <{target:X6}>";
                     }
@@ -136,48 +155,91 @@ namespace GeminiLab.Gliep.Dumper {
                 var tok = stream.Next();
                 var output = string.Format($"{{0,-{tok.Position.Source.Length + 10}}}", $"({tok.Position})");
 
-                output += ((GlugTokenType[])typeof(GlugTokenType).GetEnumValues()).Contains(tok.Type) ? tok.Type.ToString() : $"0x{(uint)(tok.Type):x8}";
+                output += ((GlugTokenType[]) typeof(GlugTokenType).GetEnumValues()).Contains(tok.Type) ? tok.Type.ToString() : $"0x{(uint) (tok.Type):x8}";
                 if (tok.Type.HasInteger()) output += $", {tok.ValueInt}(0x{tok.ValueInt:x16})";
                 if (tok.Type.HasString()) output += $", \"{EscapeSequenceConverter.Encode(tok.ValueString!)}\"";
                 Console.WriteLine(output);
             }
         }
 
-        public static void Main(string[] args) {
-            var options = CommandLineParser<CommandLineOptions>.Parse(args);
+        public class ResettableTokenStream : IGlugTokenStream {
+            public void Dispose() { }
 
-            var sourceName = 
-                options.Code != null ? "<command-line>" : 
-                options.Input == "-" ? "<stdin>" : 
-                options.Input;
+            private readonly IEnumerable<GlugToken> _tokens;
+            private          IEnumerator<GlugToken> _enumerator;
+            private          GlugToken?             _buff;
+            
+            public ResettableTokenStream(IGlugTokenStream source) {
+                _tokens = source.ToList();
+                _enumerator = _tokens.GetEnumerator();
+            }
+            
+            public bool HasNext() {
+                if (_buff != null) {
+                    return true;
+                }
+
+                if (!_enumerator.MoveNext()) {
+                    return false;
+                }
+
+                _buff = _enumerator.Current;
+                return true;
+            }
+
+            public GlugToken Next() {
+                if (_buff != null) {
+                    var temp = _buff;
+                    _buff = null;
+                    return temp;
+                }
+                
+                if (!HasNext()) throw new InvalidOperationException();
+
+                return _buff!;
+            }
+
+            public void Reset() {
+                _enumerator.Reset();
+            }
+        } 
+
+        public static void ProcessInput(CommandLineOptions.Input input) {
+            var sourceName =
+                input.IsCommandLine       ? "<command-line>" :
+                input.InputContent == "-" ? "<stdin>" :
+                                            input.InputContent;
+
             using var sourceReader =
-                options.Code != null ? new StringReader(options.Code) :
-                options.Input == "-" ? Console.In :
-                new StreamReader(new FileStream(options.Input, FileMode.Open, FileAccess.Read));
+                input.IsCommandLine       ? new StringReader(input.InputContent) :
+                input.InputContent == "-" ? Console.In :
+                                            new StreamReader(new FileStream(input.InputContent, FileMode.Open, FileAccess.Read));
 
-            using var tok = new GlugTokenizer(sourceReader, sourceName);
+            IGlugTokenStream tok = new GlugTokenizer(sourceReader, sourceName);
 
-            if (options.DumpTokenStreamAndExit) {
-                DumpTokenStream(tok);
-                return;
+            if (input.DumpTokenStream) {
+                var newTok = new ResettableTokenStream(tok);
+                tok.Dispose();
+                DumpTokenStream(newTok);
+                newTok.Reset();
+                tok = newTok;
             }
 
             var root = TypicalCompiler.Parse(tok);
-
-            if (options.DumpAST || options.DumpASTAndExit) {
+            tok.Dispose();
+            
+            if (input.DumpAST) {
                 new DumpVisitor(new IndentedWriter(Console.Out)).VisitNode(root);
-
-                if (options.DumpASTAndExit) return;
             }
 
             var unit = TypicalCompiler.PostProcessAndCodeGen(root);
 
-            if (options.DumpUnit || options.DumpUnitAndExit) {
+            if (input.DumpUnit) {
                 DumpUnit(unit);
-
-                if (options.DumpUnitAndExit) return;
             }
 
+            if (!input.Execute) return;
+            
             var vm = new GlosViMa();
             vm.WorkingDirectory = Environment.CurrentDirectory;
 
@@ -185,14 +247,20 @@ namespace GeminiLab.Gliep.Dumper {
             GlosBuiltInFunctionGenerator.AddFromInstanceFunctions(new Functions(vm), global);
             try {
                 var j1 = GlosUnitJsonSerializer.ToJson(unit);
-                
+
                 Console.WriteLine(j1.ToString(JsonStringifyOption.Inline | JsonStringifyOption.Compact | JsonStringifyOption.AsciiOnly));
-                
+
                 vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);
             } catch (Exception ex) {
                 Console.WriteLine($@"{ex.GetType().Name}: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);
             }
+        }
+
+        public static void Main(string[] args) {
+            var opt = new CommandLineParser<CommandLineOptions>().Parse(args);
+
+            opt.Inputs.ForEach(ProcessInput);
         }
     }
 }

@@ -1,28 +1,63 @@
+using System.Collections.Generic;
 using GeminiLab.Core2.CommandLineParser;
+using GeminiLab.Core2.CommandLineParser.Default;
 
 namespace GeminiLab.Gliep.Dumper {
     // ReSharper disable UnassignedGetOnlyAutoProperty UnusedAutoPropertyAccessor.Local ClassNeverInstantiated.Global
     public class CommandLineOptions {
-        [Option(Option = 'k', LongOption = "dump-token-stream-and-exit")]
-        public bool DumpTokenStreamAndExit { get; private set; }
+        [ShortOption('t'), LongOption("dump-token-stream")]
+        private bool DumpTokenStream { get; set; }
 
-        [Option(Option = 'a', LongOption = "dump-ast")]
-        public bool DumpAST { get; private set; }
+        [ShortOption('a'), LongOption("dump-ast")]
+        private bool DumpAST { get; set; }
 
-        [Option(Option = 's', LongOption = "dump-ast-and-exit")]
-        public bool DumpASTAndExit { get; private set; }
+        [ShortOption('u'), LongOption("dump-unit")]
+        private bool DumpUnit { get; set; }
 
-        [Option(Option = 'u', LongOption = "dump-unit")]
-        public bool DumpUnit { get; private set; }
+        [ShortOption('n'), LongOption("do-not-execute")]
+        private bool DoNotExecute { get; set; }
 
-        [Option(Option = 'n', LongOption = "dump-unit-and-exit")]
-        public bool DumpUnitAndExit { get; private set; }
+        private void SetDefaultOptions() {
+            DumpTokenStream = DumpAST = DumpUnit = DoNotExecute = false;
+        }
 
-        [Option(Option = 'i', LongOption = "input")]
-        public string Input { get; private set; } = "-";
+        [ShortOption('c', OptionParameter.Required), LongOption("code", OptionParameter.Required)]
+        private void OnCommandLineSource(string code) {
+            Inputs.Add(new Input(DumpTokenStream, DumpAST, DumpUnit, !DoNotExecute, true, code));
+            
+            SetDefaultOptions();
+        }
 
-        [Option(Option = 'c', LongOption = "code")]
-        public string? Code { get; private set; } = null;
+        [NonOptionArgument]
+        private void OnFileSource(string file) {
+            Inputs.Add(new Input(DumpTokenStream, DumpAST, DumpUnit, !DoNotExecute, false, file));
+            
+            SetDefaultOptions();
+        }
+
+        public class Input {
+            public Input(bool dumpTokenStream, bool dumpAST, bool dumpUnit, bool execute, bool isCommandLine, string inputContent) {
+                DumpTokenStream = dumpTokenStream;
+                DumpAST = dumpAST;
+                DumpUnit = dumpUnit;
+                Execute = execute;
+                IsCommandLine = isCommandLine;
+                InputContent = inputContent;
+            }
+            
+            public bool   DumpTokenStream { get; set; }
+            public bool   DumpAST         { get; set; }
+            public bool   DumpUnit        { get; set; }
+            public bool   Execute         { get; set; }
+            public bool   IsCommandLine   { get; set; }
+            public string InputContent    { get; set; }
+        }
+
+        public IList<Input> Inputs { get; } = new List<Input>();
+        
+        public CommandLineOptions() {
+            SetDefaultOptions();
+        }
     }
     // ReSharper restore UnassignedGetOnlyAutoProperty UnusedAutoPropertyAccessor.Local ClassNeverInstantiated.Global
 }
