@@ -4,6 +4,7 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Text;
 using GeminiLab.Core2;
 using GeminiLab.Core2.CommandLineParser;
+using GeminiLab.Core2.CommandLineParser.Default;
 using GeminiLab.Core2.IO;
 using GeminiLab.Core2.Logger;
 using GeminiLab.Core2.Logger.Appenders;
@@ -13,12 +14,12 @@ using GeminiLab.Glute.Compile;
 
 namespace GeminiLab.Glute {
     public class CommandLineOptions {
-        [Option(Option = 'd')] public string Path { get; set; } = ".";
+        [ShortOption('d')] public string Path { get; set; } = ".";
     }
 
     public static class Program {
         public static void Main(string[] args) {
-            var options = CommandLineParser<CommandLineOptions>.Parse(args);
+            var options = new CommandLineParser<CommandLineOptions>().Parse(args);
 
             /*
             var tree = new GluteParser(new GluteTokenizer(Console.In)).Parse();
