@@ -230,6 +230,13 @@
     
         May be resolved by a private NuGet server and CD system.
 
+    *(2020/10/12) Breakup plan*:
+
+    - `Glos.Code`: Model, builder and de/serialization of codes executable on Glos.
+    - `Glos`: Glos execution engine.
+    - `Glug`: Glug compiler.
+    - `Gliep`: Runtime.
+
 - [ ] *(2020/09/10)* Better CE system
 
     - [ ] From exception to message

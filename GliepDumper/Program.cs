@@ -162,6 +162,45 @@ namespace GeminiLab.Gliep.Dumper {
             }
         }
 
+        public static void DumpHex(ReadOnlySpan<byte> b) {
+            var len = b.Length;
+
+            int ptr = 0;
+            while (ptr < len) {
+                Console.Write($@"{ptr:X8} ");
+
+                for (int offset = 0; offset < 16; ++offset) {
+                    if (ptr + offset < len) {
+                        Console.Write($@" {b[ptr + offset]:X2}");
+                    } else {
+                        Console.Write(@"   ");
+                    }
+                    if (offset == 7) Console.Write(' ');
+                }
+
+                Console.Write(@" |");
+                
+                for (int offset = 0; offset < 16; ++offset) {
+                    if (ptr + offset < len) {
+                        Console.Write(ToPrintable(b[ptr + offset]));
+                    } else {
+                        Console.Write(' ');
+                    }
+                    if (offset == 7) Console.Write(' ');
+                }
+                
+                Console.WriteLine(@"|");
+
+                ptr += 16;
+            }
+
+            static char ToPrintable(byte input) {
+                if (input >= ' ' && input <= '~') return (char)input;
+
+                return '.';
+            }
+        }
+        
         public class ResettableTokenStream : IGlugTokenStream {
             public void Dispose() { }
 
@@ -247,9 +286,11 @@ namespace GeminiLab.Gliep.Dumper {
             GlosBuiltInFunctionGenerator.AddFromInstanceFunctions(new Functions(vm), global);
             try {
                 var j1 = GlosUnitJsonSerializer.ToJson(unit);
+                var bin = GlosUnitSerializer.Serialize(unit);
 
                 Console.WriteLine(j1.ToString(JsonStringifyOption.Inline | JsonStringifyOption.Compact | JsonStringifyOption.AsciiOnly));
-
+                DumpHex(bin);
+                
                 vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);
             } catch (Exception ex) {
                 Console.WriteLine($@"{ex.GetType().Name}: {ex.Message}");
