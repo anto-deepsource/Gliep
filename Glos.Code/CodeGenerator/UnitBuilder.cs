@@ -17,6 +17,11 @@ namespace GeminiLab.Glos.CodeGenerator {
             return _stringTable[str] = _stringTable.Count;
         }
 
+        public int AddNewString(string str) {
+            _impl.RealStringTable.Add(str);
+            return _stringTable[str] = _stringTable.Count;
+        }
+
         public int StringCount => _stringTable.Count;
 
 #endregion

@@ -4,12 +4,17 @@ using System.Runtime.InteropServices;
 namespace GeminiLab.Glos.Serialization {
     [StructLayout(LayoutKind.Explicit)]
     public struct GlosUnitHeader {
-        public const uint MagicValue = 0x44614c47;
+        public const uint MagicValue   = 0x44614c47;
+        public const byte MagicValueB0 = 0x47;
+        public const byte MagicValueB1 = 0x4c;
+        public const byte MagicValueB2 = 0x61;
+        public const byte MagicValueB3 = 0x44;
 
         [FieldOffset(0x00)] public uint   Magic;
+        [FieldOffset(0x04)] public uint   FileVersion;
         [FieldOffset(0x04)] public ushort FileVersionMinor;
         [FieldOffset(0x06)] public ushort FileVersionMajor;
-        [FieldOffset(0x08)] public uint   Reserved;
+        [FieldOffset(0x08)] public uint   FileLength;
         [FieldOffset(0x0c)] public uint   FirstSectionOffset;
     }
 

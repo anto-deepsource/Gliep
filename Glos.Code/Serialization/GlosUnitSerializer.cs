@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using GeminiLab.Glos.CodeGenerator;
 
 namespace GeminiLab.Glos.Serialization {
     public static class GlosUnitSerializer {
@@ -32,14 +34,14 @@ namespace GeminiLab.Glos.Serialization {
 
             var totalLength = headerSize + sectionHeaderSize * 2 + stringSectionLength + functionSectionLength;
             var mem = Marshal.AllocHGlobal(totalLength);
-            
+
             unchecked {
                 var header = (GlosUnitHeader*) mem.ToPointer();
 
                 header->Magic = GlosUnitHeader.MagicValue;
                 header->FileVersionMinor = 0;
                 header->FileVersionMajor = 1;
-                header->Reserved = 0;
+                header->FileLength = (uint) totalLength;
                 header->FirstSectionOffset = (uint) headerSize;
 
                 var stringSectionHeader = (GlosUnitSectionHeader*) (mem + headerSize).ToPointer();
@@ -76,12 +78,12 @@ namespace GeminiLab.Glos.Serialization {
 
                     functionHeader->FunctionHeaderSize = (uint) sizeof(GlosUnitFunctionHeader);
                     functionHeader->CodeLength = (uint) fun.Code.Length;
-                    functionHeader->Flags = (uint) (unit.Entry == fid ?  GlosUnitFunctionFlags.Entry : GlosUnitFunctionFlags.Default);
+                    functionHeader->Flags = (uint) (unit.Entry == fid ? GlosUnitFunctionFlags.Entry : GlosUnitFunctionFlags.Default);
                     functionHeader->VariableInContextCount = (uint) fun.VariableInContext.Count;
                     functionHeader->LocalVariableCount = (uint) fun.LocalVariableSize;
 
                     ptr += sizeof(GlosUnitFunctionHeader);
-                    
+
                     var byteCnt = encoding.GetByteCount(fun.Name);
                     *(uint*) ptr = (uint) byteCnt;
                     fixed (char* chars = fun.Name) {
@@ -103,13 +105,13 @@ namespace GeminiLab.Glos.Serialization {
                     }
 
                     ptr += fun.Code.Length;
-                    
+
                     ++fid;
                 }
             }
 
             var result = new byte[totalLength];
-                
+
             Marshal.Copy(mem, result, 0, totalLength);
             Marshal.FreeHGlobal(mem);
 
@@ -118,6 +120,94 @@ namespace GeminiLab.Glos.Serialization {
 
         public static void SerializeToStream(IGlosUnit unit, Stream stream) {
             stream.Write(Serialize(unit).AsSpan());
+        }
+
+        public unsafe static IGlosUnit? Deserialize(byte[] source) {
+            var encoding = new UTF8Encoding(false);
+            var builder = new UnitBuilder();
+            IntPtr mem = IntPtr.Zero;
+
+            try {
+                var inputSize = source.Length;
+
+                mem = Marshal.AllocHGlobal(inputSize);
+                Marshal.Copy(source, 0, mem, inputSize);
+
+                var basePtr = (byte*) mem.ToPointer();
+
+                var header = (GlosUnitHeader*) basePtr;
+                if (header->Magic != GlosUnitHeader.MagicValue
+                 || header->FileVersion > 0x10000
+                 || header->FileLength > inputSize) {
+                    return null;
+                }
+
+                var nextSectionOffset = header->FirstSectionOffset;
+                GlosUnitSectionHeader* sectionHeader;
+                while (nextSectionOffset > 0 && nextSectionOffset < header->FileLength) {
+                    sectionHeader = (GlosUnitSectionHeader*) (basePtr + nextSectionOffset);
+                    nextSectionOffset = sectionHeader->NextOffset;
+
+                    var sectionBodyPtr = ((byte*) sectionHeader) + sectionHeader->SectionHeaderLength;
+                    var sectionBodySize = sectionHeader->SectionLength - sectionHeader->SectionHeaderLength;
+                    var sectionBodyEnd = sectionBodyPtr + sectionBodySize;
+
+                    var ptr = sectionBodyPtr;
+
+                    switch ((GlosUnitSectionType) sectionHeader->SectionType) {
+                    case GlosUnitSectionType.FunctionSection:
+                        while (ptr < sectionBodyEnd) {
+                            var funHeader = (GlosUnitFunctionHeader*) ptr;
+                            ptr += sizeof(GlosUnitFunctionHeader);
+
+                            var name = ReadString(ref ptr, null);
+                            var vic = new List<string>();
+                            for (int i = 0; i < funHeader->VariableInContextCount; ++i) {
+                                vic.Add(ReadString(ref ptr, null));
+                            }
+                            
+                            var fid = builder.AddFunctionRaw(new ReadOnlySpan<byte>(ptr, (int) funHeader->CodeLength), (int) funHeader->LocalVariableCount, vic, name);
+
+                            if (((GlosUnitFunctionFlags)funHeader->Flags & GlosUnitFunctionFlags.Entry) == GlosUnitFunctionFlags.Entry) {
+                                builder.Entry = fid;
+                            }
+
+                            ptr += funHeader->CodeLength;
+                        }
+                        break;
+                    case GlosUnitSectionType.StringSection:
+                        while (ptr < sectionBodyEnd) {
+                            builder.AddNewString(ReadString(ref ptr, sectionBodyEnd));
+                        }
+                        break;
+                    default:
+                        return null;
+                    }
+                }
+
+                return builder.GetResult();
+            } catch (Exception e) {
+                return null;
+            } finally {
+                Marshal.FreeHGlobal(mem);
+            }
+
+            string ReadString(ref byte* ptr, byte* limit) {
+                if (limit != null && ptr + sizeof(uint) > limit) {
+                    throw new ArgumentOutOfRangeException(nameof(ptr));
+                }
+
+                var len = *(uint*) ptr;
+                ptr += sizeof(uint);
+
+                if (limit != null && ptr + len > limit) {
+                    throw new ArgumentOutOfRangeException(nameof(ptr));
+                }
+
+                var rv = encoding.GetString(ptr, (int)len);
+                ptr += len;
+                return rv;
+            }
         }
     }
 }

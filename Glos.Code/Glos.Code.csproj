@@ -11,5 +11,4 @@
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <Configurations>Develop;Preview;Release</Configurations>
   </PropertyGroup>
-
 </Project>

@@ -175,44 +175,46 @@ namespace GeminiLab.Gliep.Dumper {
                     } else {
                         Console.Write(@"   ");
                     }
+
                     if (offset == 7) Console.Write(' ');
                 }
 
                 Console.Write(@" |");
-                
+
                 for (int offset = 0; offset < 16; ++offset) {
                     if (ptr + offset < len) {
                         Console.Write(ToPrintable(b[ptr + offset]));
                     } else {
                         Console.Write(' ');
                     }
+
                     if (offset == 7) Console.Write(' ');
                 }
-                
+
                 Console.WriteLine(@"|");
 
                 ptr += 16;
             }
 
             static char ToPrintable(byte input) {
-                if (input >= ' ' && input <= '~') return (char)input;
+                if (input >= ' ' && input <= '~') return (char) input;
 
                 return '.';
             }
         }
-        
+
         public class ResettableTokenStream : IGlugTokenStream {
             public void Dispose() { }
 
             private readonly IEnumerable<GlugToken> _tokens;
             private          IEnumerator<GlugToken> _enumerator;
             private          GlugToken?             _buff;
-            
+
             public ResettableTokenStream(IGlugTokenStream source) {
                 _tokens = source.ToList();
                 _enumerator = _tokens.GetEnumerator();
             }
-            
+
             public bool HasNext() {
                 if (_buff != null) {
                     return true;
@@ -232,7 +234,7 @@ namespace GeminiLab.Gliep.Dumper {
                     _buff = null;
                     return temp;
                 }
-                
+
                 if (!HasNext()) throw new InvalidOperationException();
 
                 return _buff!;
@@ -241,7 +243,7 @@ namespace GeminiLab.Gliep.Dumper {
             public void Reset() {
                 _enumerator.Reset();
             }
-        } 
+        }
 
         public static void ProcessInput(CommandLineOptions.Input input) {
             var sourceName =
@@ -266,7 +268,7 @@ namespace GeminiLab.Gliep.Dumper {
 
             var root = TypicalCompiler.Parse(tok);
             tok.Dispose();
-            
+
             if (input.DumpAST) {
                 new DumpVisitor(new IndentedWriter(Console.Out)).VisitNode(root);
             }
@@ -278,19 +280,20 @@ namespace GeminiLab.Gliep.Dumper {
             }
 
             if (!input.Execute) return;
-            
+
             var vm = new GlosViMa();
             vm.WorkingDirectory = Environment.CurrentDirectory;
 
             var global = new GlosContext(null!);
             GlosBuiltInFunctionGenerator.AddFromInstanceFunctions(new Functions(vm), global);
             try {
-                var j1 = GlosUnitJsonSerializer.ToJson(unit);
                 var bin = GlosUnitSerializer.Serialize(unit);
 
-                Console.WriteLine(j1.ToString(JsonStringifyOption.Inline | JsonStringifyOption.Compact | JsonStringifyOption.AsciiOnly));
                 DumpHex(bin);
-                
+
+                var unit1 = GlosUnitSerializer.Deserialize(bin);
+                if (unit1 != null) DumpUnit(unit1);
+
                 vm.ExecuteUnit(unit, Array.Empty<GlosValue>(), global);
             } catch (Exception ex) {
                 Console.WriteLine($@"{ex.GetType().Name}: {ex.Message}");
