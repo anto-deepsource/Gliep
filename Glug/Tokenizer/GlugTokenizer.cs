@@ -13,15 +13,15 @@ namespace GeminiLab.Glug.Tokenizer {
         private const int MaxAscii        = 128;
         private const int Occupied        = sizeof(GlugTokenType) / sizeof(short) + 1;
 
-        private unsafe struct Node {
-            public       GlugTokenType Type;
-            public       short         Parent;
-            public fixed short         Next[MaxAscii - Occupied];
+        private class Node {
+            public GlugTokenType Type;
+            public short         Parent;
+            public short[]       Next = new short[MaxAscii - Occupied];
 
             public ref short this[char c] => ref Next[c - Occupied];
         }
 
-        private readonly GlosStack<Node> _nodes = new GlosStack<Node>(DefaultNodeSize);
+        private readonly List<Node> _nodes = new List<Node>(DefaultNodeSize);
 
 
         public GlugTokenType Read(string str, int len, ref int ptr) {
@@ -53,9 +53,7 @@ namespace GeminiLab.Glug.Tokenizer {
 
                 if (_nodes[ptr][c] == 0) {
                     _nodes[ptr][c] = (short) _nodes.Count;
-                    ref var nxt = ref _nodes.PushStack();
-                    nxt.Type = GlugTokenType.NotAToken;
-                    nxt.Parent = ptr;
+                    _nodes.Add(new Node { Type = GlugTokenType.NotAToken, Parent = ptr });
                 }
 
                 ptr = _nodes[ptr][c];
@@ -65,7 +63,7 @@ namespace GeminiLab.Glug.Tokenizer {
         }
 
         public AsciiTrie(Dictionary<string, GlugTokenType> values) {
-            _nodes.PushStack().Type = GlugTokenType.NotAToken;
+            _nodes.Add(new Node { Type = GlugTokenType.NotAToken });
             foreach (var (str, type) in values) Insert(str, type);
         }
     }
@@ -220,6 +218,10 @@ namespace GeminiLab.Glug.Tokenizer {
             });
         }
 
+        private static unsafe long FloatToLong(double f) {
+            return *(long*) &f;
+        }
+
         private static GlugToken? ReadNextToken(string line, ref int ptr, string source, int row) {
             int len = line.Length;
 
@@ -241,10 +243,8 @@ namespace GeminiLab.Glug.Tokenizer {
                         rv.Type = GlugTokenType.LiteralInteger;
                         rv.ValueInt = ri;
                     } else {
-                        IntegerFloatUnion ifu = default;
-                        ifu.Float = rf;
                         rv.Type = GlugTokenType.LiteralFloat;
-                        rv.ValueInt = ifu.Integer;
+                        rv.ValueInt = FloatToLong(rf);
                     }
 
                     return rv;

@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Glos\Glos.csproj" />
+    <ProjectReference Include="..\Glos.Code\Glos.Code.csproj" />
   </ItemGroup>
 
   <ItemGroup>

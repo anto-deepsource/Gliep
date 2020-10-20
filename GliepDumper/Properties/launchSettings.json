@@ -2,7 +2,7 @@
   "profiles": {
     "Gliep": {
       "commandName": "Project",
-      "commandLineArgs": "-au -"
+      "commandLineArgs": "-tau -"
     }
   }
 }
