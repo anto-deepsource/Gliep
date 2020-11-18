@@ -19,6 +19,7 @@ namespace GeminiLab.Glos.Serialization {
             }
 
             var functionSectionLength = 0;
+            var funLengths = new List<int>();
             foreach (var fun in unit.FunctionTable) {
                 var funLength = sizeof(GlosUnitFunctionHeader);
                 funLength += sizeof(uint) + encoding.GetByteCount(fun.Name);
@@ -29,6 +30,7 @@ namespace GeminiLab.Glos.Serialization {
 
                 funLength += fun.Code.Length;
 
+                funLengths.Add(funLength);
                 functionSectionLength += funLength;
             }
 
@@ -77,6 +79,7 @@ namespace GeminiLab.Glos.Serialization {
                     var functionHeader = (GlosUnitFunctionHeader*) ptr;
 
                     functionHeader->FunctionHeaderSize = (uint) sizeof(GlosUnitFunctionHeader);
+                    functionHeader->FunctionSize = (uint) funLengths[fid];
                     functionHeader->CodeLength = (uint) fun.Code.Length;
                     functionHeader->Flags = (uint) (unit.Entry == fid ? GlosUnitFunctionFlags.Entry : GlosUnitFunctionFlags.Default);
                     functionHeader->VariableInContextCount = (uint) fun.VariableInContext.Count;
@@ -172,7 +175,7 @@ namespace GeminiLab.Glos.Serialization {
                                 builder.Entry = fid;
                             }
 
-                            ptr += funHeader->CodeLength;
+                            ptr = (byte*) funHeader + funHeader->FunctionSize;
                         }
                         break;
                     case GlosUnitSectionType.StringSection:

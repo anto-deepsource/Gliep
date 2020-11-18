@@ -536,9 +536,13 @@ namespace GeminiLab.Glug.PostProcess {
 
         public override void VisitVectorDef(VectorDef val, FunctionBuilder fun, bool ru) {
             if (ru) {
-                VisitCommaExprList(val.Items, fun);
-                fun.AppendPkv();
-                --_delCount[fun];
+                if (val.Items.Count > 0) {
+                    VisitCommaExprList(val.Items, fun);
+                    fun.AppendPkv();
+                    --_delCount[fun];
+                } else {
+                    fun.AppendLdNVec();
+                }
             } else {
                 foreach (var (_, item) in val.Items) {
                     visitForDiscard(item, fun);

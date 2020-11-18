@@ -7,7 +7,6 @@ using GeminiLab.Core2;
 using GeminiLab.Core2.Collections;
 using GeminiLab.Core2.CommandLineParser;
 using GeminiLab.Core2.IO;
-using GeminiLab.Core2.Markup.Json;
 using GeminiLab.Core2.Text;
 using GeminiLab.Core2.Yielder;
 using GeminiLab.Glos;

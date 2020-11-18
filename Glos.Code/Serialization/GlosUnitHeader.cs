@@ -42,9 +42,10 @@ namespace GeminiLab.Glos.Serialization {
     [StructLayout(LayoutKind.Explicit)]
     public struct GlosUnitFunctionHeader {
         [FieldOffset(0x00)] public uint FunctionHeaderSize;
-        [FieldOffset(0x04)] public uint CodeLength;
-        [FieldOffset(0x08)] public uint Flags;
-        [FieldOffset(0x0c)] public uint VariableInContextCount;
-        [FieldOffset(0x10)] public uint LocalVariableCount;
+        [FieldOffset(0x04)] public uint FunctionSize;
+        [FieldOffset(0x08)] public uint CodeLength;
+        [FieldOffset(0x0c)] public uint Flags;
+        [FieldOffset(0x10)] public uint VariableInContextCount;
+        [FieldOffset(0x14)] public uint LocalVariableCount;
     }
 }
