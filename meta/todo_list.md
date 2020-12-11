@@ -43,6 +43,15 @@
 
     - [x] Function prototypes should not record its parent unit itself. This reference broke too many things. It may be recorded in functions.
 
+    *Update (2020/12/11)*
+
+    New plan: a improved `GlosViMa` which:
+
+    - provides builtin functions
+    - manage units
+    - manage execution contexts, which contain all stacks
+    - manage coroutines
+
 - [x] *(2020/08/29)* Make it clear where trailing separators are allowed/prohibited and make parser more strict
 
     - [ ] **Prohibited** in function parameter list:
@@ -252,4 +261,58 @@
 
     Use debug info above to convert ip to location in file, etc.
 
-- [ ] *(2020/09/10)* *(Planning)* Use reflection to generate builtin functions, so they don't need to check parameters' types every time they're called.
+    *Update (2020/12/11)*
+
+    RE Handling structure
+
+    - [ ] Add `try`, `endtry` and `throw` op.
+    - [ ] Add `try` block and in glug.
+
+        Examples:
+
+        ```
+        # parentheses optional
+        return 0 + try (1 + nil) catch() (return -1);
+        ```
+
+        will be compiled to:
+
+        ```
+        000000: ld.0
+        000001: try 00000f      ; enter try block
+        000006: ld.1
+        000007: ldnil
+        000008: add
+        000009: endtry          ; leave try block
+        00000a: b 000011
+        00000f: ld.neg1         ; enter catch block
+        000010: ret             ; leave catch block
+        000011: add
+        000012: ret
+        ```
+
+        It's forbidden to pop any element from any stack (execution, call, delimiter) if it already exists when entering current try block.
+
+        When entering catch block, all stacks will be restored as if the `try` op were a `b` op, then something (to be determined) containing the exception message and a copy of execution context will be pushed to the stack.
+
+- [ ] *(2020/09/10)* *(Planning)* Use reflection to generate builtin functions, so they don't need to check parameters' types every time they're called
+
+- [ ] *(2020/12/11)* Coroutine system
+    
+    - [ ] Add new `GlosValueType`: `Coroutine`
+
+    - [ ] Add `mkc`, `resume`, `yield` op. `resume` works like `call`, `yield` works like `ret`
+
+    - [ ] Add operators for coroutine creating, resuming and yielding (and possible destroying, but it's convenient enough to exit and destroy a coroutine with `return`). Here is a proposal:
+
+        ```
+        c = -> fn [a, b] {
+            [c, d] = <- [b, a];
+            return [d, c];
+        }
+
+        result0 = c <- [1, 2]
+        result1 = c <- [4, 5]
+
+        print (result0 .. result1) # [2, 1, 5, 4] expected
+        ```
