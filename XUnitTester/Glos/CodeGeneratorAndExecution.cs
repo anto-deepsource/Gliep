@@ -363,7 +363,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
 
             fgen.AppendRet();
 
-            GlosExternalFunction uen = arg => {
+            GlosExternalPureFunction uen = arg => {
                 var t = arg[0].AssertTable();
                 var k = arg[1];
                 var v = arg[2];
@@ -372,7 +372,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 return Array.Empty<GlosValue>();
             };
 
-            GlosExternalFunction ren = arg => {
+            GlosExternalPureFunction ren = arg => {
                 return new[] { arg[1] };
             };
 

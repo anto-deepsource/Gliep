@@ -66,7 +66,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
-        public static ref GlosValue SetExternalFunction(this ref GlosValue v, GlosExternalFunction value) {
+        public static ref GlosValue SetExternalFunction(this ref GlosValue v, GlosExternalPureFunction value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
             v.Type = GlosValueType.ExternalFunction;
@@ -117,7 +117,7 @@ namespace GeminiLab.Glos {
             throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Function);
         }
 
-        public static GlosExternalFunction AssertExternalFunction(this in GlosValue v) {
+        public static GlosExternalPureFunction AssertExternalFunction(this in GlosValue v) {
             if (v.Type == GlosValueType.ExternalFunction) return v.AssumeExternalFunction();
             throw new GlosValueTypeAssertionFailedException(v, GlosValueType.ExternalFunction);
         }
@@ -146,7 +146,7 @@ namespace GeminiLab.Glos {
         public static GlosFunction AssumeFunction(this in GlosValue v) => (GlosFunction) v.ValueObject!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GlosExternalFunction AssumeExternalFunction(this in GlosValue v) => (GlosExternalFunction) v.ValueObject!;
+        public static GlosExternalPureFunction AssumeExternalFunction(this in GlosValue v) => (GlosExternalPureFunction) v.ValueObject!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GlosVector AssumeVector(this in GlosValue v) => (GlosVector) v.ValueObject!;

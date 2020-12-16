@@ -89,8 +89,8 @@ namespace GeminiLab.Glos {
         }
 
         public static bool BothExternalFunction(in GlosValue x, in GlosValue y,
-                                                [NotNullWhen(true)] out GlosExternalFunction? xv,
-                                                [NotNullWhen(true)] out GlosExternalFunction? yv) {
+                                                [NotNullWhen(true)] out GlosExternalPureFunction? xv,
+                                                [NotNullWhen(true)] out GlosExternalPureFunction? yv) {
             if (x.Type == GlosValueType.Function && y.Type == GlosValueType.Function) {
                 xv = x.AssumeExternalFunction();
                 yv = y.AssumeExternalFunction();

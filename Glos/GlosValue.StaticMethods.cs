@@ -3,7 +3,7 @@ namespace GeminiLab.Glos {
         public static implicit operator GlosValue(long v) => NewInteger(v);
         public static implicit operator GlosValue(double v) => NewFloat(v);
         public static implicit operator GlosValue(bool v) => NewBoolean(v);
-        public static implicit operator GlosValue(GlosExternalFunction v) => NewExternalFunction(v);
+        public static implicit operator GlosValue(GlosExternalPureFunction v) => NewExternalFunction(v);
         public static implicit operator GlosValue(GlosTable v) => NewTable(v);
         public static implicit operator GlosValue(string v) => NewString(v);
         public static implicit operator GlosValue(GlosFunction v) => NewFunction(v);
@@ -33,7 +33,7 @@ namespace GeminiLab.Glos {
             return rv;
         }
 
-        public static GlosValue NewExternalFunction(GlosExternalFunction value) {
+        public static GlosValue NewExternalFunction(GlosExternalPureFunction value) {
             var rv = new GlosValue();
             rv.SetExternalFunction(value);
             return rv;

@@ -49,7 +49,7 @@ namespace GeminiLab.Gliep {
             var idx = -1;
 
             return new GlosValue[] {
-                (GlosExternalFunction) (p => new[] { ++idx >= len ? GlosValue.NewNil() : vec[idx] })
+                (GlosExternalPureFunction) (p => new[] { ++idx >= len ? GlosValue.NewNil() : vec[idx] })
             };
         }
 
