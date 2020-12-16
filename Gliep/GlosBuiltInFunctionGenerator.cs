@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -29,7 +29,7 @@ namespace GeminiLab.Gliep {
                 var hasParamArray = param[^1].IsDefined(typeof(ParamArrayAttribute), false);
 
                 // todo: maybe build this function dynamically by reflection to speed it up?
-                ctx.CreateVariable(name, (GlosExternalFunction)(p => {
+                ctx.CreateVariable(name, (GlosExternalPureFunction)(p => {
                     var len = p.Length;
                     var args = new List<object>();
 
