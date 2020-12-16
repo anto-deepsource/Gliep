@@ -49,7 +49,7 @@
 
     - provides builtin functions
     - manage units
-    - manage execution contexts, which contain all stacks
+    - ~~manage execution contexts, which contain all stacks~~ call it coroutine
     - manage coroutines
 
 - [x] *(2020/08/29)* Make it clear where trailing separators are allowed/prohibited and make parser more strict
