@@ -1,3 +1,5 @@
+using System;
+
 namespace GeminiLab.Glos {
     public static class GlosMetamethodNames {
         public static readonly string Add = "__add";
@@ -23,5 +25,27 @@ namespace GeminiLab.Glos {
         public static readonly string Str = "__str";
 
         public static readonly string Hash = "__hash";
+
+        public static string FromOp(GlosOp op) {
+            return op switch {
+                GlosOp.Add => Add,
+                GlosOp.Sub => Sub,
+                GlosOp.Mul => Mul,
+                GlosOp.Div => Div,
+                GlosOp.Mod => Mod,
+                GlosOp.Lsh => Lsh,
+                GlosOp.Rsh => Rsh,
+                GlosOp.And => And,
+                GlosOp.Orr => Orr,
+                GlosOp.Xor => Xor,
+                GlosOp.Lss => Lss,
+                GlosOp.Equ => Equ,
+                GlosOp.Ren => Ren,
+                GlosOp.Uen => Uen,
+                GlosOp.Not => Not,
+                GlosOp.Neg => Neg,
+                _          => throw new ArgumentOutOfRangeException(),
+            };
+        }
     }
 }
