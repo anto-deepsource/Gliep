@@ -9,6 +9,7 @@ namespace GeminiLab.Glos {
         public int          PrivateStackBase;
         public int          InstructionPointer;
         public int          DelimiterStackBase;
+        public int          ReturnSize;
         public GlosFunction Function;
         public GlosContext  Context;
     }

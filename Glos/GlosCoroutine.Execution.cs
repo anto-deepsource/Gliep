@@ -78,7 +78,7 @@ namespace GeminiLab.Glos {
             return true;
         }
 
-        private void pushNewCallFrame(int bptr, GlosFunction function, int argc, GlosContext? context) {
+        private void pushNewStackFrame(int bptr, GlosFunction function, int argc, GlosContext? context, int returnSize) {
             ref var frame = ref pushCallStackFrame();
 
             frame.Function = function;
@@ -92,6 +92,8 @@ namespace GeminiLab.Glos {
             frame.InstructionPointer = 0;
             frame.DelimiterStackBase = _dptr;
 
+            frame.ReturnSize = returnSize;
+            
             foreach (var s in function.Prototype.VariableInContext) frame.Context.CreateVariable(s);
         }
 
@@ -102,30 +104,29 @@ namespace GeminiLab.Glos {
         }
 
         public ref struct ExecResult {
-            public ExecResultType          Result;
-            public GlosValue[]             ReturnValues;
-            public int                     CoroutineToResume;
+            public ExecResultType Result;
+            public GlosValue[]    ReturnValues;
+            public int            CoroutineToResume;
         }
 
-        private ExecResult execute(int callStackBase, bool allowCoroutineSchedule) { 
+        private ExecResult execute(int callStackBase, bool allowCoroutineSchedule) {
             var bptr = _sptr;
 
             int ip = 0;
             GlosFunctionPrototype proto = null!;
-            ReadOnlySpan<byte> code = default;
             int len = 0;
             IGlosUnit unit = null!;
             GlosContext ctx = null!, global = null!;
 
             try {
-                restoreStatus(ref code);
+                restoreStatus();
 
                 while (_cptr > callStackBase) {
                     if (ip < 0 || ip > len) {
                         throw new GlosInvalidInstructionPointerException();
                     }
 
-                    if (!ReadInstructionAndImmediate(code, ref ip, out var op, out long imms, out bool immOnStack))
+                    if (!ReadInstructionAndImmediate(proto.Code, ref ip, out var op, out long imms, out bool immOnStack))
                         throw new GlosUnexpectedEndOfCodeException();
 
                     if (immOnStack) {
@@ -139,7 +140,7 @@ namespace GeminiLab.Glos {
                     // execution
                     switch (cat) {
                     case GlosOpCategory.BinaryOperator:
-                        executeBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
+                        executeBinaryOperation(op);
                         popStack();
                         break;
                     case GlosOpCategory.TableVectorOperator when op == GlosOp.Smt:
@@ -237,7 +238,7 @@ namespace GeminiLab.Glos {
                         break;
                     }
                     case GlosOpCategory.UnaryOperator:
-                        executeUnaryOperation(ref stackTop(), in stackTop(), op);
+                        executeUnaryOperation(op);
                         break;
                     case GlosOpCategory.ContextOperator when op == GlosOp.Rvc:
                         stackTop() = ctx.GetVariableReference(stackTop().AssertString());
@@ -368,10 +369,7 @@ namespace GeminiLab.Glos {
                             popUntil(ptr + nextRetc);
                         } else if (funv.Type == GlosValueType.Function) {
                             var fun = funv.AssertFunction();
-                            storeStatus();
-                            pushNewCallFrame(ptr, fun, nextArgc, null);
-                            restoreStatus(ref code);
-                            pushUntil(callStackTop().PrivateStackBase);
+                            callGlosFunction(fun, nextArgc, -1);
                         } else {
                             throw new GlosValueNotCallableException(funv);
                         }
@@ -383,11 +381,24 @@ namespace GeminiLab.Glos {
                         var rtb = popDelimiter();
                         var retc = _sptr - rtb;
 
+                        var returnSize = callStackTop().ReturnSize;
+                        if (returnSize >= 0) {
+                            while (retc > returnSize) {
+                                popStack();
+                                --retc;
+                            }
+
+                            while (retc < returnSize) {
+                                pushNil();
+                                ++retc;
+                            }
+                        }
+                        
                         _stack.AsSpan(rtb, retc).CopyTo(_stack.AsSpan(callStackTop().StackBase, retc));
                         popUntil(callStackTop().StackBase + retc);
                         popCurrentFrameDelimiter();
                         popCallStackFrame();
-                        restoreStatus(ref code);
+                        restoreStatus();
                         break;
                     }
                     case GlosOpCategory.Others when op == GlosOp.Bind:
@@ -443,22 +454,29 @@ namespace GeminiLab.Glos {
 
                 return new ExecResult { Result = ExecResultType.Return, ReturnValues = rv };
             } catch (GlosException ex) when (!(ex is GlosRuntimeException)) {
-                throw new GlosRuntimeException(this, ex);
+                throw new Exception();
+                // throw new GlosRuntimeException(this, ex);
             } finally {
                 storeStatus();
             }
 
 #region Local Functions
 
-            void restoreStatus(ref ReadOnlySpan<byte> codeRef) {
+            void callGlosFunction(GlosFunction fun, int argc, int returnSize) {
+                storeStatus();
+                pushNewStackFrame(_sptr - argc, fun, argc, null, returnSize);
+                restoreStatus();
+                pushUntil(callStackTop().PrivateStackBase);
+            }
+            
+            void restoreStatus() {
                 if (_cptr <= callStackBase) return;
 
                 ref var frame = ref callStackTop();
 
                 ip = frame.InstructionPointer;
                 proto = frame.Function.Prototype;
-                codeRef = proto.Code;
-                len = codeRef.Length;
+                len = proto.Code.Length;
                 unit = frame.Function.Unit;
                 ctx = frame.Context;
                 global = ctx.Global;
@@ -470,16 +488,32 @@ namespace GeminiLab.Glos {
                 frame.InstructionPointer = ip;
             }
 
-            bool unOpUseMetamethod(in GlosValue x, in GlosValue y, GlosOp op) { }
+            bool tryUseBinaryMetamethod(GlosOp op) {
+                
+            }
 
-            bool biOpUseMetamethod(in GlosValue v, GlosOp op) { }
+            bool tryUseUnaryMetamethod(GlosOp op) {
+                
+            }
 
-            void executeBinaryOperation(ref GlosValue dest, in GlosValue x, in GlosValue y, GlosOp op) { }
+            void executeBinaryOperation(GlosOp op) {
+                if (tryUseBinaryMetamethod(op)) {
+                    return;
+                }
+                
+                GlosValueStaticCalculator.ExecuteBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
+                popStack();
+            }
 
-            void executeUnaryOperation(ref GlosValue dest, in GlosValue v, GlosOp op) { }
+            void executeUnaryOperation(GlosOp op) {
+                if (tryUseUnaryMetamethod(op)) {
+                    return;
+                }
+                
+                GlosValueStaticCalculator.ExecuteUnaryOperation(ref stackTop(), in stackTop(), op);
+            }
 
 #endregion
-            
         }
 
         public GlosValue[] ExecuteFunctionSync(GlosFunction function, GlosValue[]? args = null, GlosContext? thisContext = null) {
@@ -488,7 +522,7 @@ namespace GeminiLab.Glos {
             var firstArgc = args?.Length ?? 0;
             args?.AsSpan().CopyTo(_stack.AsSpan(bptr, firstArgc));
 
-            pushNewCallFrame(bptr, function, firstArgc, thisContext);
+            pushNewStackFrame(bptr, function, firstArgc, thisContext, -1);
             pushUntil(callStackTop().PrivateStackBase);
 
             var result = execute(callStackBase, false);
