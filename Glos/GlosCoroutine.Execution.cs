@@ -141,7 +141,6 @@ namespace GeminiLab.Glos {
                     switch (cat) {
                     case GlosOpCategory.BinaryOperator:
                         executeBinaryOperation(op);
-                        popStack();
                         break;
                     case GlosOpCategory.TableVectorOperator when op == GlosOp.Smt:
                         stackTop().AssertTable().Metatable = stackTop(1).AssertTable();
