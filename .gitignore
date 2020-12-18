@@ -270,7 +270,7 @@ __pycache__/
 *.swp
 
 # resharper
-*.DotSettings
+# *.DotSettings
 
 # ignore
 *.ignore
