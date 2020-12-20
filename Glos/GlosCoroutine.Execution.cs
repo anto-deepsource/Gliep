@@ -326,7 +326,7 @@ namespace GeminiLab.Glos {
                         var nextArgc = _sptr - ptr;
 
                         if (funv.Type == GlosValueType.ExternalFunction) {
-                            var fun = funv.AssertExternalFunction();
+                            var fun = funv.AssertExternalPureFunction();
 
                             var nextArgs = new GlosValue[nextArgc];
                             _stack.AsSpan(ptr, nextArgc).CopyTo(nextArgs.AsSpan());

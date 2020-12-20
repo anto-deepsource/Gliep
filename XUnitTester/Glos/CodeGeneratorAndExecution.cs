@@ -389,8 +389,8 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 .MoveNext().AssertNil()
                 .MoveNext().AssertTable(t => {
                     GlosTableChecker.Create(t)
-                        .Has(GlosMetamethodNames.Uen, v => v.AssertExternalFunction() == uen)
-                        .Has(GlosMetamethodNames.Ren, v => v.AssertExternalFunction() == ren)
+                        .Has(GlosMetamethodNames.Uen, v => v.AssertExternalPureFunction() == uen)
+                        .Has(GlosMetamethodNames.Ren, v => v.AssertExternalPureFunction() == ren)
                         .AssertAllKeyChecked();
                 })
                 .MoveNext().AssertEnd();
