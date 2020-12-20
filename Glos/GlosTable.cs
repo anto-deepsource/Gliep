@@ -108,14 +108,13 @@ namespace GeminiLab.Glos {
         private void resize(int size) {
             _buckets = new int[size];
             Array.Resize(ref _entries, size);
+            _size = size;
 
             for (int i = 0; i < _count; ++i) {
                 ref int bucket = ref getBucket(_entries[i].Hash);
                 _entries[i].Next = bucket - 1;
                 bucket = i + 1;
             }
-
-            _size = size;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
