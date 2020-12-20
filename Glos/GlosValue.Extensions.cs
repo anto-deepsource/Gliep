@@ -184,11 +184,5 @@ namespace GeminiLab.Glos {
         public static void AssertInvokable(this in GlosValue v) {
             if (!v.IsInvokable()) throw new GlosValueNotCallableException(v);
         }
-
-        public static GlosValue[] Invoke(this in GlosValue v, GlosViMa vm, GlosValue[] args) {
-            v.AssertInvokable();
-
-            return v.Type == GlosValueType.Function ? vm.ExecuteFunction(v.AssertFunction(), args) : v.AssertExternalFunction().Invoke(args);
-        }
     }
 }
