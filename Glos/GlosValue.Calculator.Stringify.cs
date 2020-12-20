@@ -22,20 +22,6 @@ namespace GeminiLab.Glos {
                     _                              => throw new ArgumentOutOfRangeException()
                 };
             }
-
-            [ExcludeFromCodeCoverage]
-            public string Stringify(in GlosValue v) {
-                GlosValue temp = default;
-                temp.SetNil();
-
-                if (v.Type == GlosValueType.String) return v.AssumeString();
-
-                if (v.Type == GlosValueType.Table && TryInvokeMetamethod(ref temp, v, _viMa, GlosMetamethodNames.Str)) {
-                    return temp.Type == GlosValueType.String ? temp.AssumeString() : Stringify(temp);
-                }
-
-                return DebugStringify(v);
-            }
         }
     }
 }
