@@ -52,6 +52,12 @@
     - ~~manage execution contexts, which contain all stacks~~ call it coroutine
     - manage coroutines
 
+    *Update (2020/12/21)*
+
+    To be answered:
+
+    - How should unit manager (especially function `require`) react with coroutine system?
+
 - [x] *(2020/08/29)* Make it clear where trailing separators are allowed/prohibited and make parser more strict
 
     - [ ] **Prohibited** in function parameter list:
