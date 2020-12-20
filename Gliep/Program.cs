@@ -18,9 +18,12 @@ namespace GeminiLab.Gliep {
 
         [GlosBuiltInFunction("print")]
         public GlosValue[] Print(params GlosValue[] values) {
+            /*
             Console.WriteLine(values.Select(x => _vm.Calculator.Stringify(x)).JoinBy(" "));
 
             return Array.Empty<GlosValue>();
+            */
+            return Debug(values);
         }
 
         [GlosBuiltInFunction("debug")]

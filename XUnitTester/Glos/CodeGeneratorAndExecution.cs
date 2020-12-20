@@ -167,11 +167,11 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
         public void TableWithUenAndRenMetamethods() {
             var metaUen = Builder.AddFunction();
 
-            metaUen.AppendLdArg(2);
+            metaUen.AppendLdArg(2); // load value
             metaUen.AppendLd(1);
-            metaUen.AppendAdd();
-            metaUen.AppendLdArg(0);
-            metaUen.AppendLdArg(1);
+            metaUen.AppendAdd();    // add value by 1
+            metaUen.AppendLdArg(0); // load table
+            metaUen.AppendLdArg(1); // load key
             metaUen.AppendUenL();
             metaUen.AppendRet();
 
@@ -368,7 +368,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 var k = arg[1];
                 var v = arg[2];
 
-                t.UpdateEntryLocally(v, k);
+                t.UpdateEntry(v, k);
                 return Array.Empty<GlosValue>();
             };
 

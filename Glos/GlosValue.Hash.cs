@@ -1,43 +1,14 @@
+using System;
+
 namespace GeminiLab.Glos {
     public partial struct GlosValue {
-        private long getHash(GlosViMa viMa) {
-            if (_hashCodeCalculated) return _hashCode;
-
-            GlosValue v = default;
-            _hashCode = TryInvokeMetamethod(ref v, this, viMa, GlosMetamethodNames.Hash) ? v.getHash(viMa) : ValueObject!.GetHashCode();
-
-            _hashCodeCalculated = true;
-            return _hashCode;
-        }
-
-        private void preEvalHash() {
-            if (_type == GlosValueType.Table) {
-                _hashCodeCalculated = false;
-                return;
-            }
-
-            _hashCode = _type switch {
-                GlosValueType.Nil              => 0,
-                GlosValueType.Integer          => ValueNumber.Integer,
-                GlosValueType.Float            => ValueNumber.Integer,
-                GlosValueType.Boolean          => ValueNumber.Integer,
-                GlosValueType.String           => StringHash((string) ValueObject!),
-                GlosValueType.Function         => FunctionHash((GlosFunction) ValueObject!),
-                GlosValueType.ExternalFunction => ValueObject!.GetHashCode(),
-                GlosValueType.Vector           => ValueObject!.GetHashCode(),
-                _                              => 0,
-            };
-
-            _hashCodeCalculated = true;
-        }
-
-        private static long Combine(int hi, int lo) {
+        private static ulong Combine(int hi, int lo) {
             unchecked {
-                return (long) (((ulong) (uint) hi) << 32 | (uint) lo);
+                return (((ulong) (uint) hi) << 32) | (uint) lo;
             }
         }
 
-        private static long StringHash(string v) {
+        private static ulong StringHash(string v) {
             int mid = v.Length / 2;
 
             // only this ugly and slow implementation
@@ -45,8 +16,32 @@ namespace GeminiLab.Glos {
             return Combine(v.Substring(0, mid).GetHashCode(), v.Substring(mid).GetHashCode());
         }
 
-        private static long FunctionHash(GlosFunction fun) {
+        private static ulong FunctionHash(GlosFunction fun) {
             return Combine(fun.Prototype.GetHashCode(), fun.ParentContext?.GetHashCode() ?? 0);
+        }
+
+        public readonly ulong Hash() {
+            if (_hashAssigned) {
+                return _hashCode;
+            }
+
+            return unchecked(Type switch {
+                GlosValueType.Nil              => 0ul,
+                GlosValueType.Integer          => (ulong) ValueNumber.Integer,
+                GlosValueType.Float            => (ulong) ValueNumber.Integer,
+                GlosValueType.Boolean          => (ulong) ValueNumber.Integer,
+                GlosValueType.Table            => (ulong) ValueObject!.GetHashCode(),
+                GlosValueType.String           => StringHash(this.AssumeString()),
+                GlosValueType.Function         => FunctionHash(this.AssumeFunction()),
+                GlosValueType.ExternalFunction => (ulong) ValueObject!.GetHashCode(),
+                GlosValueType.Vector           => (ulong) ValueObject!.GetHashCode(),
+                _                              => 0,
+            });
+        }
+
+        public void SetHash(ulong hash) {
+            _hashAssigned = true;
+            _hashCode = hash;
         }
     }
 }

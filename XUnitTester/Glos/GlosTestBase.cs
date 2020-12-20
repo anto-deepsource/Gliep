@@ -14,6 +14,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
         protected GlosValue[] Execute(GlosValue[]? args = null, GlosContext? parentContext = null) {
             using var unit = Builder.GetResult();
             
+            ViMa.ClearCoroutines();
             return ViMa.ExecuteUnit(unit, args, parentContext);
         }
     }

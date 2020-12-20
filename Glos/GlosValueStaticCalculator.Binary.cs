@@ -114,27 +114,24 @@ namespace GeminiLab.Glos {
         }
 
         public static void Equ(ref GlosValue dest, in GlosValue x, in GlosValue y) {
-            if (GlosValue.BothNil(x, y)) dest.SetBoolean(true);
-            else if (GlosValue.BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint == yint);
-            else if (GlosValue.BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat == yfloat);
-            else if (GlosValue.BothString(x, y, out var xstring, out var ystring)) dest.SetBoolean(xstring == ystring);
-            else if (GlosValue.BothBoolean(x, y, out var xbool, out var ybool)) dest.SetBoolean(xbool == ybool);
-            else if (GlosValue.BothFunction(x, y, out var xfun, out var yfun)) dest.SetBoolean(xfun.Prototype == yfun.Prototype && xfun.ParentContext == yfun.ParentContext);
-
-            else dest.SetBoolean(x.Type == y.Type && ReferenceEquals(x.ValueObject, y.ValueObject));
+            dest.SetBoolean(Equals(x, y));
         }
 
         public static void Neq(ref GlosValue dest, in GlosValue x, in GlosValue y) {
-            if (GlosValue.BothNil(x, y)) dest.SetBoolean(false);
-            else if (GlosValue.BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint != yint);
-            else if (GlosValue.BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat != yfloat);
-            else if (GlosValue.BothString(x, y, out var xstring, out var ystring)) dest.SetBoolean(xstring != ystring);
-            else if (GlosValue.BothBoolean(x, y, out var xbool, out var ybool)) dest.SetBoolean(xbool != ybool);
-            else if (GlosValue.BothFunction(x, y, out var xfun, out var yfun)) dest.SetBoolean(xfun.Prototype != yfun.Prototype || xfun.ParentContext != yfun.ParentContext);
-
-            else dest.SetBoolean(x.Type != y.Type || !ReferenceEquals(x.ValueObject, y.ValueObject));
+            dest.SetBoolean(!Equals(x, y));
         }
 
+        public static bool Equals(in GlosValue x, in GlosValue y) {
+            if (GlosValue.BothNil(x, y)) return true;
+            if (GlosValue.BothInteger(x, y, out var xint, out var yint)) return xint == yint;
+            if (GlosValue.BothNumeric(x, y, out var xfloat, out var yfloat)) return xfloat == yfloat;
+            if (GlosValue.BothString(x, y, out var xstring, out var ystring)) return xstring == ystring;
+            if (GlosValue.BothBoolean(x, y, out var xbool, out var ybool)) return xbool == ybool;
+            if (GlosValue.BothFunction(x, y, out var xfun, out var yfun)) return xfun.Prototype == yfun.Prototype && xfun.ParentContext == yfun.ParentContext;
+            
+            return x.Type == y.Type && ReferenceEquals(x.ValueObject, y.ValueObject);
+        }
+        
         public static void ExecuteBinaryOperation(ref GlosValue dest, in GlosValue x, in GlosValue y, GlosOp op) {
             switch (op) {
             case GlosOp.Add:

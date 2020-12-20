@@ -13,5 +13,10 @@ namespace GeminiLab.Glos {
             if (index < 0 || index >= MaxSyscallCount) throw new ArgumentOutOfRangeException();
             _syscalls[index] = syscall;
         }
+
+        public GlosSyscall? GetSyscall(int index) {
+            if (index < 0 || index >= MaxSyscallCount) throw new ArgumentOutOfRangeException();
+            return _syscalls[index];
+        }
     }
 }

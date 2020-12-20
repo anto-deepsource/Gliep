@@ -62,5 +62,11 @@ namespace GeminiLab.Glos {
             rv.SetVector(value);
             return rv;
         }
+
+        public static void Swap(ref GlosValue a, ref GlosValue b) {
+            GlosValue temp = a;
+            a = b;
+            b = temp;
+        }
     }
 }

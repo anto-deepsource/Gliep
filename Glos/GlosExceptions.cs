@@ -8,25 +8,29 @@ namespace GeminiLab.Glos {
     }
 
     public class GlosRuntimeException : GlosException {
-        public GlosRuntimeException(GlosViMa viMa, Exception innerException)
+        public GlosRuntimeException(GlosCoroutine coroutine, Exception innerException)
             : base(string.Format(i18n.Strings.DefaultMessageGlosRuntimeExceptionWithInner, innerException.GetType().Name, innerException.Message), innerException) {
-            ViMa = viMa;
+            ViMa = coroutine.Parent;
+            Coroutine = coroutine;
         }
 
-        public GlosRuntimeException(GlosViMa viMa, string? message = null)
+        public GlosRuntimeException(GlosCoroutine coroutine, string? message = null)
             : base(message ?? i18n.Strings.DefaultMessageGlosRuntimeException) {
-            ViMa = viMa;
+            ViMa = coroutine.Parent;
+            Coroutine = coroutine;
         }
 
-        public GlosRuntimeException(GlosViMa viMa, string message, Exception innerException)
+        public GlosRuntimeException(GlosCoroutine coroutine, string message, Exception innerException)
             : base(message, innerException) {
-            ViMa = viMa;
+            ViMa = coroutine.Parent;
+            Coroutine = coroutine;
         }
 
-        public GlosViMa ViMa { get; }
+        public GlosViMa      ViMa      { get; }
+        public GlosCoroutine Coroutine { get; }
 
         private GlosStackFrame[]? _callStack = null;
-        public GlosStackFrame[] CallStack => _callStack ??= ViMa.CallStackFrames.ToArray();
+        public GlosStackFrame[] CallStack => _callStack ??= Coroutine.CallStackFrames.ToArray();
         
         
     }

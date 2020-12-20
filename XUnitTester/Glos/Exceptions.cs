@@ -20,7 +20,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 Execute();
             });
 
-            Assert.Equal(44, ViMa.CallStackFrames[^1].InstructionPointer);
+            Assert.Equal(44, ViMa.CurrentCoroutine?.CallStackFrames[^1].InstructionPointer);
         }
 
         [Fact]

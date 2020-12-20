@@ -14,26 +14,26 @@ namespace GeminiLab.XUnitTester.Gliep.Misc {
         public static GlosTableChecker Create(GlosTable table) => new GlosTableChecker(table);
 
         public GlosTableChecker HasNot(GlosValue key) {
-            Assert.False(Table.TryReadEntryLocally(key, out _));
+            Assert.False(Table.TryReadEntry(key, out _));
             return this;
         }
 
         public GlosTableChecker Has(GlosValue key) {
             _keysVisited.Add(key);
-            Assert.True(Table.TryReadEntryLocally(key, out _));
+            Assert.True(Table.TryReadEntry(key, out _));
             return this;
         }
 
         public GlosTableChecker Has(GlosValue key, Action<GlosValue> valueChecker) {
             _keysVisited.Add(key);
-            Assert.True(Table.TryReadEntryLocally(key, out var value));
+            Assert.True(Table.TryReadEntry(key, out var value));
             valueChecker(value);
             return this;
         }
 
         public GlosTableChecker Has(GlosValue key, Predicate<GlosValue> valuePredicate) {
             _keysVisited.Add(key);
-            Assert.True(Table.TryReadEntryLocally(key, out var value));
+            Assert.True(Table.TryReadEntry(key, out var value));
             Assert.True(valuePredicate(value));
             return this;
         }

@@ -31,7 +31,7 @@ namespace GeminiLab.Glute {
             _viMa.SetSyscall(0,
                              (stack, callStack, delStack) => {
                                  var v = stack.PopStack();
-                                 output.Write(_viMa.Calculator.Stringify(v));
+                                 // TODO: new stringifier: output.Write(_viMa.Calculator.Stringify(v));
                              });
 
             var unit = GlutePostProcess.PostProcessAndCodeGen(new GluteParser(new GluteTokenizer(input)).Parse());

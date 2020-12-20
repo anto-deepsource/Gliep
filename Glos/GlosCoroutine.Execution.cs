@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace GeminiLab.Glos {
     public enum GlosCoroutineStatus : byte {
@@ -13,23 +15,35 @@ namespace GeminiLab.Glos {
     public partial class GlosCoroutine {
         public GlosCoroutineStatus Status { get; private set; }
 
-        private ReadOnlySpan<GlosValue> resume(ReadOnlySpan<GlosValue> args) {
+        public GlosViMa Parent { get; }
+
+        public ExecResult Resume(ReadOnlySpan<GlosValue> args) {
             switch (Status) {
-            case GlosCoroutineStatus.Initial:
-                break;
+            case GlosCoroutineStatus.Initial: {
+                var fun = callStackTop().Function;
+                var ctx = callStackTop().Context;
+                popCallStackFrame();
+
+                var argc = args.Length;
+                args.CopyTo(_stack.AsSpan(0, argc));
+                pushNewStackFrame(0, fun, argc, ctx, -1);
+                pushUntil(callStackTop().PrivateStackBase);
+                
+                goto case GlosCoroutineStatus.Suspend;
+            }
+            case GlosCoroutineStatus.Suspend: {
+                return execute(0, true);
+            }
             case GlosCoroutineStatus.InStack:
-                break;
             case GlosCoroutineStatus.Running:
+            case GlosCoroutineStatus.Stopped: {
+                throw new InvalidOperationException();
+
                 break;
-            case GlosCoroutineStatus.Suspend:
-                break;
-            case GlosCoroutineStatus.Stopped:
-                break;
+            }
             default:
                 throw new ArgumentOutOfRangeException();
             }
-
-            return new ReadOnlySpan<GlosValue>();
         }
 
         public static bool ReadInstructionAndImmediate(ReadOnlySpan<byte> code, ref int ip, out GlosOp op, out long imm, out bool immOnStack) {
@@ -93,7 +107,7 @@ namespace GeminiLab.Glos {
             frame.DelimiterStackBase = _dptr;
 
             frame.ReturnSize = returnSize;
-            
+
             foreach (var s in function.Prototype.VariableInContext) frame.Context.CreateVariable(s);
         }
 
@@ -110,9 +124,12 @@ namespace GeminiLab.Glos {
         }
 
         private ExecResult execute(int callStackBase, bool allowCoroutineSchedule) {
-            var bptr = _sptr;
+            var bptr = callStackTop().StackBase;
 
             int ip = 0;
+            int phase = 0, phaseCount = 0;
+            GlosOp lastOp = GlosOp.Invalid;
+            long lastImm = 0;
             GlosFunctionPrototype proto = null!;
             int len = 0;
             IGlosUnit unit = null!;
@@ -126,12 +143,29 @@ namespace GeminiLab.Glos {
                         throw new GlosInvalidInstructionPointerException();
                     }
 
-                    if (!ReadInstructionAndImmediate(proto.Code, ref ip, out var op, out long imms, out bool immOnStack))
-                        throw new GlosUnexpectedEndOfCodeException();
+                    GlosOp op;
+                    long imms;
+                    if (phase == 0) {
+                        if (!ReadInstructionAndImmediate(proto.Code, ref ip, out op, out imms, out bool immOnStack)) {
+                            throw new GlosUnexpectedEndOfCodeException();
+                        }
 
-                    if (immOnStack) {
-                        imms = stackTop().AssertInteger();
-                        popStack();
+                        if (immOnStack) {
+                            imms = stackTop().AssertInteger();
+                            popStack();
+                        }
+
+                        lastOp = op;
+                        lastImm = imms;
+                        phaseCount = GlosOpExecutionInfo.Phases[(int) op];
+                        phase = phaseCount > 1 ? 1 : 0;
+                    } else {
+                        op = lastOp;
+                        imms = lastImm;
+                        phase += 1;
+                        if (phase == phaseCount) {
+                            phase = 0;
+                        }
                     }
 
                     var cat = GlosOpInfo.Categories[(int) op];
@@ -139,8 +173,11 @@ namespace GeminiLab.Glos {
                     GlosValue temp = default;
                     // execution
                     switch (cat) {
-                    case GlosOpCategory.BinaryOperator:
-                        executeBinaryOperation(op);
+                    case GlosOpCategory.ArithmeticOperator:
+                        executeArithmeticOperation(op);
+                        break;
+                    case GlosOpCategory.ComparisonOperator:
+                        executeComparisonOperation(op);
                         break;
                     case GlosOpCategory.TableVectorOperator when op == GlosOp.Smt:
                         stackTop().AssertTable().Metatable = stackTop(1).AssertTable();
@@ -154,78 +191,6 @@ namespace GeminiLab.Glos {
                         }
 
                         break;
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Ren: {
-                        ref var target = ref stackTop(1);
-
-                        if (target.Type == GlosValueType.Vector) {
-                            var vec = target.AssumeVector();
-                            var idx = stackTop().ValueNumber.Integer;
-                            if (stackTop().Type == GlosValueType.Integer && idx >= 0 && idx < vec.Count) {
-                                target = vec[(int) idx];
-                            } else {
-                                target.SetNil();
-                            }
-                        } else {
-                            if (target.AssertTable().TryReadEntry(stackTop(), out temp)) {
-                                target = temp;
-                            } else {
-                                target.SetNil();
-                            }
-                        }
-
-                        popStack();
-                        break;
-                    }
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Uen: {
-                        ref var target = ref stackTop(1);
-
-                        if (target.Type == GlosValueType.Vector) {
-                            stackTop(1).AssumeVector()[(int) stackTop().AssertInteger()] = stackTop(2);
-                        } else {
-                            stackTop(1).AssertTable().UpdateEntry(stackTop(), stackTop(2));
-                        }
-
-                        popStack(3);
-                        break;
-                    }
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.RenL: {
-                        ref var target = ref stackTop(1);
-
-                        if (target.Type == GlosValueType.Vector) {
-                            var vec = target.AssumeVector();
-                            var idx = stackTop().ValueNumber.Integer;
-                            if (stackTop().Type == GlosValueType.Integer && idx >= 0 && idx < vec.Count) {
-                                target = vec[(int) idx];
-                            } else {
-                                target.SetNil();
-                            }
-                        } else {
-                            if (target.AssertTable().TryReadEntryLocally(stackTop(), out temp)) {
-                                target = temp;
-                            } else {
-                                target.SetNil();
-                            }
-                        }
-
-                        popStack();
-                        break;
-                    }
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.UenL: {
-                        ref var target = ref stackTop(1);
-
-                        if (target.Type == GlosValueType.Vector) {
-                            stackTop(1).AssumeVector()[(int) stackTop().AssertInteger()] = stackTop(2);
-                        } else {
-                            stackTop(1).AssertTable().UpdateEntryLocally(stackTop(), stackTop(2));
-                        }
-
-                        popStack(3);
-                        break;
-                    }
-                    case GlosOpCategory.TableVectorOperator when op == GlosOp.Ien:
-                        stackTop(2).AssertTable().UpdateEntryLocally(stackTop(1), stackTop());
-                        popStack(2);
-                        break;
                     case GlosOpCategory.TableVectorOperator when op == GlosOp.Pshv:
                         stackTop().AssertVector().Push(in stackTop(1));
                         popStack(2);
@@ -236,6 +201,9 @@ namespace GeminiLab.Glos {
                         tail.SetNil();
                         break;
                     }
+                    case GlosOpCategory.TableVectorOperator:
+                        executeTableVectorOperator(op);
+                        break;
                     case GlosOpCategory.UnaryOperator:
                         executeUnaryOperation(op);
                         break;
@@ -267,7 +235,7 @@ namespace GeminiLab.Glos {
                         pushStack().SetInteger(op == GlosOp.LdNeg1 ? -1 : imms);
                         break;
                     case GlosOpCategory.LoadMisc when op == GlosOp.LdNTbl:
-                        pushStack().SetTable(new GlosTable(this));
+                        pushStack().SetTable(new GlosTable());
                         break;
                     case GlosOpCategory.LoadMisc when op == GlosOp.LdNil:
                         pushNil();
@@ -338,7 +306,7 @@ namespace GeminiLab.Glos {
                         break;
                     }
                     case GlosOpCategory.Syscall:
-                        // _syscalls[(int) imms]?.Invoke(_stack, _callStack, _delStack);
+                        Parent.GetSyscall((int) imms)?.Invoke(_stack, _callStack, _delStack);
                         break;
                     case GlosOpCategory.Others when op == GlosOp.Dup:
                         pushStack();
@@ -392,7 +360,7 @@ namespace GeminiLab.Glos {
                                 ++retc;
                             }
                         }
-                        
+
                         _stack.AsSpan(rtb, retc).CopyTo(_stack.AsSpan(callStackTop().StackBase, retc));
                         popUntil(callStackTop().StackBase + retc);
                         popCurrentFrameDelimiter();
@@ -453,8 +421,7 @@ namespace GeminiLab.Glos {
 
                 return new ExecResult { Result = ExecResultType.Return, ReturnValues = rv };
             } catch (GlosException ex) when (!(ex is GlosRuntimeException)) {
-                throw new Exception();
-                // throw new GlosRuntimeException(this, ex);
+                throw new GlosRuntimeException(this, ex);
             } finally {
                 storeStatus();
             }
@@ -467,13 +434,17 @@ namespace GeminiLab.Glos {
                 restoreStatus();
                 pushUntil(callStackTop().PrivateStackBase);
             }
-            
+
             void restoreStatus() {
                 if (_cptr <= callStackBase) return;
 
                 ref var frame = ref callStackTop();
 
                 ip = frame.InstructionPointer;
+                phase = frame.Phase;
+                phaseCount = frame.PhaseCount;
+                lastOp = frame.LastOp;
+                lastImm = frame.LastImm;
                 proto = frame.Function.Prototype;
                 len = proto.Code.Length;
                 unit = frame.Function.Unit;
@@ -482,34 +453,290 @@ namespace GeminiLab.Glos {
             }
 
             void storeStatus() {
+                if (_cptr <= callStackBase) return;
+
                 ref var frame = ref callStackTop();
 
                 frame.InstructionPointer = ip;
+                frame.Phase = phase;
+                frame.PhaseCount = phaseCount;
+                frame.LastOp = lastOp;
+                frame.LastImm = lastImm;
             }
 
-            bool tryUseBinaryMetamethod(GlosOp op) {
-                
-            }
+            void executeArithmeticOperation(GlosOp op) {
+                var useMetamethod = GlosValue.TryGetMetamethodOfOperand(in stackTop(1), in stackTop(), GlosMetamethodNames.FromOp(op), false, out var mm);
 
-            bool tryUseUnaryMetamethod(GlosOp op) {
-                
-            }
-
-            void executeBinaryOperation(GlosOp op) {
-                if (tryUseBinaryMetamethod(op)) {
-                    return;
+                if (!useMetamethod) {
+                    GlosValueStaticCalculator.ExecuteBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
+                    popStack();
+                } else {
+                    if (mm.Type == GlosValueType.Function) {
+                        callGlosFunction(mm.AssumeFunction(), 2, 1);
+                    }
                 }
-                
-                GlosValueStaticCalculator.ExecuteBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
-                popStack();
+            }
+
+            void executeComparisonOperation(GlosOp op) {
+                if (op == GlosOp.Lss || op == GlosOp.Gtr) {
+                    if (phase == 1) {
+                        var useMetamethod = GlosValue.TryGetMetamethodOfOperand(in stackTop(1), in stackTop(), GlosMetamethodNames.Lss, false, out var lss);
+
+                        if (!useMetamethod) {
+                            GlosValueStaticCalculator.ExecuteBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
+                            popStack();
+                            phase = 0;
+                        } else {
+                            if (op == GlosOp.Gtr) {
+                                GlosValue.Swap(ref stackTop(1), ref stackTop());
+                            }
+
+                            if (lss.Type == GlosValueType.Function) {
+                                callGlosFunction(lss.AssumeFunction(), 2, 1);
+                            }
+                        }
+                    } else { // last phase
+                        stackTop().SetBoolean(stackTop().Truthy());
+                    }
+                } else if (op == GlosOp.Equ || op == GlosOp.Neq) {
+                    if (phase == 1) {
+                        var useMetamethod = GlosValue.TryGetMetamethodOfOperand(in stackTop(1), in stackTop(), GlosMetamethodNames.Equ, false, out var equ);
+
+                        if (!useMetamethod) {
+                            GlosValueStaticCalculator.ExecuteBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
+                            popStack();
+                            phase = 0;
+                        } else {
+                            if (equ.Type == GlosValueType.Function) {
+                                callGlosFunction(equ.AssumeFunction(), 2, 1);
+                            }
+                        }
+                    } else { // last phase
+                        if (op == GlosOp.Neq) {
+                            stackTop().SetBoolean(stackTop().Falsey());
+                        } else {
+                            stackTop().SetBoolean(stackTop().Truthy());
+                        }
+                    }
+                } else if (op == GlosOp.Leq || op == GlosOp.Geq) {
+                    // if we should use metamethods, the stack will be like:
+                    // 
+                    // - after the first phase:
+                    // 
+                    // | opl | opr | equ metamethod | args for lss metamethod
+                    // ---------------------------------------------------------
+                    // |  by user, |            by vima              
+                    // |  swapped  |
+                    // |  if geq   |
+                    // 
+                    // - before the second phase:
+                    // 
+                    // | opl | opr | equ metamethod | result from lss metamethod
+                    // ---------------------------------------------------------
+                    // |  by user, |            by vima              
+                    // |  swapped  |
+                    // |  if geq   |
+                    // 
+                    // - if lss gives a affirmative answer, we skip the last phase, otherwise the stack will be (after the second phase):
+                    //
+                    // | opl | opr | args for equ metamethod
+                    // ---------------------------------------------------------
+                    // |  by user, |            by vima              
+                    // |  swapped  |
+                    // |  if geq   |
+                    //
+                    // - and before the last phase:
+                    // 
+                    // | opl | opr | final answer
+                    // ---------------------------------------------------------
+                    // |  by user, |            by vima              
+                    // |  swapped  |
+                    // |  if geq   |
+                    if (phase == 1) {
+                        var useMetamethod = GlosValue.TryGetMetamethodOfOperand(in stackTop(1), in stackTop(), GlosMetamethodNames.Lss, false, out var lss);
+                        useMetamethod = GlosValue.TryGetMetamethodOfOperand(in stackTop(1), in stackTop(), GlosMetamethodNames.Equ, false, out var equ) && useMetamethod;
+
+                        if (!useMetamethod) {
+                            GlosValueStaticCalculator.ExecuteBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
+                            popStack();
+                            stackTop().SetBoolean(stackTop().Truthy());
+
+                            phase = 0;
+                        } else {
+                            if (op == GlosOp.Geq) {
+                                GlosValue.Swap(ref stackTop(1), ref stackTop());
+                            }
+
+                            pushStack(equ);
+
+                            pushStack(in stackTop(2));
+                            pushStack(in stackTop(2));
+
+                            if (lss.Type == GlosValueType.Function) {
+                                callGlosFunction(lss.AssumeFunction(), 2, 1);
+                            }
+                        }
+                    } else if (phase == 2) {
+                        stackTop().SetBoolean(stackTop().Truthy());
+                        if (stackTop().AssumeBoolean()) {
+                            popStack(3);
+                            stackTop().SetBoolean(true);
+                            phase = 0;
+                        } else {
+                            var equ = stackTop(1);
+                            popStack(2);
+
+                            pushStack(in stackTop(1));
+                            pushStack(in stackTop(1));
+
+                            if (equ.Type == GlosValueType.Function) {
+                                callGlosFunction(equ.AssumeFunction(), 2, 1);
+                            }
+                        }
+                    } else { // last phase
+                        stackTop(2).SetBoolean(stackTop().Truthy());
+                        popStack(2);
+                    }
+                }
+            }
+
+            void executeTableVectorOperator(GlosOp op) {
+                if (phase == 1) { // first phase: get hash
+                    if (op == GlosOp.Ren) {
+                        if (GlosValue.TryGetMetamethodOfOperand(in stackTop(1), GlosMetamethodNames.Ren, out var ren)) {
+                            if (ren.Type == GlosValueType.Function) {
+                                phase = 0;
+                                callGlosFunction(ren.AssumeFunction(), 2, 1);
+                                
+                                return;
+                            }
+                        }
+                    }
+
+                    if (op == GlosOp.Uen) {
+                        if (GlosValue.TryGetMetamethodOfOperand(in stackTop(1), GlosMetamethodNames.Uen, out var ren)) {
+                            if (ren.Type == GlosValueType.Function) {
+                                var value = stackTop(2);
+                                stackTop(2) = stackTop(1);
+                                stackTop(1) = stackTop();
+                                stackTop() = value;
+
+                                phase = 0;
+                                callGlosFunction(ren.AssumeFunction(), 3, 1);
+                                
+                                return;
+                            }
+                        }
+                    }
+
+                    ref GlosValue key = ref (op == GlosOp.Ien ? ref stackTop(1) : ref stackTop());
+
+                    pushStack(-1);
+                    if (GlosValue.TryGetMetamethodOfOperand(in key, GlosMetamethodNames.Hash, out var fun)) {
+                        pushStack(in key);
+
+                        if (fun.Type == GlosValueType.Function) {
+                            callGlosFunction(fun.AssumeFunction(), 1, 1);
+                        }
+                    } else {
+                        pushStack(unchecked((long) key.Hash()));
+                    }
+                } else if (phase == 2) { // second phase: find entry
+                    var eid = unchecked((int) stackTop(1).AssertInteger());
+                    var hash = unchecked((ulong) stackTop().AssertInteger());
+
+                    ref var key = ref (op == GlosOp.Ien ? ref stackTop(3) : ref stackTop(2));
+                    var table = (op == GlosOp.Ien ? ref stackTop(4) : ref stackTop(3)).AssertTable();
+
+                    eid = table.NextEntry(hash, eid);
+
+                    stackTop(1).SetInteger(eid);
+
+                    if (eid >= 0) {
+                        ref var entry = ref table.GetEntryAt(eid);
+
+                        if (GlosValue.TryGetMetamethodOfOperand(in key, in entry.Key, GlosMetamethodNames.Equ, false, out var equ)) {
+                            pushStack(in key);
+                            pushStack(in entry.Key);
+
+                            if (equ.Type == GlosValueType.Function) {
+                                callGlosFunction(equ.AssumeFunction(), 2, 1);
+                            }
+                        } else {
+                            pushStack(GlosValueStaticCalculator.Equals(in key, in entry.Key));
+                        }
+                    } else {
+                        phase = 3; // jump to last phase
+                    }
+                } else if (phase == 3) { // third phase: check equality
+                    var equals = stackTop().Truthy();
+                    popStack();
+
+                    if (!equals) {
+                        phase = 1; // jump to phase 2
+                    }
+                } else if (phase == 0) {
+                    var eid = unchecked((int) stackTop(1).AssertInteger());
+                    var hash = unchecked((ulong) stackTop().AssertInteger());
+
+                    switch (op) {
+                    case GlosOp.Ren:
+                    case GlosOp.RenL: {
+                        var table = stackTop(3).AssertTable();
+                        ref var key = ref stackTop(2);
+
+                        if (eid < 0) {
+                            stackTop(3).SetNil();
+                        } else {
+                            stackTop(3) = table.GetEntryAt(eid).Value;
+                        }
+
+                        popStack(3);
+                        break;
+                    }
+                    case GlosOp.Uen:
+                    case GlosOp.UenL: {
+                        var table = stackTop(3).AssertTable();
+                        ref var key = ref stackTop(2);
+                        ref var value = ref stackTop(4);
+
+                        if (eid < 0) {
+                            table.NewEntry(hash, in key, in value);
+                        } else {
+                            table.GetEntryAt(eid).Value = value;
+                        }
+
+                        popStack(5);
+                        break;
+                    }
+                    case GlosOp.Ien: {
+                        var table = stackTop(4).AssertTable();
+                        ref var key = ref stackTop(3);
+                        ref var value = ref stackTop(2);
+
+                        if (eid < 0) {
+                            table.NewEntry(hash, in key, in value);
+                        } else {
+                            table.GetEntryAt(eid).Value = value;
+                        }
+
+                        popStack(4);
+                        break;
+                    }
+                    }
+                }
             }
 
             void executeUnaryOperation(GlosOp op) {
-                if (tryUseUnaryMetamethod(op)) {
-                    return;
+                var useMetamethod = GlosValue.TryGetMetamethodOfOperand(in stackTop(), GlosMetamethodNames.FromOp(op), out var mm);
+
+                if (!useMetamethod) {
+                    GlosValueStaticCalculator.ExecuteUnaryOperation(ref stackTop(), in stackTop(), op);
+                } else {
+                    if (mm.Type == GlosValueType.Function) {
+                        callGlosFunction(mm.AssumeFunction(), 1, 1);
+                    }
                 }
-                
-                GlosValueStaticCalculator.ExecuteUnaryOperation(ref stackTop(), in stackTop(), op);
             }
 
 #endregion
@@ -533,11 +760,15 @@ namespace GeminiLab.Glos {
             return result.ReturnValues;
         }
 
-        public GlosCoroutine(GlosViMa parent, GlosFunction entry) {
+        public GlosCoroutine(GlosViMa parent, GlosFunction entry) : this(parent, entry, null) { }
+
+        public GlosCoroutine(GlosViMa parent, GlosFunction entry, GlosContext? rootContext) {
             Status = GlosCoroutineStatus.Invalid;
+            Parent = parent;
 
             ref var stackframe = ref pushCallStackFrame();
             stackframe.Function = entry;
+            stackframe.Context = rootContext!;
 
             Status = GlosCoroutineStatus.Initial;
         }

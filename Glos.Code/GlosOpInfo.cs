@@ -1,7 +1,8 @@
 namespace GeminiLab.Glos {
     public enum GlosOpCategory : byte {
         NotUsed,
-        BinaryOperator,
+        ArithmeticOperator, // including bitwise operators
+        ComparisonOperator,
         TableVectorOperator,
         UnaryOperator,
         ContextOperator,
@@ -31,23 +32,23 @@ namespace GeminiLab.Glos {
     public static class GlosOpInfo {
         public static GlosOpCategory[] Categories { get; } = {
             // 0x00
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
+            GlosOpCategory.ArithmeticOperator,
+            GlosOpCategory.ArithmeticOperator,
+            GlosOpCategory.ArithmeticOperator,
+            GlosOpCategory.ArithmeticOperator,
+            GlosOpCategory.ArithmeticOperator,
+            GlosOpCategory.ArithmeticOperator,
+            GlosOpCategory.ArithmeticOperator,
+            GlosOpCategory.ArithmeticOperator,
             // 0x08
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
-            GlosOpCategory.BinaryOperator,
+            GlosOpCategory.ArithmeticOperator,
+            GlosOpCategory.ArithmeticOperator,
+            GlosOpCategory.ComparisonOperator,
+            GlosOpCategory.ComparisonOperator,
+            GlosOpCategory.ComparisonOperator,
+            GlosOpCategory.ComparisonOperator,
+            GlosOpCategory.ComparisonOperator,
+            GlosOpCategory.ComparisonOperator,
             // 0x10
             GlosOpCategory.TableVectorOperator,
             GlosOpCategory.TableVectorOperator,

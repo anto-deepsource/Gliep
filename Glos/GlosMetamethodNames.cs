@@ -44,7 +44,7 @@ namespace GeminiLab.Glos {
                 GlosOp.Uen => Uen,
                 GlosOp.Not => Not,
                 GlosOp.Neg => Neg,
-                _          => throw new ArgumentOutOfRangeException(),
+                _          => "",
             };
         }
     }
