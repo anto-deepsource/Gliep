@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>Develop;Preview;Release</Configurations>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
