@@ -18,7 +18,11 @@ namespace GeminiLab.Glos {
         public GlosValue[]                   Arguments;
     }
     
-    public interface IGlosExternalAsyncFunction {
+    public interface IGlosExternalAsyncFunctionCall {
         AsyncFunctionResumeResult Resume(ReadOnlySpan<GlosValue> arguments);
+    }
+    
+    public interface IGlosExternalAsyncFunction {
+        IGlosExternalAsyncFunctionCall Call(GlosCoroutine coroutine);
     }
 }

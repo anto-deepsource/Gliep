@@ -215,7 +215,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
             }, 2);
 
             var global = new GlosContext(null);
-            global.CreateVariable(funName, GlosValue.NewExternalFunction(args => new GlosValue[] { args.Length }));
+            global.CreateVariable(funName, GlosValue.NewExternalPureFunction(args => new GlosValue[] { args.Length }));
             
             Builder.Entry = fid;
 
@@ -292,7 +292,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
 
             Builder.Entry = fid;
 
-            var res = Execute(new[] { GlosValue.NewExternalFunction(x => {
+            var res = Execute(new[] { GlosValue.NewExternalPureFunction(x => {
                 return new GlosValue[] { x.Select(v => v.AssertInteger()).Sum() };
             }) });
 
