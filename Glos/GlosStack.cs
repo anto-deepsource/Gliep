@@ -2,7 +2,7 @@ using System;
 
 namespace GeminiLab.Glos {
     public class GlosStack<T> {
-        public const int DefaultInitialCapacity = 128;
+        public const int DefaultInitialCapacity = 16;
 
         public GlosStack() : this(DefaultInitialCapacity) { }
 
