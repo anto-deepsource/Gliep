@@ -96,8 +96,6 @@ namespace GeminiLab.Glos {
         }
 
         public static void Leq(ref GlosValue dest, in GlosValue x, in GlosValue y) {
-            GlosValue temp = default;
-
             if (GlosValue.BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint <= yint);
             else if (GlosValue.BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat <= yfloat);
             else if (GlosValue.BothString(x, y, out var xstr, out var ystr)) dest.SetBoolean(string.Compare(xstr, ystr, StringComparison.Ordinal) <= 0);
@@ -105,8 +103,6 @@ namespace GeminiLab.Glos {
         }
 
         public static void Geq(ref GlosValue dest, in GlosValue x, in GlosValue y) {
-            GlosValue temp = default;
-
             if (GlosValue.BothInteger(x, y, out var xint, out var yint)) dest.SetBoolean(xint >= yint);
             else if (GlosValue.BothNumeric(x, y, out var xfloat, out var yfloat)) dest.SetBoolean(xfloat >= yfloat);
             else if (GlosValue.BothString(x, y, out var xstr, out var ystr)) dest.SetBoolean(string.Compare(xstr, ystr, StringComparison.Ordinal) >= 0);

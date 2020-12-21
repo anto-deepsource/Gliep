@@ -178,7 +178,6 @@ namespace GeminiLab.Glos {
 
                     var cat = GlosOpInfo.Categories[(int) op];
 
-                    GlosValue temp = default;
                     // execution
                     switch (cat) {
                     case GlosOpCategory.ArithmeticOperator:
@@ -333,7 +332,7 @@ namespace GeminiLab.Glos {
                         var ptr = peekDelimiter();
                         var nextArgc = _sptr - ptr;
 
-                        callGlosFunction(funv, nextArgc, -1);
+                        callFunction(funv, nextArgc, -1);
                         break;
                     }
                     case GlosOpCategory.Others when op == GlosOp.Ret: {
@@ -422,7 +421,7 @@ namespace GeminiLab.Glos {
 #region Local Functions
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void callGlosFunction(in GlosValue funv, int argc, int returnSize) {
+            void callFunction(in GlosValue funv, int argc, int returnSize) {
                 var bptr = _sptr - argc;
 
                 funv.AssertInvokable();
@@ -490,7 +489,7 @@ namespace GeminiLab.Glos {
                     GlosValueStaticCalculator.ExecuteBinaryOperation(ref stackTop(1), in stackTop(1), in stackTop(), op);
                     popStack();
                 } else {
-                    callGlosFunction(mm, 2, 1);
+                    callFunction(mm, 2, 1);
                 }
             }
 
@@ -509,7 +508,7 @@ namespace GeminiLab.Glos {
                                 GlosValue.Swap(ref stackTop(1), ref stackTop());
                             }
 
-                            callGlosFunction(lss, 2, 1);
+                            callFunction(lss, 2, 1);
                         }
                     } else { // last phase
                         stackTop().SetBoolean(stackTop().Truthy());
@@ -523,7 +522,7 @@ namespace GeminiLab.Glos {
                             popStack();
                             phase = 0;
                         } else {
-                            callGlosFunction(equ, 2, 1);
+                            callFunction(equ, 2, 1);
                         }
                     } else { // last phase
                         if (op == GlosOp.Neq) {
@@ -586,7 +585,7 @@ namespace GeminiLab.Glos {
                             pushStack(in stackTop(2));
                             pushStack(in stackTop(2));
 
-                            callGlosFunction(lss, 2, 1);
+                            callFunction(lss, 2, 1);
                         }
                     } else if (phase == 2) {
                         stackTop().SetBoolean(stackTop().Truthy());
@@ -601,7 +600,7 @@ namespace GeminiLab.Glos {
                             pushStack(in stackTop(1));
                             pushStack(in stackTop(1));
 
-                            callGlosFunction(equ, 2, 1);
+                            callFunction(equ, 2, 1);
                         }
                     } else { // last phase
                         stackTop(2).SetBoolean(stackTop().Truthy());
@@ -616,7 +615,7 @@ namespace GeminiLab.Glos {
                     if (op == GlosOp.Ren) {
                         if (GlosValue.TryGetMetamethodOfOperand(in stackTop(1), GlosMetamethodNames.Ren, out var ren)) {
                             phase = 0;
-                            callGlosFunction(ren, 2, 1);
+                            callFunction(ren, 2, 1);
 
                             return;
                         }
@@ -630,7 +629,7 @@ namespace GeminiLab.Glos {
                             stackTop() = value;
 
                             phase = 0;
-                            callGlosFunction(ren, 3, 1);
+                            callFunction(ren, 3, 1);
 
                             return;
                         }
@@ -642,7 +641,7 @@ namespace GeminiLab.Glos {
                     if (GlosValue.TryGetMetamethodOfOperand(in key, GlosMetamethodNames.Hash, out var fun)) {
                         pushStack(in key);
 
-                        callGlosFunction(fun, 1, 1);
+                        callFunction(fun, 1, 1);
                     } else {
                         pushStack(unchecked((long) key.Hash()));
                     }
@@ -664,7 +663,7 @@ namespace GeminiLab.Glos {
                             pushStack(in key);
                             pushStack(in entry.Key);
 
-                            callGlosFunction(equ, 2, 1);
+                            callFunction(equ, 2, 1);
                         } else {
                             pushStack(GlosValueStaticCalculator.Equals(in key, in entry.Key));
                         }
@@ -737,7 +736,7 @@ namespace GeminiLab.Glos {
                 if (!useMetamethod) {
                     GlosValueStaticCalculator.ExecuteUnaryOperation(ref stackTop(), in stackTop(), op);
                 } else {
-                    callGlosFunction(mm, 1, 1);
+                    callFunction(mm, 1, 1);
                 }
             }
 
