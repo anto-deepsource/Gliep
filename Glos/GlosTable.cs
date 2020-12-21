@@ -10,8 +10,8 @@ using System.Runtime.InteropServices;
 // https://source.dot.net/#System.Private.CoreLib/HashHelpers.cs
 namespace GeminiLab.Glos {
     public class GlosTable {
-        private int[]   _buckets;
-        private Entry[] _entries;
+        private int[]   _buckets = null!;
+        private Entry[] _entries = null!;
         private int     _size;
         private int     _count;
 

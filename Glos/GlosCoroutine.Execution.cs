@@ -38,8 +38,6 @@ namespace GeminiLab.Glos {
             case GlosCoroutineStatus.Running:
             case GlosCoroutineStatus.Stopped: {
                 throw new InvalidOperationException();
-
-                break;
             }
             default:
                 throw new ArgumentOutOfRangeException();

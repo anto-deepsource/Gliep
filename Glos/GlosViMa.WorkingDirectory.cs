@@ -1,5 +1,6 @@
 namespace GeminiLab.Glos {
     public partial class GlosViMa {
+        // TODO: remove it
         public string WorkingDirectory { get; set; }
 
         public IGlosUnit? CurrentExecutingUnit {
