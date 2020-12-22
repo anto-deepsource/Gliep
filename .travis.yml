@@ -1,6 +1,6 @@
 language: csharp
 mono: none
-dotnet: 3.1.302
+dotnet: 3.1.404
 dist: bionic
 script:
   - mkdir tools
