@@ -140,7 +140,7 @@ namespace GeminiLab.Gliep.Dumper {
 
                 Console.WriteLine($@"#{i}: ""{fun.Name}"", loc size {fun.LocalVariableSize}{(fun.VariableInContext.Count > 0 ? $", ctx var: {fun.VariableInContext.JoinBy(", ")}" : "")}{(unit.Entry == i ? ", entry" : "")}");
 
-                var ops = fun.Code;
+                var ops = fun.CodeSpan;
                 var ip = 0;
 
                 while (ip < ops.Length) {

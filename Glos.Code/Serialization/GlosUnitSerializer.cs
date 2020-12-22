@@ -28,7 +28,7 @@ namespace GeminiLab.Glos.Serialization {
                     funLength += sizeof(uint) + encoding.GetByteCount(str);
                 }
 
-                funLength += fun.Code.Length;
+                funLength += fun.CodeSpan.Length;
 
                 funLengths.Add(funLength);
                 functionSectionLength += funLength;
@@ -80,7 +80,7 @@ namespace GeminiLab.Glos.Serialization {
 
                     functionHeader->FunctionHeaderSize = (uint) sizeof(GlosUnitFunctionHeader);
                     functionHeader->FunctionSize = (uint) funLengths[fid];
-                    functionHeader->CodeLength = (uint) fun.Code.Length;
+                    functionHeader->CodeLength = (uint) fun.CodeSpan.Length;
                     functionHeader->Flags = (uint) (unit.Entry == fid ? GlosUnitFunctionFlags.Entry : GlosUnitFunctionFlags.Default);
                     functionHeader->VariableInContextCount = (uint) fun.VariableInContext.Count;
                     functionHeader->LocalVariableCount = (uint) fun.LocalVariableSize;
@@ -103,11 +103,11 @@ namespace GeminiLab.Glos.Serialization {
                         }
                     }
 
-                    fixed (byte* code = fun.Code) {
-                        Buffer.MemoryCopy(code, ptr, Int64.MaxValue, fun.Code.Length);
+                    fixed (byte* code = fun.CodeSpan) {
+                        Buffer.MemoryCopy(code, ptr, Int64.MaxValue, fun.CodeSpan.Length);
                     }
 
-                    ptr += fun.Code.Length;
+                    ptr += fun.CodeSpan.Length;
 
                     ++fid;
                 }

@@ -137,6 +137,7 @@ namespace GeminiLab.Glos {
             GlosOp lastOp = GlosOp.Invalid;
             long lastImm = 0;
             GlosFunctionPrototype proto = null!;
+            ReadOnlyMemory<byte> code = default;
             int len = 0;
             IGlosUnit unit = null!;
             GlosContext ctx = null!, global = null!;
@@ -152,7 +153,7 @@ namespace GeminiLab.Glos {
                     GlosOp op;
                     long imms;
                     if (phase == 0) {
-                        if (!ReadInstructionAndImmediate(proto.Code, ref ip, out op, out imms, out bool immOnStack)) {
+                        if (!ReadInstructionAndImmediate(code.Span, ref ip, out op, out imms, out bool immOnStack)) {
                             throw new GlosUnexpectedEndOfCodeException();
                         }
 
@@ -460,7 +461,8 @@ namespace GeminiLab.Glos {
                 lastOp = frame.LastOp;
                 lastImm = frame.LastImm;
                 proto = frame.Function.Prototype;
-                len = proto.Code.Length;
+                code = proto.CodeMemory;
+                len = code.Length;
                 unit = frame.Function.Unit;
                 ctx = frame.Context;
                 global = ctx.Global;

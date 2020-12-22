@@ -13,7 +13,8 @@ namespace GeminiLab.Glos {
         public string Name { get; }
 
         private readonly byte[] _code;
-        public ReadOnlySpan<byte> Code => new ReadOnlySpan<byte>(_code);
+        public ReadOnlySpan<byte> CodeSpan => new ReadOnlySpan<byte>(_code);
+        public ReadOnlyMemory<byte> CodeMemory => new ReadOnlyMemory<byte>(_code);
 
         public int LocalVariableSize { get; }
 
