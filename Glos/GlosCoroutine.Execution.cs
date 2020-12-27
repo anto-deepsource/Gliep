@@ -419,7 +419,9 @@ namespace GeminiLab.Glos {
 
 #region Local Functions
 
+#if !DEVELOP
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
             void callFunction(in GlosValue funv, int argc, int returnSize) {
                 var bptr = _sptr - argc;
 
@@ -449,7 +451,9 @@ namespace GeminiLab.Glos {
                 }
             }
 
+#if !DEVELOP
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
             void restoreStatus() {
                 if (_cptr <= callStackBase) return;
 
@@ -468,7 +472,9 @@ namespace GeminiLab.Glos {
                 global = ctx.Global;
             }
 
+#if !DEVELOP
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
             void storeStatus() {
                 if (_cptr <= callStackBase) return;
 
@@ -481,7 +487,9 @@ namespace GeminiLab.Glos {
                 frame.LastImm = lastImm;
             }
 
+#if !DEVELOP
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
             void executeArithmeticOperation(GlosOp op) {
                 var useMetamethod = GlosValue.TryGetMetamethodOfOperand(in stackTop(1), in stackTop(), GlosMetamethodNames.FromOp(op), false, out var mm);
 
@@ -493,7 +501,9 @@ namespace GeminiLab.Glos {
                 }
             }
 
+#if !DEVELOP
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
             void executeComparisonOperation(GlosOp op) {
                 if (op == GlosOp.Lss || op == GlosOp.Gtr) {
                     if (phase == 1) {
@@ -609,7 +619,9 @@ namespace GeminiLab.Glos {
                 }
             }
 
+#if !DEVELOP
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
             void executeTableVectorOperator(GlosOp op) {
                 if (phase == 1) { // first phase: get hash
                     if (op == GlosOp.Ren) {
@@ -729,7 +741,9 @@ namespace GeminiLab.Glos {
                 }
             }
 
+#if !DEVELOP
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
             void executeUnaryOperation(GlosOp op) {
                 var useMetamethod = GlosValue.TryGetMetamethodOfOperand(in stackTop(), GlosMetamethodNames.FromOp(op), out var mm);
 
