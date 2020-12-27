@@ -16,7 +16,7 @@ namespace GeminiLab.Gliep {
             _vm = vm;
         }
 
-        [GlosBuiltInFunction("print")]
+        [GlosBuiltInPureFunction("print")]
         public GlosValue[] Print(params GlosValue[] values) {
             /*
             Console.WriteLine(values.Select(x => _vm.Calculator.Stringify(x)).JoinBy(" "));
@@ -26,14 +26,14 @@ namespace GeminiLab.Gliep {
             return Debug(values);
         }
 
-        [GlosBuiltInFunction("debug")]
+        [GlosBuiltInPureFunction("debug")]
         public GlosValue[] Debug(params GlosValue[] values) {
             Console.WriteLine(values.Select(x => GlosValue.Calculator.DebugStringify(x)).JoinBy(" "));
 
             return Array.Empty<GlosValue>();
         }
 
-        [GlosBuiltInFunction("format")]
+        [GlosBuiltInPureFunction("format")]
         public GlosValue[] Format(string format, params GlosValue[] values) {
             var args = values.Select(x => x.Type switch {
                 GlosValueType.Nil     => "nil",
@@ -46,7 +46,7 @@ namespace GeminiLab.Gliep {
             return new GlosValue[] { string.Format(format, args: args) };
         }
 
-        [GlosBuiltInFunction("iter")]
+        [GlosBuiltInPureFunction("iter")]
         public GlosValue[] Iter(GlosVector vec) {
             var len = vec.Count;
             var idx = -1;
@@ -56,7 +56,7 @@ namespace GeminiLab.Gliep {
             };
         }
 
-        [GlosBuiltInFunction("__built_in_sqrt")]
+        [GlosBuiltInPureFunction("__built_in_sqrt")]
         public GlosValue[] Sqrt(double val) {
             return new GlosValue[] {
                 Math.Sqrt(val)
@@ -77,8 +77,8 @@ namespace GeminiLab.Gliep {
         }
         
         [GlosBuiltInFunction("require")]
-        public GlosValue[] Require(string key) {
-            return new[] { _um.Load(key).Result };
+        public GlosValue[] Require(GlosCoroutine cor, string key) {
+            return new[] { _um.Load(key, cor).Result };
         }
     }
 

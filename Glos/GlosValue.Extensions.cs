@@ -69,7 +69,7 @@ namespace GeminiLab.Glos {
         public static ref GlosValue SetExternalFunction(this ref GlosValue v, GlosExternalFunction value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
-            v.Type = GlosValueType.ExternalPureFunction;
+            v.Type = GlosValueType.ExternalFunction;
 
             return ref v;
         }

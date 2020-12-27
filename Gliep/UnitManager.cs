@@ -50,7 +50,7 @@ namespace GeminiLab.Gliep {
         
         public bool Loaded(string key) => _units.ContainsKey(key);
 
-        public LoadedUnit Load(string key) {
+        public LoadedUnit Load(string key, GlosCoroutine cor) {
             if (Loaded(key)) return _units[key];
 
             ParseRequireKey(key, out var isLibrary, out string? file);
@@ -64,8 +64,8 @@ namespace GeminiLab.Gliep {
 
             
             _unit2Location[unit] = location;
-            
-            var result = _viMa.ExecuteUnit(unit, null, _global);
+
+            var result = cor.ExecuteFunctionSync(new GlosFunction(unit.FunctionTable[unit.Entry], _global, unit));
             var loaded = new LoadedUnit(key, location, unit, result.Length > 0 ? result[0] : GlosValue.NewNil());
             return _units[key] = loaded;
         }
