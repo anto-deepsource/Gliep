@@ -6,11 +6,12 @@ namespace GeminiLab.Glos {
         public static implicit operator GlosValue(GlosTable v) => NewTable(v);
         public static implicit operator GlosValue(string v) => NewString(v);
         public static implicit operator GlosValue(GlosFunction v) => NewFunction(v);
-        public static implicit operator GlosValue(GlosExternalFunction v) => NewExternalFunction(v);
+        public static implicit operator GlosValue(GlosEFunction v) => NewEFunction(v);
         public static implicit operator GlosValue(GlosVector v) => NewVector(v);
-        public static implicit operator GlosValue(GlosExternalPureFunction v) => NewExternalPureFunction(v);
+        public static implicit operator GlosValue(GlosPureEFunction v) => NewPureEFunction(v);
+
         // Unfortunately, C# do not allow this.
-        // public static implicit operator GlosValue(IGlosExternalAsyncFunction v) => NewExternalAsyncFunction(v);
+        // public static implicit operator GlosValue(IGlosAsyncEFunction v) => NewAsyncEFunction(v);
         // So in GlosValue.Extensions.cs we have an extension method instead.
 
         public static GlosValue NewNil() {
@@ -55,9 +56,9 @@ namespace GeminiLab.Glos {
             return rv;
         }
 
-        public static GlosValue NewExternalFunction(GlosExternalFunction value) {
+        public static GlosValue NewEFunction(GlosEFunction value) {
             var rv = new GlosValue();
-            rv.SetExternalFunction(value);
+            rv.SetEFunction(value);
             return rv;
         }
 
@@ -67,15 +68,15 @@ namespace GeminiLab.Glos {
             return rv;
         }
 
-        public static GlosValue NewExternalPureFunction(GlosExternalPureFunction value) {
+        public static GlosValue NewPureEFunction(GlosPureEFunction value) {
             var rv = new GlosValue();
-            rv.SetExternalPureFunction(value);
+            rv.SetPureEFunction(value);
             return rv;
         }
 
-        public static GlosValue NewExternalAsyncFunction(IGlosExternalAsyncFunction value) {
+        public static GlosValue NewAsyncEFunction(IGlosAsyncEFunction value) {
             var rv = new GlosValue();
-            rv.SetExternalAsyncFunction(value);
+            rv.SetAsyncEFunction(value);
             return rv;
         }
 

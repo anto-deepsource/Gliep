@@ -60,9 +60,7 @@ namespace GeminiLab.Glos {
             return false;
         }
 
-        public static bool BothString(in GlosValue x, in GlosValue y,
-                                      [NotNullWhen(true)] out string? xv,
-                                      [NotNullWhen(true)] out string? yv) {
+        public static bool BothString(in GlosValue x, in GlosValue y, [NotNullWhen(true)] out string? xv, [NotNullWhen(true)] out string? yv) {
             if (x.Type == GlosValueType.String && y.Type == GlosValueType.String) {
                 xv = x.AssumeString();
                 yv = y.AssumeString();
@@ -74,9 +72,7 @@ namespace GeminiLab.Glos {
             return false;
         }
 
-        public static bool BothFunction(in GlosValue x, in GlosValue y,
-                                        [NotNullWhen(true)] out GlosFunction? xv,
-                                        [NotNullWhen(true)] out GlosFunction? yv) {
+        public static bool BothFunction(in GlosValue x, in GlosValue y, [NotNullWhen(true)] out GlosFunction? xv, [NotNullWhen(true)] out GlosFunction? yv) {
             if (x.Type == GlosValueType.Function && y.Type == GlosValueType.Function) {
                 xv = x.AssumeFunction();
                 yv = y.AssumeFunction();
@@ -88,12 +84,10 @@ namespace GeminiLab.Glos {
             return false;
         }
 
-        public static bool BothExternalPureFunction(in GlosValue x, in GlosValue y,
-                                                [NotNullWhen(true)] out GlosExternalPureFunction? xv,
-                                                [NotNullWhen(true)] out GlosExternalPureFunction? yv) {
+        public static bool BothPureEFunction(in GlosValue x, in GlosValue y, [NotNullWhen(true)] out GlosPureEFunction? xv, [NotNullWhen(true)] out GlosPureEFunction? yv) {
             if (x.Type == GlosValueType.Function && y.Type == GlosValueType.Function) {
-                xv = x.AssumeExternalPureFunction();
-                yv = y.AssumeExternalPureFunction();
+                xv = x.AssumePureEFunction();
+                yv = y.AssumePureEFunction();
 
                 return true;
             }

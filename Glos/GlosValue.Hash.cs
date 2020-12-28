@@ -28,18 +28,18 @@ namespace GeminiLab.Glos {
             */
 
             return unchecked(Type switch {
-                GlosValueType.Nil                   => 0ul,
-                GlosValueType.Integer               => (ulong) ValueNumber.Integer,
-                GlosValueType.Float                 => (ulong) ValueNumber.Integer,
-                GlosValueType.Boolean               => (ulong) ValueNumber.Integer,
-                GlosValueType.Table                 => (ulong) ValueObject!.GetHashCode(),
-                GlosValueType.String                => StringHash(this.AssumeString()),
-                GlosValueType.Function              => FunctionHash(this.AssumeFunction()),
-                GlosValueType.ExternalFunction      => (ulong) ValueObject!.GetHashCode(),
-                GlosValueType.Vector                => (ulong) ValueObject!.GetHashCode(),
-                GlosValueType.ExternalPureFunction  => (ulong) ValueObject!.GetHashCode(),
-                GlosValueType.ExternalAsyncFunction => (ulong) ValueObject!.GetHashCode(),
-                _                                   => 0,
+                GlosValueType.Nil            => 0ul,
+                GlosValueType.Integer        => (ulong) ValueNumber.Integer,
+                GlosValueType.Float          => (ulong) ValueNumber.Integer,
+                GlosValueType.Boolean        => (ulong) ValueNumber.Integer,
+                GlosValueType.Table          => (ulong) ValueObject!.GetHashCode(),
+                GlosValueType.String         => StringHash(this.AssumeString()),
+                GlosValueType.Function       => FunctionHash(this.AssumeFunction()),
+                GlosValueType.EFunction      => (ulong) ValueObject!.GetHashCode(),
+                GlosValueType.Vector         => (ulong) ValueObject!.GetHashCode(),
+                GlosValueType.PureEFunction  => (ulong) ValueObject!.GetHashCode(),
+                GlosValueType.AsyncEFunction => (ulong) ValueObject!.GetHashCode(),
+                _                            => 0,
             });
         }
 

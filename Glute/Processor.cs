@@ -99,10 +99,10 @@ namespace GeminiLab.Glute {
         protected virtual GlosContext GetRootContext() {
             var rv = new GlosContext(null);
 
-            rv.CreateVariable("create_guid", GlosValue.NewExternalPureFunction(param => { return new GlosValue[] { Guid.NewGuid().ToString().ToUpper() }; }));
+            rv.CreateVariable("create_guid", GlosValue.NewPureEFunction(param => { return new GlosValue[] { Guid.NewGuid().ToString().ToUpper() }; }));
             rv.CreateVariable(
                 "format",
-                GlosValue.NewExternalPureFunction(
+                GlosValue.NewPureEFunction(
                     param => {
                         if (param.Length <= 0) return new GlosValue[] { "" };
 
@@ -126,7 +126,7 @@ namespace GeminiLab.Glute {
 
             rv.CreateVariable(
                 "now",
-                GlosValue.NewExternalPureFunction(
+                GlosValue.NewPureEFunction(
                     param => {
                         string format = @"yyyy/MM/dd HH:mm:ss";
 

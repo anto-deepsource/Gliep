@@ -363,7 +363,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
 
             fgen.AppendRet();
 
-            GlosExternalPureFunction uen = arg => {
+            GlosPureEFunction uen = arg => {
                 var t = arg[0].AssertTable();
                 var k = arg[1];
                 var v = arg[2];
@@ -372,7 +372,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 return Array.Empty<GlosValue>();
             };
 
-            GlosExternalPureFunction ren = arg => {
+            GlosPureEFunction ren = arg => {
                 return new[] { arg[1] };
             };
 
@@ -389,8 +389,8 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 .MoveNext().AssertNil()
                 .MoveNext().AssertTable(t => {
                     GlosTableChecker.Create(t)
-                        .Has(GlosMetamethodNames.Uen, v => v.AssertExternalPureFunction() == uen)
-                        .Has(GlosMetamethodNames.Ren, v => v.AssertExternalPureFunction() == ren)
+                        .Has(GlosMetamethodNames.Uen, v => v.AssertPureEFunction() == uen)
+                        .Has(GlosMetamethodNames.Ren, v => v.AssertPureEFunction() == ren)
                         .AssertAllKeyChecked();
                 })
                 .MoveNext().AssertEnd();

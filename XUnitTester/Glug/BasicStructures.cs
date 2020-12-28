@@ -261,7 +261,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
             ";
 
             var context = new GlosContext(null);
-            context.CreateVariable("ext", (GlosExternalPureFunction) ((param) => {
+            context.CreateVariable("ext", (GlosPureEFunction) ((param) => {
                 context.GetVariableReference("x") = 3;
                 return new GlosValue[] { 3 };
             }));

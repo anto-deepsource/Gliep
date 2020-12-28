@@ -55,13 +55,13 @@ namespace GeminiLab.Gliep {
 
                 // todo: maybe build these functions dynamically by reflection to speed it up?
                 if (pure) {
-                    ctx.CreateVariable(name, (GlosExternalPureFunction)(p => {
+                    ctx.CreateVariable(name, (GlosPureEFunction)(p => {
                         var args = new List<object>();
                         parseArgs(true, param, p, args);
                         return (GlosValue[])m.Invoke(instance, args.ToArray())!;
                     }));
                 } else {
-                    ctx.CreateVariable(name, (GlosExternalFunction)((cor, p) => {
+                    ctx.CreateVariable(name, (GlosEFunction)((cor, p) => {
                         var args = new List<object> { cor };
                         parseArgs(false, param, p, args);
                         return (GlosValue[])m.Invoke(instance, args.ToArray())!;

@@ -66,10 +66,10 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
-        public static ref GlosValue SetExternalFunction(this ref GlosValue v, GlosExternalFunction value) {
+        public static ref GlosValue SetEFunction(this ref GlosValue v, GlosEFunction value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
-            v.Type = GlosValueType.ExternalFunction;
+            v.Type = GlosValueType.EFunction;
 
             return ref v;
         }
@@ -82,15 +82,15 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
-        public static ref GlosValue SetExternalPureFunction(this ref GlosValue v, GlosExternalPureFunction value) {
+        public static ref GlosValue SetPureEFunction(this ref GlosValue v, GlosPureEFunction value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
-            v.Type = GlosValueType.ExternalPureFunction;
+            v.Type = GlosValueType.PureEFunction;
 
             return ref v;
         }
 
-        public static ref GlosValue SetExternalAsyncFunction(this ref GlosValue v, IGlosExternalAsyncFunction value) {
+        public static ref GlosValue SetAsyncEFunction(this ref GlosValue v, IGlosAsyncEFunction value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
             v.Type = GlosValueType.Vector;
@@ -147,10 +147,10 @@ namespace GeminiLab.Glos {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GlosExternalFunction AssertExternalFunction(this in GlosValue v) {
-            if (v.Type == GlosValueType.ExternalFunction) return v.AssumeExternalFunction();
+        public static GlosEFunction AssertEFunction(this in GlosValue v) {
+            if (v.Type == GlosValueType.EFunction) return v.AssumeEFunction();
 
-            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.ExternalFunction);
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.EFunction);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -161,17 +161,17 @@ namespace GeminiLab.Glos {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GlosExternalPureFunction AssertExternalPureFunction(this in GlosValue v) {
-            if (v.Type == GlosValueType.ExternalPureFunction) return v.AssumeExternalPureFunction();
+        public static GlosPureEFunction AssertPureEFunction(this in GlosValue v) {
+            if (v.Type == GlosValueType.PureEFunction) return v.AssumePureEFunction();
 
-            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.ExternalPureFunction);
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.PureEFunction);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IGlosExternalAsyncFunction AssertExternalAsyncFunction(this in GlosValue v) {
-            if (v.Type == GlosValueType.ExternalAsyncFunction) return v.AssumeExternalAsyncFunction();
+        public static IGlosAsyncEFunction AssertAsyncEFunction(this in GlosValue v) {
+            if (v.Type == GlosValueType.AsyncEFunction) return v.AssumeAsyncEFunction();
 
-            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.ExternalAsyncFunction);
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.AsyncEFunction);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -193,16 +193,16 @@ namespace GeminiLab.Glos {
         public static GlosFunction AssumeFunction(this in GlosValue v) => (GlosFunction) v.ValueObject!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GlosExternalFunction AssumeExternalFunction(this in GlosValue v) => (GlosExternalFunction) v.ValueObject!;
+        public static GlosEFunction AssumeEFunction(this in GlosValue v) => (GlosEFunction) v.ValueObject!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GlosVector AssumeVector(this in GlosValue v) => (GlosVector) v.ValueObject!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GlosExternalPureFunction AssumeExternalPureFunction(this in GlosValue v) => (GlosExternalPureFunction) v.ValueObject!;
+        public static GlosPureEFunction AssumePureEFunction(this in GlosValue v) => (GlosPureEFunction) v.ValueObject!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IGlosExternalAsyncFunction AssumeExternalAsyncFunction(this in GlosValue v) => (IGlosExternalAsyncFunction) v.ValueObject!;
+        public static IGlosAsyncEFunction AssumeAsyncEFunction(this in GlosValue v) => (IGlosAsyncEFunction) v.ValueObject!;
 
         public static double ToFloat(this in GlosValue v) {
             if (v.Type == GlosValueType.Float) return v.ValueNumber.Float;
@@ -235,17 +235,17 @@ namespace GeminiLab.Glos {
 
         public static bool IsInvokable(this in GlosValue v) {
             return v.Type == GlosValueType.Function
-                || v.Type == GlosValueType.ExternalFunction
-                || v.Type == GlosValueType.ExternalPureFunction
-                || v.Type == GlosValueType.ExternalAsyncFunction;
+                || v.Type == GlosValueType.EFunction
+                || v.Type == GlosValueType.PureEFunction
+                || v.Type == GlosValueType.AsyncEFunction;
         }
 
         public static void AssertInvokable(this in GlosValue v) {
             if (!v.IsInvokable()) throw new GlosValueNotCallableException(v);
         }
 
-        public static GlosValue ToGlosValue(this IGlosExternalAsyncFunction fun) {
-            return GlosValue.NewExternalAsyncFunction(fun);
+        public static GlosValue ToGlosValue(this IGlosAsyncEFunction fun) {
+            return GlosValue.NewAsyncEFunction(fun);
         }
     }
 }

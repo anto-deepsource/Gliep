@@ -1,28 +1,28 @@
 using System;
 
 namespace GeminiLab.Glos {
-    public delegate GlosValue[] GlosExternalPureFunction(GlosValue[] arg);
-    
-    public delegate GlosValue[] GlosExternalFunction(GlosCoroutine coroutine, GlosValue[] args);
+    public delegate GlosValue[] GlosPureEFunction(GlosValue[] arg);
 
-    public enum AsyncFunctionResumeResultType {
+    public delegate GlosValue[] GlosEFunction(GlosCoroutine coroutine, GlosValue[] args);
+
+    public enum AsyncEFunctionResumeResultType {
         Return,
         Resume,
         Yield,
         Call,
     }
-    
-    public struct AsyncFunctionResumeResult {
-        public AsyncFunctionResumeResultType Type;
+
+    public struct AsyncEFunctionResumeResult {
+        public AsyncEFunctionResumeResultType Type;
         public GlosValue                     Value;
         public GlosValue[]                   Arguments;
     }
-    
-    public interface IGlosExternalAsyncFunctionCall {
-        AsyncFunctionResumeResult Resume(ReadOnlySpan<GlosValue> arguments);
+
+    public interface IGlosAsyncEFunctionCall {
+        AsyncEFunctionResumeResult Resume(ReadOnlySpan<GlosValue> arguments);
     }
-    
-    public interface IGlosExternalAsyncFunction {
-        IGlosExternalAsyncFunctionCall Call(GlosCoroutine coroutine);
+
+    public interface IGlosAsyncEFunction {
+        IGlosAsyncEFunctionCall Call(GlosCoroutine coroutine);
     }
 }

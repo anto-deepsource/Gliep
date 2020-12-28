@@ -427,15 +427,15 @@ namespace GeminiLab.Glos {
 
                 funv.AssertInvokable();
 
-                if (funv.Type == GlosValueType.ExternalFunction || funv.Type == GlosValueType.ExternalPureFunction) {
+                if (funv.Type == GlosValueType.EFunction || funv.Type == GlosValueType.PureEFunction) {
                     var args = new GlosValue[argc];
                     _stack.AsSpan(bptr, argc).CopyTo(args.AsSpan());
 
                     GlosValue[] rets;
-                    if (funv.Type == GlosValueType.ExternalFunction) {
-                        rets = funv.AssertExternalFunction()(this, args);
+                    if (funv.Type == GlosValueType.EFunction) {
+                        rets = funv.AssertEFunction()(this, args);
                     } else {
-                        rets = funv.AssertExternalPureFunction()(args);
+                        rets = funv.AssertPureEFunction()(args);
                     }
 
                     var retc = rets.Length;
@@ -446,7 +446,7 @@ namespace GeminiLab.Glos {
                     pushNewStackFrame(_sptr - argc, funv.AssertFunction(), argc, null, returnSize);
                     restoreStatus();
                     pushUntil(callStackTop().PrivateStackBase);
-                } else if (funv.Type == GlosValueType.ExternalAsyncFunction) {
+                } else if (funv.Type == GlosValueType.AsyncEFunction) {
                     throw new NotImplementedException();
                 }
             }
