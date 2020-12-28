@@ -13,9 +13,11 @@ namespace GeminiLab.Glos {
         public IntegerFloatUnion ValueNumber;
         public object?           ValueObject;
 
+        /*
         // hash assigned or calculated
         private bool _hashAssigned;
         private ulong _hashCode;
+        */
 
         public override string ToString() {
             return Calculator.DebugStringify(this);

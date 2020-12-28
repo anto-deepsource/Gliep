@@ -21,8 +21,8 @@ namespace GeminiLab.Gliep {
     }
 
     public class UnitManager {
-        private readonly Dictionary<string, LoadedUnit>    _units         = new Dictionary<string, LoadedUnit>();
-        private readonly Dictionary<IGlosUnit, IFileInfo?> _unit2Location = new Dictionary<IGlosUnit, IFileInfo?>();
+        private readonly Dictionary<string, LoadedUnit>    _units         = new();
+        private readonly Dictionary<IGlosUnit, IFileInfo?> _unit2Location = new();
 
         private IFileSystem _fs;
         private GlosViMa    _viMa;

@@ -21,27 +21,33 @@ namespace GeminiLab.Glos {
         }
 
         public readonly ulong Hash() {
+            /*
             if (_hashAssigned) {
                 return _hashCode;
             }
+            */
 
             return unchecked(Type switch {
-                GlosValueType.Nil              => 0ul,
-                GlosValueType.Integer          => (ulong) ValueNumber.Integer,
-                GlosValueType.Float            => (ulong) ValueNumber.Integer,
-                GlosValueType.Boolean          => (ulong) ValueNumber.Integer,
-                GlosValueType.Table            => (ulong) ValueObject!.GetHashCode(),
-                GlosValueType.String           => StringHash(this.AssumeString()),
-                GlosValueType.Function         => FunctionHash(this.AssumeFunction()),
-                GlosValueType.ExternalFunction => (ulong) ValueObject!.GetHashCode(),
-                GlosValueType.Vector           => (ulong) ValueObject!.GetHashCode(),
-                _                              => 0,
+                GlosValueType.Nil                   => 0ul,
+                GlosValueType.Integer               => (ulong) ValueNumber.Integer,
+                GlosValueType.Float                 => (ulong) ValueNumber.Integer,
+                GlosValueType.Boolean               => (ulong) ValueNumber.Integer,
+                GlosValueType.Table                 => (ulong) ValueObject!.GetHashCode(),
+                GlosValueType.String                => StringHash(this.AssumeString()),
+                GlosValueType.Function              => FunctionHash(this.AssumeFunction()),
+                GlosValueType.ExternalFunction      => (ulong) ValueObject!.GetHashCode(),
+                GlosValueType.Vector                => (ulong) ValueObject!.GetHashCode(),
+                GlosValueType.ExternalPureFunction  => (ulong) ValueObject!.GetHashCode(),
+                GlosValueType.ExternalAsyncFunction => (ulong) ValueObject!.GetHashCode(),
+                _                                   => 0,
             });
         }
 
+        /*
         public void SetHash(ulong hash) {
             _hashAssigned = true;
             _hashCode = hash;
         }
+        */
     }
 }
