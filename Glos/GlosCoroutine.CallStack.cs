@@ -19,5 +19,7 @@ namespace GeminiLab.Glos {
         }
 
         public ReadOnlySpan<GlosStackFrame> CallStackFrames => _callStack.AsSpan(0, _cptr);
+
+        public IGlosUnit CurrentExecutingUnit => callStackTop().Function.Unit;
     }
 }

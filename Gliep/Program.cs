@@ -91,7 +91,7 @@ namespace GeminiLab.Gliep {
 
         public static void Main(string[] args) {
             var vm = new GlosViMa();
-            vm.WorkingDirectory = Environment.CurrentDirectory;
+            // vm.WorkingDirectory = Environment.CurrentDirectory;
             var entryLoc = "";
 
             IGlosUnit unit;
