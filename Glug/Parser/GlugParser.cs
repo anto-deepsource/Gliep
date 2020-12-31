@@ -30,7 +30,9 @@ namespace GeminiLab.Glug.Parser {
          || type == GlugTokenType.SymbolBra
          || type == GlugTokenType.SymbolKet
          || type == GlugTokenType.SymbolDiscard
-         || type == GlugTokenType.SymbolDotDotDot;
+         || type == GlugTokenType.SymbolDotDotDot
+         || type == GlugTokenType.SymbolRArrow
+         || type == GlugTokenType.SymbolLArrow;
 
         protected virtual bool LikelyVarRef(GlugTokenType type) =>
             type == GlugTokenType.Identifier
@@ -66,6 +68,7 @@ namespace GeminiLab.Glug.Parser {
                 GlugTokenType.SymbolAtBang     => GlugBiOpType.IndexLocal,
                 GlugTokenType.SymbolDot        => GlugBiOpType.Index,
                 GlugTokenType.SymbolDotBang    => GlugBiOpType.IndexLocal,
+                GlugTokenType.SymbolLArrow     => GlugBiOpType.Resume,
                 _                              => throw new ArgumentOutOfRangeException(),
             };
 
@@ -94,6 +97,7 @@ namespace GeminiLab.Glug.Parser {
                 GlugTokenType.SymbolDotDot     => 0x88,
                 GlugTokenType.SymbolDollar     => 0x90,
                 GlugTokenType.OpCall           => 0xa0,
+                GlugTokenType.SymbolLArrow     => 0xa8,
                 GlugTokenType.SymbolAt         => 0xb0,
                 GlugTokenType.SymbolAtBang     => 0xb0,
                 GlugTokenType.SymbolDot        => 0xc0,
@@ -127,6 +131,7 @@ namespace GeminiLab.Glug.Parser {
                 GlugTokenType.SymbolDotDot     => false, // actually it doesn't really matter, but i prefer right-associated operators, so ...
                 GlugTokenType.SymbolDollar     => false,
                 GlugTokenType.OpCall           => true,
+                GlugTokenType.SymbolLArrow     => false,
                 GlugTokenType.SymbolAt         => true,
                 GlugTokenType.SymbolAtBang     => true,
                 GlugTokenType.SymbolDot        => true,
@@ -138,7 +143,9 @@ namespace GeminiLab.Glug.Parser {
             op == GlugTokenType.SymbolSub
          || op == GlugTokenType.SymbolNot
          || op == GlugTokenType.SymbolQuery
-         || op == GlugTokenType.SymbolDotDotDot;
+         || op == GlugTokenType.SymbolDotDotDot 
+         || op == GlugTokenType.SymbolLArrow
+         || op == GlugTokenType.SymbolRArrow;
 
         protected virtual GlugUnOpType UnOpFromToken(GlugTokenType op) =>
             op switch {
@@ -146,6 +153,8 @@ namespace GeminiLab.Glug.Parser {
                 GlugTokenType.SymbolNot       => GlugUnOpType.Not,
                 GlugTokenType.SymbolQuery     => GlugUnOpType.IsNil,
                 GlugTokenType.SymbolDotDotDot => GlugUnOpType.Unpack,
+                GlugTokenType.SymbolLArrow    => GlugUnOpType.Yield,
+                GlugTokenType.SymbolRArrow    => GlugUnOpType.Mkc,
                 _                             => throw new ArgumentOutOfRangeException(),
             };
 
@@ -195,21 +204,6 @@ namespace GeminiLab.Glug.Parser {
                 expr = lastDot ? new LiteralString(ReadIdentifier()) : ReadExprItem();
 
                 var op = Stream.NextEof() ? GlugTokenType.NotAToken : Stream.PeekToken().Type;
-
-                if (op == GlugTokenType.SymbolRArrow) {
-                    var arrow = Stream.GetToken();
-                    var param = new List<string>();
-
-                    if (expr is VarRef { IsDef: false, IsGlobal: false } vr) {
-                        param.Add(vr.Id);
-                    } else if (expr is OnStackList osl && osl.List.All(x => x.Type == CommaExprListItemType.Plain && x.Expr is VarRef { IsDef: false, IsGlobal: false })) {
-                        param.AddRange(osl.List.Select(x => ((VarRef) x.Expr).Id));
-                    } else {
-                        throw new GlugUnexpectedTokenException(op, new List<GlugTokenType>(), arrow.Position);
-                    }
-
-                    expr = new Function(DefaultLambdaName(param, arrow), false, param, ReadExprGreedily()).WithPosition(arrow.Position);
-                }
 
                 int p = BiOpPrecedence(op);
                 var pos = PositionInSource.NotAPosition();
@@ -262,6 +256,27 @@ namespace GeminiLab.Glug.Parser {
         }
 
         protected virtual Expr ReadExprItem() {
+            var item = ReadNoLambdaExprItem();
+
+            if (!Stream.NextEof() && Stream.PeekToken().Type == GlugTokenType.SymbolRArrow) {
+                var param = new List<string>();
+
+                if (item is VarRef { IsDef: false, IsGlobal: false } vr) {
+                    param.Add(vr.Id);
+                } else if (item is OnStackList osl && osl.List.All(x => x.Type == CommaExprListItemType.Plain && x.Expr is VarRef { IsDef: false, IsGlobal: false })) {
+                    param.AddRange(osl.List.Select(x => ((VarRef) x.Expr).Id));
+                } else {
+                    return item;
+                }
+
+                var arrow = Stream.GetToken();
+                item = new Function(DefaultLambdaName(param, arrow), false, param, ReadExprGreedily()).WithPosition(arrow.Position);
+            }
+
+            return item;
+        }
+
+        protected virtual Expr ReadNoLambdaExprItem() {
             var tok = Stream.PeekToken();
 
             if (tok.Type.GetCategory() == GlugTokenTypeCategory.Literal) {
@@ -509,13 +524,13 @@ namespace GeminiLab.Glug.Parser {
 
                     rv.Add(new CommaExprListItem(CommaExprListItemType.Plain, ReadExprGreedily()));
                 }
-                
+
                 if (Stream.PeekToken().Type == GlugTokenType.SymbolComma) Consume(GlugTokenType.SymbolComma);
             }
 
             return rv;
         }
-        
+
         protected virtual TableDef ReadTableDef() {
             var rv = new List<TableDefPair>();
 
@@ -548,7 +563,7 @@ namespace GeminiLab.Glug.Parser {
 
         protected virtual VectorDef ReadVectorDef() {
             var pos = ConsumeButPosition(GlugTokenType.SymbolVecBegin);
-            
+
             var rv = ReadCommaExprList();
 
             Consume(GlugTokenType.SymbolVecEnd);
