@@ -217,9 +217,9 @@ namespace GeminiLab.Glos {
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,
             GlosOpCategory.NotUsed,
-            GlosOpCategory.NotUsed,
-            GlosOpCategory.NotUsed,
-            GlosOpCategory.NotUsed,
+            GlosOpCategory.Others,
+            GlosOpCategory.Others,
+            GlosOpCategory.Others,
             // 0xa8
             GlosOpCategory.Others,
             GlosOpCategory.Others,

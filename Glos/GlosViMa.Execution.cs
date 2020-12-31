@@ -3,30 +3,25 @@ using System.Collections.Generic;
 
 namespace GeminiLab.Glos {
     public partial class GlosViMa {
-        // Todo: coroutine should be referred by GlosCoroutine class instead of a index
-        // Todo (then): coroutine list here could be removed or be replace by a list of weak references to coroutines
-        private readonly List<GlosCoroutine> _coroutines     = new List<GlosCoroutine>();
-        private readonly Stack<int>          _coroutineStack = new Stack<int>();
+        private readonly Stack<GlosCoroutine> _coroutineStack = new();
 
         // TODO: unwrap coroutine stack when an exception occurs
         public void ClearCoroutines() {
-            _coroutines.Clear();
             _coroutineStack.Clear();
         }
-        
+
         public GlosValue[] ExecuteFunctionWithProvidedContext(GlosFunction function, GlosContext? context, GlosValue[]? args = null) {
             if (_coroutineStack.Count > 0) {
                 throw new InvalidOperationException();
             }
-            
+
             args ??= new GlosValue[0];
-            
+
             _coroutineStack.Push(NewCoroutine(function, context));
             while (_coroutineStack.Count > 0) {
-                var cid = _coroutineStack.Peek();
-                var coroutine = _coroutines[cid];
+                var cor = _coroutineStack.Peek();
 
-                var result = coroutine.Resume(args);
+                var result = cor.Resume(args);
                 args = result.ReturnValues;
 
                 switch (result.Result) {
@@ -45,24 +40,20 @@ namespace GeminiLab.Glos {
             return args;
         }
 
-        public int NewCoroutine(GlosFunction function, GlosContext? context) {
-            var cor = new GlosCoroutine(this, function, context);
-            var id = _coroutines.Count;
-
-            _coroutines.Add(cor);
-            return id;
+        public GlosCoroutine NewCoroutine(GlosFunction function, GlosContext? context) {
+            return new(this, function, context);
         }
 
         public GlosCoroutine? CurrentCoroutine {
             get {
-                if (!_coroutineStack.TryPeek(out int cid)) {
-                    return null;
+                if (_coroutineStack.TryPeek(out var cor)) {
+                    return cor;
                 }
 
-                return _coroutines[cid];
+                return null;
             }
         }
-        
+
         public GlosValue[] ExecuteFunction(GlosFunction function, GlosValue[]? args = null) {
             return ExecuteFunctionWithProvidedContext(function, null, args);
         }

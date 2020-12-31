@@ -119,6 +119,10 @@ namespace GeminiLab.Glos {
         Dup     = 0xa0,
         Pop     = 0xa1,
 
+        Mkc     = 0xa5,
+        Yield   = 0xa6,
+        Resume  = 0xa7,
+
         LdDel   = 0xa8,
         Call    = 0xa9,
         Ret     = 0xaa,

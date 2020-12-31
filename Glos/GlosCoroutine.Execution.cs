@@ -126,7 +126,7 @@ namespace GeminiLab.Glos {
         public ref struct ExecResult {
             public ExecResultType Result;
             public GlosValue[]    ReturnValues;
-            public int            CoroutineToResume;
+            public GlosCoroutine  CoroutineToResume;
         }
 
         private ExecResult execute(int callStackBase, bool allowCoroutineSchedule) {
@@ -321,6 +321,32 @@ namespace GeminiLab.Glos {
                     case GlosOpCategory.Others when op == GlosOp.Pop:
                         popStack();
                         break;
+                    case GlosOpCategory.Others when op == GlosOp.Mkc:
+                        stackTop().SetCoroutine(new GlosCoroutine(Parent, stackTop().AssertFunction()));
+                        break;
+                    case GlosOpCategory.Others when op == GlosOp.Yield: {
+                        var yldb = popDelimiter();
+                        var yldc = _sptr - yldb;
+
+                        var yld = new GlosValue[yldc];
+                        _stack.AsSpan(yldb, yldc).CopyTo(yld);
+                        popUntil(yldb);
+
+                        return new ExecResult { Result = ExecResultType.Yield, ReturnValues = yld };
+                    }
+                    case GlosOpCategory.Others when op == GlosOp.Resume: {
+                        var cor = stackTop().AssumeCoroutine();
+                        popStack();
+
+                        var argb = peekDelimiter();
+                        var argc = _sptr - argb;
+
+                        var args = new GlosValue[argc];
+                        _stack.AsSpan(argb, argc).CopyTo(args);
+                        popUntil(argb);
+
+                        return new ExecResult { Result = ExecResultType.Resume, CoroutineToResume = cor, ReturnValues = args };
+                    }
                     case GlosOpCategory.Others when op == GlosOp.LdDel:
                         pushDelimiter();
                         break;
@@ -328,10 +354,10 @@ namespace GeminiLab.Glos {
                         var funv = stackTop();
                         popStack();
 
-                        var ptr = peekDelimiter();
-                        var nextArgc = _sptr - ptr;
+                        var argb = peekDelimiter();
+                        var argc = _sptr - argb;
 
-                        callFunction(funv, nextArgc, -1);
+                        callFunction(funv, argc, -1);
                         break;
                     }
                     case GlosOpCategory.Others when op == GlosOp.Ret: {
