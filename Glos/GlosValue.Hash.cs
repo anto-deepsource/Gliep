@@ -39,6 +39,7 @@ namespace GeminiLab.Glos {
                 GlosValueType.Vector         => (ulong) ValueObject!.GetHashCode(),
                 GlosValueType.PureEFunction  => (ulong) ValueObject!.GetHashCode(),
                 GlosValueType.AsyncEFunction => (ulong) ValueObject!.GetHashCode(),
+                GlosValueType.Coroutine      => (ulong) ValueObject!.GetHashCode(),
                 _                            => 0,
             });
         }

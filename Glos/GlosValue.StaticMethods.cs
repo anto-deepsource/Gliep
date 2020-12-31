@@ -9,6 +9,7 @@ namespace GeminiLab.Glos {
         public static implicit operator GlosValue(GlosEFunction v) => NewEFunction(v);
         public static implicit operator GlosValue(GlosVector v) => NewVector(v);
         public static implicit operator GlosValue(GlosPureEFunction v) => NewPureEFunction(v);
+        public static implicit operator GlosValue(GlosCoroutine v) => NewCoroutine(v);
 
         // Unfortunately, C# do not allow this.
         // public static implicit operator GlosValue(IGlosAsyncEFunction v) => NewAsyncEFunction(v);
@@ -77,6 +78,12 @@ namespace GeminiLab.Glos {
         public static GlosValue NewAsyncEFunction(IGlosAsyncEFunction value) {
             var rv = new GlosValue();
             rv.SetAsyncEFunction(value);
+            return rv;
+        }
+
+        public static GlosValue NewCoroutine(GlosCoroutine value) {
+            var rv = new GlosValue();
+            rv.SetCoroutine(value);
             return rv;
         }
 

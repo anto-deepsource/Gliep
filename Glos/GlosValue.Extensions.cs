@@ -93,11 +93,18 @@ namespace GeminiLab.Glos {
         public static ref GlosValue SetAsyncEFunction(this ref GlosValue v, IGlosAsyncEFunction value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
-            v.Type = GlosValueType.Vector;
+            v.Type = GlosValueType.AsyncEFunction;
 
             return ref v;
         }
 
+        public static ref GlosValue SetCoroutine(this ref GlosValue v, GlosCoroutine value) {
+            v.ValueNumber.Integer = 0;
+            v.ValueObject = value;
+            v.Type = GlosValueType.Coroutine;
+
+            return ref v;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AssertNil(this in GlosValue v) {
@@ -175,6 +182,13 @@ namespace GeminiLab.Glos {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GlosCoroutine AssertCoroutine(this in GlosValue v) {
+            if (v.Type == GlosValueType.Coroutine) return v.AssumeCoroutine();
+
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Coroutine);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long AssumeInteger(this in GlosValue v) => v.ValueNumber.Integer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -203,6 +217,9 @@ namespace GeminiLab.Glos {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IGlosAsyncEFunction AssumeAsyncEFunction(this in GlosValue v) => (IGlosAsyncEFunction) v.ValueObject!;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GlosCoroutine AssumeCoroutine(this in GlosValue v) => (GlosCoroutine) v.ValueObject!;
 
         public static double ToFloat(this in GlosValue v) {
             if (v.Type == GlosValueType.Float) return v.ValueNumber.Float;
