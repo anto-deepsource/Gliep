@@ -28,6 +28,13 @@ namespace GeminiLab.Glos {
                 case GlosCoroutine.ExecResultType.Return:
                 case GlosCoroutine.ExecResultType.Yield:
                     _coroutineStack.Pop();
+
+                    if (_coroutineStack.Count > 0) {
+                        _coroutineStack.Peek().ClearToResume();
+                    } else if (result.Result == GlosCoroutine.ExecResultType.Yield) {
+                        throw new InvalidOperationException();
+                    }
+
                     break;
                 case GlosCoroutine.ExecResultType.Resume:
                     _coroutineStack.Push(result.CoroutineToResume);

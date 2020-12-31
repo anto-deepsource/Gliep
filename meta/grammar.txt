@@ -18,6 +18,7 @@ Block       : ( Expr ';'?)*
 Expr        : ExprItem
             | Expr ("."| ".!") identifier
             | Expr ("@"| "@!") Expr
+            | Expr "<-" Expr
             | Expr Expr
             | Expr "$" Expr
             | Expr ".." Expr
@@ -53,6 +54,8 @@ ExprItem    : literal
             | OnStackList
             | TableDef
             | VectorDef
+            | "<-" ExprItem
+            | "->" ExprItem
             ;
 
 NamedOperator   : "`" identifier

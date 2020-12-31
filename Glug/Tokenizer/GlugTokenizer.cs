@@ -215,6 +215,7 @@ namespace GeminiLab.Glug.Tokenizer {
                 ["{|"] = GlugTokenType.SymbolVecBegin,
                 ["|}"] = GlugTokenType.SymbolVecEnd,
                 ["..."] = GlugTokenType.SymbolDotDotDot,
+                ["<-"] = GlugTokenType.SymbolLArrow,
             });
         }
 

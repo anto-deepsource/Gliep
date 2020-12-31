@@ -329,7 +329,11 @@ namespace GeminiLab.Glug.PostProcess {
         }
 
         public override void VisitUnOp(UnOp val, FunctionBuilder fun, bool ru) {
-            visitForValue(val.Expr, fun);
+            if (val.Op == GlugUnOpType.Yield) {
+                visitForOsl(val.Expr, fun);
+            } else {
+                visitForValue(val.Expr, fun);
+            }
 
             switch (val.Op) {
             case GlugUnOpType.Neg:
@@ -348,9 +352,21 @@ namespace GeminiLab.Glug.PostProcess {
                 fun.AppendUpv();
                 ++_delCount[fun];
                 break;
+            case GlugUnOpType.Yield:
+                fun.AppendYield();
+                break;
+            case GlugUnOpType.Mkc:
+                fun.AppendMkc();
+                break;
             }
 
-            if (!ru) fun.AppendPop();
+            if (!ru) {
+                if (val.Op == GlugUnOpType.Yield) {
+                    fun.AppendShpRv(0);
+                } else {
+                    fun.AppendPop();
+                }
+            }
         }
 
         private void createStoreInstr(Node node, FunctionBuilder fun) {
@@ -402,6 +418,15 @@ namespace GeminiLab.Glug.PostProcess {
                 visitForOsl(val.ExprR, fun);
                 visitForValue(val.ExprL, fun);
                 fun.AppendCall();
+
+                if (!ru) {
+                    fun.AppendShpRv(0);
+                    --_delCount[fun];
+                }
+            } else if (val.Op == GlugBiOpType.Resume) {
+                visitForOsl(val.ExprR, fun);
+                visitForValue(val.ExprL, fun);
+                fun.AppendResume();
 
                 if (!ru) {
                     fun.AppendShpRv(0);

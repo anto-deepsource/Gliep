@@ -199,6 +199,8 @@ namespace GeminiLab.Glug.AST {
         Typeof,
         IsNil,
         Unpack,
+        Yield,
+        Mkc,
     }
 
     public class UnOp : Expr {
@@ -236,6 +238,7 @@ namespace GeminiLab.Glug.AST {
         ShortCircuitAnd,
         ShortCircuitOrr,
         NullCoalescing,
+        Resume,
     }
 
     public class BiOp : Expr {

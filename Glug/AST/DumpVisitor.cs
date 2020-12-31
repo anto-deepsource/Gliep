@@ -193,6 +193,8 @@ namespace GeminiLab.Glug.AST {
                 GlugUnOpType.Typeof => "typeof",
                 GlugUnOpType.IsNil  => "isnil",
                 GlugUnOpType.Unpack => "unpack",
+                GlugUnOpType.Yield  => "yield",
+                GlugUnOpType.Mkc    => "mkc",
                 _                   => throw new GlugInternalException(),
             });
             Writer.WriteLine(GetPositionPrefix(val.Position));
@@ -227,6 +229,7 @@ namespace GeminiLab.Glug.AST {
                 GlugBiOpType.ShortCircuitAnd => "short-circuit and",
                 GlugBiOpType.ShortCircuitOrr => "short-circuit orr",
                 GlugBiOpType.NullCoalescing  => "coalescing",
+                GlugBiOpType.Resume          => "resume",
                 _                            => throw new GlugInternalException(),
             });
             Writer.WriteLine(GetPositionPrefix(val.Position));

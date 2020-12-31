@@ -164,6 +164,9 @@ namespace GeminiLab.Glos.CodeGenerator {
         // stack auxiliary
         public void AppendDup() => AppendInstruction(GlosOp.Dup);
         public void AppendPop() => AppendInstruction(GlosOp.Pop);
+        public void AppendMkc() => AppendInstruction(GlosOp.Mkc);
+        public void AppendYield() => AppendInstruction(GlosOp.Yield);
+        public void AppendResume() => AppendInstruction(GlosOp.Resume);
         public void AppendLdDel() => AppendInstruction(GlosOp.LdDel);
         public void AppendCall() => AppendInstruction(GlosOp.Call);
         public void AppendRet() => AppendInstruction(GlosOp.Ret);

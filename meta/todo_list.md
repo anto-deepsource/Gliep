@@ -312,13 +312,13 @@
     - [ ] Add operators for coroutine creating, resuming and yielding (and possible destroying, but it's convenient enough to exit and destroy a coroutine with `return`). Here is a proposal:
 
         ```
-        c = -> fn [a, b] {
+        c = -> fn [a, b] (
             [c, d] = <- [b, a];
             return [d, c];
-        }
+        );
 
-        result0 = c <- [1, 2]
-        result1 = c <- [4, 5]
+        [x, y] = c <- [1, 2];
+        [z, w] = c <- [4, 5];
 
-        print (result0 .. result1) # [2, 1, 5, 4] expected
+        print[x, y, z, w] # [2, 1, 5, 4] expected
         ```

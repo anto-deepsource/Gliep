@@ -17,22 +17,40 @@ namespace GeminiLab.Glos {
 
         public GlosViMa Parent { get; }
 
+        public void ClearToResume() {
+            if (Status != GlosCoroutineStatus.InStack) throw new ArgumentOutOfRangeException();
+
+            Status = GlosCoroutineStatus.Suspend;
+        }
+
         public ExecResult Resume(ReadOnlySpan<GlosValue> args) {
+            var argc = args.Length;
+            args.CopyTo(_stack.AsSpan(_sptr, argc));
+
             switch (Status) {
             case GlosCoroutineStatus.Initial: {
                 var fun = callStackTop().Function;
                 var ctx = callStackTop().Context;
                 popCallStackFrame();
 
-                var argc = args.Length;
-                args.CopyTo(_stack.AsSpan(0, argc));
                 pushNewStackFrame(0, fun, argc, ctx, -1);
                 pushUntil(callStackTop().PrivateStackBase);
 
                 goto case GlosCoroutineStatus.Suspend;
             }
             case GlosCoroutineStatus.Suspend: {
-                return execute(0, true);
+                Status = GlosCoroutineStatus.Running;
+
+                var res = execute(0, true);
+
+                Status = res.Result switch {
+                    ExecResultType.Return => GlosCoroutineStatus.Stopped,
+                    ExecResultType.Resume => GlosCoroutineStatus.InStack,
+                    ExecResultType.Yield  => GlosCoroutineStatus.Suspend,
+                    _                     => throw new ArgumentOutOfRangeException()
+                };
+
+                return res;
             }
             case GlosCoroutineStatus.InStack:
             case GlosCoroutineStatus.Running:

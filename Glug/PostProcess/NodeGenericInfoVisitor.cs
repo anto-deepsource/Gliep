@@ -64,6 +64,14 @@ namespace GeminiLab.Glug.PostProcess {
             Pass.NodeInformation<NodeGenericInfo>(val).IsOnStackList = val.List.Count > 0 && Pass.NodeInformation<NodeGenericInfo>(val.List[^1]).IsOnStackList;
         }
 
+        public override void VisitUnOp(UnOp val) {
+            base.VisitUnOp(val);
+
+            var info = Pass.NodeInformation<NodeGenericInfo>(val);
+
+            info.IsOnStackList = val.Op == GlugUnOpType.Yield;
+        }
+
         public override void VisitBiOp(BiOp val) {
             base.VisitBiOp(val);
 
@@ -71,6 +79,7 @@ namespace GeminiLab.Glug.PostProcess {
 
             info.IsOnStackList =
                 val.Op == GlugBiOpType.Call
+             || val.Op == GlugBiOpType.Resume
              || val.Op == GlugBiOpType.Concat
              || (val.Op == GlugBiOpType.Assign && val.ExprL is OnStackList);
 
