@@ -407,5 +407,28 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .FirstOne().AssertFloatAbsoluteError(expected, epsilon)
                 .MoveNext().AssertEnd();
         }
+
+        [Fact]
+        public void CoroutineBasic() {
+            var code = $@"
+                # swap two pairs
+                c = -> fn [a, b] (
+                    [c, d] = <- [b, a];
+                    return [d, c];
+                );
+
+                [x, y] = c <- [1, 2];
+                [z, w] = c <- [4, 5];
+
+                [x, y, z, w] # [2, 1, 5, 4] expected
+            ";
+            
+            GlosValueArrayChecker.Create(Execute(code))
+                .FirstOne().AssertInteger(2)
+                .MoveNext().AssertInteger(1)
+                .MoveNext().AssertInteger(5)
+                .MoveNext().AssertInteger(4)
+                .MoveNext().AssertEnd();
+        }
     }
 }
