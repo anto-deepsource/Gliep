@@ -470,6 +470,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
             var code = @"
                 x = 0; y = 0;
                 t = {};
+                v = {| 1, 2 ,3 |};
                 `meta t = {
                     .__add: [a, b] -> ( x = b; a )
                 };
@@ -483,13 +484,47 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 )) 9) y = z;
                 ~10;
                 {| 11, 12 |};
+                v @ |>;
                 t @ ""__add"";
-                x + y # 2 + 8 expected
+                x + y + v @ |> # 2 + 8 + 2 expected
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
-                .FirstOne().AssertInteger(10)
+                .FirstOne().AssertInteger(12)
                 .MoveNext().AssertEnd();
+        }
+
+        [Fact]
+        public void BadHash() {
+            var code = @"
+                range = [from, to] -> (
+                    !x = from - 1;
+                    return fn[] if (x + 1 < to) x = x + 1
+                );
+
+                mt = {
+                    .__hash: t -> t.x % 4,
+                    .__equ: [a, b] -> a.x == b.x,
+                };
+
+                new_number = x -> ( number = { .x: x }; `meta number = mt; number );
+
+                t = {};
+                for (i: range[0, 128]) t @ (new_number i) = i;
+
+                v = {||};
+                for (i: range[0, 128]) v @ |> = t @ (new_number i);
+
+                ...v
+            ";
+
+            var checker = GlosValueArrayChecker.Create(Execute(code)).FirstOne();
+
+            for (int i = 0; i < 128; ++i) {
+                checker = checker.AssertInteger(i).MoveNext();
+            }
+
+            checker.AssertEnd();
         }
     }
 }
