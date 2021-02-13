@@ -14,6 +14,7 @@ namespace Exam {
         public static int Main(string[] args) {
             TypeLayout.PrintLayout<GlosValue>();
             TypeLayout.PrintLayout<A>();
+            TypeLayout.PrintLayout<GlosStackFrame>();
             return 0;
         }
     }
