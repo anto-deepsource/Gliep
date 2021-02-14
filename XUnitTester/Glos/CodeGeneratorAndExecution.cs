@@ -856,5 +856,72 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 .MoveNext().AssertString(nameof(GlosValueType.Integer).ToLowerInvariant())
                 .MoveNext().AssertEnd();
         }
+
+        class AsyncFunctionExample : IGlosAsyncEFunction {
+            class CallExample : IGlosAsyncEFunctionCall {
+                private long _sum = 0;
+
+                public AsyncEFunctionResumeResult Resume(ReadOnlySpan<GlosValue> arguments) {
+                    long num = 0;
+                    if (arguments.Length >= 1 && arguments[0].Type == GlosValueType.Integer) {
+                        num = arguments[0].AssumeInteger();
+                    }
+
+                    if (num < 0) {
+                        return new AsyncEFunctionResumeResult {
+                            Type = AsyncEFunctionResumeResultType.Return,
+                            Arguments = new GlosValue[] { _sum },
+                        };
+                    } else {
+                        _sum += num;
+                        return new AsyncEFunctionResumeResult {
+                            Type = AsyncEFunctionResumeResultType.Yield,
+                            Arguments = new GlosValue[] { _sum },
+                        };
+                    }
+                }
+            }
+
+            public IGlosAsyncEFunctionCall Call(GlosCoroutine coroutine) {
+                return new CallExample();
+            }
+        }
+
+        [Fact]
+        public void AsyncExternalFunction() {
+            var f = Builder.AddFunction();
+            var c = f.AllocateLocalVariable();
+
+            f.AppendLdArg(0);
+            f.AppendMkc();
+            f.AppendStLoc(c);
+            f.AppendLdDel();
+            f.AppendLdDel();
+            f.AppendLd(1);
+            f.AppendLdLoc(c);
+            f.AppendResume();
+            f.AppendPopDel();
+            f.AppendLdDel();
+            f.AppendLd(2);
+            f.AppendLdLoc(c);
+            f.AppendResume();
+            f.AppendPopDel();
+            f.AppendLdDel();
+            f.AppendLd(3);
+            f.AppendLdLoc(c);
+            f.AppendResume();
+            f.AppendPopDel();
+            f.AppendRet();
+
+            f.SetEntry();
+
+            var res = Execute(new[] { GlosValue.NewAsyncEFunction(new AsyncFunctionExample()) });
+
+            GlosValueArrayChecker.Create(res)
+                .FirstOne().AssertInteger(1)
+                .MoveNext().AssertInteger(3)
+                .MoveNext().AssertInteger(6)
+                .MoveNext().AssertEnd();
+        }
     }
 }

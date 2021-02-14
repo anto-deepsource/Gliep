@@ -1,6 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace GeminiLab.Glos {
     public enum GlosCoroutineStatus : byte {
@@ -29,11 +27,14 @@ namespace GeminiLab.Glos {
 
             switch (Status) {
             case GlosCoroutineStatus.Initial: {
-                var fun = callStackTop().Function;
-                var ctx = callStackTop().Context;
-                popCallStackFrame();
+                if (Entry.Type == GlosValueType.Function) {
+                    pushNewStackFrame(0, Entry.AssumeFunction(), argc, RootContext, -1);
+                } else if (Entry.Type == GlosValueType.AsyncEFunction) {
+                    pushNewAsyncEFunctionStackFrame(0, Entry.AssumeAsyncEFunction().Call(this), -1);
+                } else {
+                    throw new ArgumentOutOfRangeException(nameof(Entry));
+                }
 
-                pushNewStackFrame(0, fun, argc, ctx, -1);
                 pushUntil(callStackTop().PrivateStackBase);
 
                 goto case GlosCoroutineStatus.Suspend;
@@ -120,6 +121,7 @@ namespace GeminiLab.Glos {
             ref var frame = ref pushCallStackFrame();
 
             frame.Function = function;
+            frame.Call = null;
             frame.Context = context ?? new GlosContext(function.ParentContext);
 
             frame.StackBase = bptr;
@@ -133,6 +135,24 @@ namespace GeminiLab.Glos {
             frame.ReturnSize = returnSize;
 
             foreach (var s in function.Prototype.VariableInContext) frame.Context.CreateVariable(s);
+        }
+
+        private void pushNewAsyncEFunctionStackFrame(int bptr, IGlosAsyncEFunctionCall call, int returnSize) {
+            ref var frame = ref pushCallStackFrame();
+
+            frame.Function = null;
+            frame.Call = call;
+            frame.Context = null!;
+
+            frame.StackBase = bptr;
+            frame.ArgumentsCount = 0;
+            frame.LocalVariablesBase = bptr;
+            frame.PrivateStackBase = bptr;
+            frame.InstructionPointer = -1;
+            frame.NextInstructionPointer = -1;
+            frame.DelimiterStackBase = _dptr;
+
+            frame.ReturnSize = returnSize;
         }
 
         public enum ExecResultType {
@@ -165,6 +185,56 @@ namespace GeminiLab.Glos {
 
                 while (_cptr > callStackBase) {
                     if (ip < 0 || ip > len || nip < 0 || nip > len) {
+                        // we use ip: -1 and nip: -1 to mark a async external function
+                        if (ip < 0 && nip < 0 && callStackTop().Call is {} call) {
+                            var result = call.Resume(_stack.AsSpan(bptr));
+
+                            popUntil(bptr);
+
+                            switch (result.Type) {
+                            case AsyncEFunctionResumeResultType.Return: {
+                                var retc = result.Arguments.Length;
+                                var returnSize = callStackTop().ReturnSize;
+                                if (returnSize < 0) {
+                                    returnSize = retc;
+                                }
+
+                                var copySize = returnSize > retc ? retc : returnSize;
+
+                                result.Arguments.AsSpan(0, copySize).CopyTo(_stack.AsSpan(bptr, copySize));
+
+                                popCallStackFrame();
+                                restoreStatus();
+                                break;
+                            }
+                            case AsyncEFunctionResumeResultType.Resume: {
+                                var cor = result.Value.AssertCoroutine();
+                                var args = result.Arguments;
+
+                                return new ExecResult { Result = ExecResultType.Resume, CoroutineToResume = cor, ReturnValues = args };
+                            }
+                            case AsyncEFunctionResumeResultType.Yield: {
+                                var args = result.Arguments;
+
+                                return new ExecResult { Result = ExecResultType.Yield, ReturnValues = args };
+                            }
+                            case AsyncEFunctionResumeResultType.Call: {
+                                var args = result.Arguments;
+                                var argc = args.Length;
+                                var funv = result.Value;
+
+                                args.CopyTo(_stack.AsSpan(bptr, argc));
+                                callFunction(funv, argc, -1);
+
+                                break;
+                            }
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                            }
+
+                            continue;
+                        }
+
                         throw new GlosInvalidInstructionPointerException();
                     }
 
@@ -344,7 +414,12 @@ namespace GeminiLab.Glos {
                         popStack();
                         break;
                     case GlosOpCategory.Others when op == GlosOp.Mkc:
-                        stackTop().SetCoroutine(new GlosCoroutine(Parent, stackTop().AssertFunction()));
+                        var type = stackTop().Type;
+                        if (type != GlosValueType.Function && type != GlosValueType.AsyncEFunction) {
+                            throw new GlosValueTypeAssertionFailedException(stackTop(), GlosValueType.Function); // TODO
+                        }
+
+                        stackTop().SetCoroutine(new GlosCoroutine(Parent, stackTop()));
                         break;
                     case GlosOpCategory.Others when op == GlosOp.Yield: {
                         var yldb = popDelimiter();
@@ -495,7 +570,9 @@ namespace GeminiLab.Glos {
                     restoreStatus();
                     pushUntil(callStackTop().PrivateStackBase);
                 } else if (funv.Type == GlosValueType.AsyncEFunction) {
-                    throw new NotImplementedException();
+                    storeStatus();
+                    pushNewAsyncEFunctionStackFrame(_sptr - argc, funv.AssertAsyncEFunction().Call(this), returnSize);
+                    restoreStatus();
                 }
             }
 
@@ -507,6 +584,8 @@ namespace GeminiLab.Glos {
 
                 ref var frame = ref callStackTop();
 
+                bptr = frame.StackBase;
+
                 ip = frame.InstructionPointer;
                 nip = frame.NextInstructionPointer;
                 lastOp = frame.LastOp;
@@ -514,12 +593,12 @@ namespace GeminiLab.Glos {
                 nextPhase = frame.NextPhase;
                 phaseCount = frame.PhaseCount;
                 lastImm = frame.LastImm;
-                proto = frame.Function.Prototype;
-                code = proto.CodeMemory;
+                proto = frame.Function?.Prototype;
+                code = proto?.CodeMemory ?? ReadOnlyMemory<byte>.Empty;
                 len = code.Length;
-                unit = frame.Function.Unit;
+                unit = frame.Function?.Unit;
                 ctx = frame.Context;
-                global = ctx.Global;
+                global = ctx?.Global;
             }
 
 #if !DEVELOP
@@ -828,15 +907,16 @@ namespace GeminiLab.Glos {
             return result.ReturnValues;
         }
 
-        public GlosCoroutine(GlosViMa parent, GlosFunction entry) : this(parent, entry, null) { }
+        public  GlosValue    Entry       { get; }
+        private GlosContext? RootContext { get; }
 
-        public GlosCoroutine(GlosViMa parent, GlosFunction entry, GlosContext? rootContext) {
+        public GlosCoroutine(GlosViMa parent, GlosValue entry) : this(parent, entry, null) { }
+
+        public GlosCoroutine(GlosViMa parent, GlosValue entry, GlosContext? rootContext) {
             Status = GlosCoroutineStatus.Invalid;
             Parent = parent;
-
-            ref var stackframe = ref pushCallStackFrame();
-            stackframe.Function = entry;
-            stackframe.Context = rootContext!;
+            Entry = entry;
+            RootContext = rootContext;
 
             Status = GlosCoroutineStatus.Initial;
         }
