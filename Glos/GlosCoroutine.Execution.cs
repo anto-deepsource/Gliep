@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace GeminiLab.Glos {
     public enum GlosCoroutineStatus : byte {
