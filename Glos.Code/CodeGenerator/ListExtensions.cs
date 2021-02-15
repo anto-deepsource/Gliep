@@ -32,7 +32,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         }
 
         internal static void SetInteger32(this IList<byte> list, int offset, int item) {
-            if (offset + 4 >= list.Count) throw new ArgumentOutOfRangeException(nameof(offset));
+            if (offset + 4 > list.Count) throw new ArgumentOutOfRangeException(nameof(offset));
 
             int i = item;
             unsafe {

@@ -8,8 +8,8 @@ namespace GeminiLab.Glos {
 
         public GlosVector() : this(DefaultInitSize) { }
 
-        public GlosVector(int len) {
-            _list = new GlosStack<GlosValue>(len);
+        public GlosVector(int cap) {
+            _list = new GlosStack<GlosValue>(cap);
         }
 
         public ref GlosValue this[int index] => ref _list[index];
@@ -18,6 +18,10 @@ namespace GeminiLab.Glos {
             ref var rv = ref _list.PushStack();
             rv = value;
             return ref rv;
+        }
+
+        public ref GlosValue PushNil() {
+            return ref _list.PushStack().SetNil();
         }
 
         public void Pop() {

@@ -294,24 +294,30 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
             var res = Execute();
 
             GlosValueArrayChecker.Create(res)
-                .FirstOne().AssertTable(t => {
-                    GlosTableChecker.Create(t)
-                        .Has(0, v => v.AssertInteger() == 1)
-                        .Has(1, v => v.AssertInteger() == 1)
-                        .AssertAllKeyChecked();
-                })
-                .MoveNext().AssertTable(t => {
-                    GlosTableChecker.Create(t)
-                        .Has(0, v => v.AssertInteger() == 1)
-                        .Has(1, v => v.AssertInteger() == 1)
-                        .AssertAllKeyChecked();
-                })
-                .MoveNext().AssertTable(t => {
-                    GlosTableChecker.Create(t)
-                        .Has(0, v => v.AssertInteger() == 0)
-                        .Has(1, v => v.AssertInteger() == 1)
-                        .AssertAllKeyChecked();
-                })
+                .FirstOne().AssertTable(
+                    t => {
+                        GlosTableChecker.Create(t)
+                            .Has(0, v => v.AssertInteger() == 1)
+                            .Has(1, v => v.AssertInteger() == 1)
+                            .AssertAllKeyChecked();
+                    }
+                )
+                .MoveNext().AssertTable(
+                    t => {
+                        GlosTableChecker.Create(t)
+                            .Has(0, v => v.AssertInteger() == 1)
+                            .Has(1, v => v.AssertInteger() == 1)
+                            .AssertAllKeyChecked();
+                    }
+                )
+                .MoveNext().AssertTable(
+                    t => {
+                        GlosTableChecker.Create(t)
+                            .Has(0, v => v.AssertInteger() == 0)
+                            .Has(1, v => v.AssertInteger() == 1)
+                            .AssertAllKeyChecked();
+                    }
+                )
                 .MoveNext().AssertInteger(1)
                 .MoveNext().AssertFalse()
                 .MoveNext().AssertInteger(1)
@@ -372,27 +378,29 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 return Array.Empty<GlosValue>();
             };
 
-            GlosPureEFunction ren = arg => {
-                return new[] { arg[1] };
-            };
+            GlosPureEFunction ren = arg => { return new[] { arg[1] }; };
 
             fgen.SetEntry();
 
             var res = Execute(new GlosValue[] { uen, ren });
 
             GlosValueArrayChecker.Create(res)
-                .FirstOne().AssertTable(t => {
-                    GlosTableChecker.Create(t)
-                        .Has(0, v => v.AssertInteger() == 3)
-                        .AssertAllKeyChecked();
-                })
+                .FirstOne().AssertTable(
+                    t => {
+                        GlosTableChecker.Create(t)
+                            .Has(0, v => v.AssertInteger() == 3)
+                            .AssertAllKeyChecked();
+                    }
+                )
                 .MoveNext().AssertNil()
-                .MoveNext().AssertTable(t => {
-                    GlosTableChecker.Create(t)
-                        .Has(GlosMetamethodNames.Uen, v => v.AssertPureEFunction() == uen)
-                        .Has(GlosMetamethodNames.Ren, v => v.AssertPureEFunction() == ren)
-                        .AssertAllKeyChecked();
-                })
+                .MoveNext().AssertTable(
+                    t => {
+                        GlosTableChecker.Create(t)
+                            .Has(GlosMetamethodNames.Uen, v => v.AssertPureEFunction() == uen)
+                            .Has(GlosMetamethodNames.Ren, v => v.AssertPureEFunction() == ren)
+                            .AssertAllKeyChecked();
+                    }
+                )
                 .MoveNext().AssertEnd();
         }
 
@@ -496,7 +504,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
             sub.AppendLdStr(idx);
             sub.AppendUvg();
             sub.AppendRet();
-            
+
             var fgen = Builder.AddFunction();
             var subLoc = fgen.AllocateLocalVariable();
 
@@ -551,7 +559,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
         [Fact]
         public void LdArgATest() {
             var fgen = Builder.AddFunction();
-            
+
             // this function return the value and index first negative integer of integer-only arguments
             var iter = fgen.AllocateLocalVariable();
 
@@ -585,7 +593,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
 
             fgen.InsertLabel(ret);
             fgen.AppendRet();
-            
+
             fgen.SetEntry();
 
             var ran = new Random();
@@ -618,13 +626,13 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
             var fgen = Builder.AddFunction();
 
             const int argc = 1;
-            
+
             fgen.AppendLdArg(0);
             for (int i = 1; i < argc; ++i) {
                 fgen.AppendLdArg(i);
                 fgen.AppendAdd();
             }
-            
+
             fgen.SetEntry();
 
             var ran = new U64ToI64PRNG<Mt19937X64>();
@@ -660,7 +668,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
 
                 for (int i = 0; i < 64; ++i) {
                     for (int j = 0; j < 64; ++j) {
-                        long v = (long)((1ul << i) | (1ul << j));
+                        long v = (long) ((1ul << i) | (1ul << j));
 
                         expected += v;
                         fgen.AppendLd(v);
@@ -777,23 +785,27 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
         [Fact]
         public void Syscall() {
             // syscall 0: ldlocc
-            ViMa.SetSyscall(0, (stack, callStack, delStack) => {
-                stack.PushStack() = callStack.StackTop().Function.Prototype.LocalVariableSize;
-            });
+            ViMa.SetSyscall(0, (stack, callStack, delStack) => { stack.PushStack() = callStack.StackTop().Function.Prototype.LocalVariableSize; });
 
             // syscall 1: erase all locs
-            ViMa.SetSyscall(1, (stack, callStack, delStack) => {
-                foreach (ref var v in stack.AsSpan(callStack.StackTop().LocalVariablesBase, callStack.StackTop().Function.Prototype.LocalVariableSize)) {
-                    v.SetNil();
+            ViMa.SetSyscall(
+                1,
+                (stack, callStack, delStack) => {
+                    foreach (ref var v in stack.AsSpan(callStack.StackTop().LocalVariablesBase, callStack.StackTop().Function.Prototype.LocalVariableSize)) {
+                        v.SetNil();
+                    }
                 }
-            });
+            );
 
             // syscall 2: set all locs to 1
-            ViMa.SetSyscall(2, (stack, callStack, delStack) => {
-                foreach (ref var v in stack.AsSpan(callStack.StackTop().LocalVariablesBase, callStack.StackTop().Function.Prototype.LocalVariableSize)) {
-                    v.SetInteger(1);
+            ViMa.SetSyscall(
+                2,
+                (stack, callStack, delStack) => {
+                    foreach (ref var v in stack.AsSpan(callStack.StackTop().LocalVariablesBase, callStack.StackTop().Function.Prototype.LocalVariableSize)) {
+                        v.SetInteger(1);
+                    }
                 }
-            });
+            );
 
             var locc = 4;
             var fgen = Builder.AddFunction();
@@ -808,10 +820,12 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
             for (int i = 0; i < locc; ++i) {
                 fgen.AppendLdLoc(locs[i]);
             }
+
             fgen.AppendSyscall(1);
             for (int i = 0; i < locc; ++i) {
                 fgen.AppendLdLoc(locs[i]);
             }
+
             fgen.AppendSyscall(2);
             for (int i = 0; i < locc; ++i) {
                 fgen.AppendLdLoc(locs[i]);
@@ -857,8 +871,8 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 .MoveNext().AssertEnd();
         }
 
-        class AsyncFunctionExample : IGlosAsyncEFunction {
-            class CallExample : IGlosAsyncEFunctionCall {
+        class AsyncSumFunction : IGlosAsyncEFunction {
+            class C : IGlosAsyncEFunctionCall {
                 private long _sum = 0;
 
                 public AsyncEFunctionResumeResult Resume(ReadOnlySpan<GlosValue> arguments) {
@@ -868,22 +882,16 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                     }
 
                     if (num < 0) {
-                        return new AsyncEFunctionResumeResult {
-                            Type = AsyncEFunctionResumeResultType.Return,
-                            Arguments = new GlosValue[] { _sum },
-                        };
+                        return new AsyncEFunctionResumeResult { Type = AsyncEFunctionResumeResultType.Return, Arguments = new GlosValue[] { _sum }, };
                     } else {
                         _sum += num;
-                        return new AsyncEFunctionResumeResult {
-                            Type = AsyncEFunctionResumeResultType.Yield,
-                            Arguments = new GlosValue[] { _sum },
-                        };
+                        return new AsyncEFunctionResumeResult { Type = AsyncEFunctionResumeResultType.Yield, Arguments = new GlosValue[] { _sum }, };
                     }
                 }
             }
 
             public IGlosAsyncEFunctionCall Call(GlosCoroutine coroutine) {
-                return new CallExample();
+                return new C();
             }
         }
 
@@ -915,12 +923,122 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
 
             f.SetEntry();
 
-            var res = Execute(new[] { GlosValue.NewAsyncEFunction(new AsyncFunctionExample()) });
+            var res = Execute(new[] { GlosValue.NewAsyncEFunction(new AsyncSumFunction()) });
 
             GlosValueArrayChecker.Create(res)
                 .FirstOne().AssertInteger(1)
                 .MoveNext().AssertInteger(3)
                 .MoveNext().AssertInteger(6)
+                .MoveNext().AssertEnd();
+        }
+
+        class SchedulableMapFunction : IGlosAsyncEFunction {
+            class C : IGlosAsyncEFunctionCall {
+                private int        _processed = -1;
+                private int        _length    = 0;
+                private GlosVector _mapped    = null!;
+                private GlosVector _vec       = null!;
+                private GlosValue  _fun       = default;
+
+                public AsyncEFunctionResumeResult Resume(ReadOnlySpan<GlosValue> arguments) {
+                    if (_processed < 0) {
+                        _vec = arguments[0].AssertVector();
+                        _fun = arguments[1];
+                        _fun.AssertInvokable();
+
+                        _length = _vec.Count;
+
+                        _mapped = new GlosVector(_length);
+                        _processed = 0;
+                    } else {
+                        if (arguments.Length >= 1) {
+                            _mapped.Push(in arguments[0]);
+                        } else {
+                            _mapped.PushNil();
+                        }
+                    }
+
+                    if (_processed >= _length) {
+                        return new AsyncEFunctionResumeResult { Type = AsyncEFunctionResumeResultType.Return, Arguments = new GlosValue[] { _mapped }, };
+                    }
+
+                    return new AsyncEFunctionResumeResult { Type = AsyncEFunctionResumeResultType.Call, Value = _fun, Arguments = new[] { _vec[_processed++] }, };
+                }
+            }
+
+            public IGlosAsyncEFunctionCall Call(GlosCoroutine coroutine) {
+                return new C();
+            }
+        }
+
+        [Fact]
+        public void SchedulableMap() {
+            // infOne is a coroutine that yields 1 endlessly
+            var infOne = Builder.AddFunction();
+            var begin = infOne.AllocateAndInsertLabel();
+            infOne.AppendLdDel();
+            infOne.AppendLd(1);
+            infOne.AppendYield();
+            infOne.AppendShpRv(0);
+            infOne.AppendB(begin);
+
+            // sqrAddOne is a function add 1 (get from infOne) to its first argument squared and returns it
+            var sqrAddOne = Builder.AddFunction();
+            var infOneLv = sqrAddOne.AllocateLocalVariable();
+            sqrAddOne.AppendLdStr("inf_one");
+            sqrAddOne.AppendRvg();
+            sqrAddOne.AppendStLoc(infOneLv);
+            sqrAddOne.AppendLdDel();
+            sqrAddOne.AppendLdArg(0);
+            sqrAddOne.AppendDup();
+            sqrAddOne.AppendMul();
+            sqrAddOne.AppendLdDel();
+            sqrAddOne.AppendLdLoc(infOneLv);
+            sqrAddOne.AppendResume();
+            sqrAddOne.AppendShpRv(1);
+            sqrAddOne.AppendAdd();
+            sqrAddOne.AppendRet();
+
+            // main test function
+            // args: map
+            var f = Builder.AddFunction();
+            var map = f.AllocateLocalVariable();
+            var mapper = f.AllocateLocalVariable();
+
+            f.AppendLdArg(0);
+            f.AppendStLoc(map);
+
+            f.AppendLdFun(sqrAddOne);
+            f.AppendBind();
+            f.AppendStLoc(mapper);
+
+            f.AppendLdFun(infOne);
+            f.AppendBind();
+            f.AppendMkc();
+            f.AppendLdStr("inf_one");
+            f.AppendUvg();
+
+            f.AppendLdDel();
+            f.AppendLd(0);
+            f.AppendLd(1);
+            f.AppendLd(2);
+            f.AppendLd(3);
+            f.AppendPkv();
+            f.AppendLdLoc(mapper);
+            f.AppendLdLoc(map);
+            f.AppendCall();
+            f.AppendUpv();
+            f.AppendRet();
+
+            f.SetEntry();
+
+            var res = Execute(new[] { GlosValue.NewAsyncEFunction(new SchedulableMapFunction()) });
+
+            GlosValueArrayChecker.Create(res)
+                .FirstOne().AssertInteger(1)
+                .MoveNext().AssertInteger(2)
+                .MoveNext().AssertInteger(5)
+                .MoveNext().AssertInteger(10)
                 .MoveNext().AssertEnd();
         }
     }
