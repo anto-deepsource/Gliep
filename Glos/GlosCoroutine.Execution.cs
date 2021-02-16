@@ -80,38 +80,41 @@ namespace GeminiLab.Glos {
             var immt = GlosOpInfo.Immediates[opb];
 
             unchecked {
-                switch (immt) {
-                case GlosOpImmediate.Embedded:
-                    imm = opb & 0x07;
-                    break;
-                case GlosOpImmediate.Byte:
-                    if (ip + 1 > len) return false;
+                unsafe {
+                    fixed (byte* immp = &code[ip]) {
+                        switch (immt) {
+                        case GlosOpImmediate.Embedded:
+                            imm = opb & 0x07;
+                            break;
+                        case GlosOpImmediate.Byte:
+                            if (ip + 1 > len) return false;
 
-                    imm = (sbyte) code[ip++];
-                    break;
-                case GlosOpImmediate.Dword:
-                    if (ip + 4 > len) return false;
+                            imm = (sbyte) *immp;
+                            ip += 1;
+                            break;
+                        case GlosOpImmediate.Word:
+                            if (ip + 2 > len) return false;
 
-                    imm = unchecked((int) (uint) ((ulong) code[ip] | ((ulong) code[ip + 1] << 8) | ((ulong) code[ip + 2] << 16) | ((ulong) code[ip + 3] << 24)));
-                    ip += 4;
-                    break;
-                case GlosOpImmediate.Qword:
-                    if (ip + 8 > len) return false;
+                            imm = *(short*) immp;
+                            ip += 2;
+                            break;
+                        case GlosOpImmediate.Dword:
+                            if (ip + 4 > len) return false;
 
-                    imm = unchecked((long) ((ulong) code[ip]
-                                          | ((ulong) code[ip + 1] << 8)
-                                          | ((ulong) code[ip + 2] << 16)
-                                          | ((ulong) code[ip + 3] << 24)
-                                          | ((ulong) code[ip + 4] << 32)
-                                          | ((ulong) code[ip + 5] << 40)
-                                          | ((ulong) code[ip + 6] << 48)
-                                          | ((ulong) code[ip + 7] << 56)));
+                            imm = *(int*) immp;
+                            ip += 4;
+                            break;
+                        case GlosOpImmediate.Qword:
+                            if (ip + 8 > len) return false;
 
-                    ip += 8;
-                    break;
-                case GlosOpImmediate.OnStack:
-                    immOnStack = true;
-                    break;
+                            imm = *(long*) immp;
+                            ip += 8;
+                            break;
+                        case GlosOpImmediate.OnStack:
+                            immOnStack = true;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -187,7 +190,7 @@ namespace GeminiLab.Glos {
                 while (_cptr > callStackBase) {
                     if (ip < 0 || ip > len || nip < 0 || nip > len) {
                         // we use ip: -1 and nip: -1 to mark a async external function
-                        if (ip < 0 && nip < 0 && callStackTop().Call is {} call) {
+                        if (ip < 0 && nip < 0 && callStackTop().Call is { } call) {
                             var result = call.Resume(_stack.AsSpan(bptr));
 
                             popUntil(bptr);
