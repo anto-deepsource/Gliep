@@ -80,39 +80,39 @@ namespace GeminiLab.Glos {
             var immt = GlosOpInfo.Immediates[opb];
 
             unchecked {
-                unsafe {
-                    fixed (byte* immp = &code[ip]) {
-                        switch (immt) {
-                        case GlosOpImmediate.Embedded:
-                            imm = opb & 0x07;
-                            break;
-                        case GlosOpImmediate.Byte:
-                            if (ip + 1 > len) return false;
+                if (immt == GlosOpImmediate.Embedded) {
+                    imm = opb & 0x07;
+                } else if (immt == GlosOpImmediate.OnStack) {
+                    immOnStack = true;
+                } else if (immt != GlosOpImmediate.None) {
+                    unsafe {
+                        fixed (byte* immp = &code[ip]) {
+                            switch (immt) {
+                            case GlosOpImmediate.Byte:
+                                if (ip + 1 > len) return false;
 
-                            imm = (sbyte) *immp;
-                            ip += 1;
-                            break;
-                        case GlosOpImmediate.Word:
-                            if (ip + 2 > len) return false;
+                                imm = (sbyte) *immp;
+                                ip += 1;
+                                break;
+                            case GlosOpImmediate.Word:
+                                if (ip + 2 > len) return false;
 
-                            imm = *(short*) immp;
-                            ip += 2;
-                            break;
-                        case GlosOpImmediate.Dword:
-                            if (ip + 4 > len) return false;
+                                imm = *(short*) immp;
+                                ip += 2;
+                                break;
+                            case GlosOpImmediate.Dword:
+                                if (ip + 4 > len) return false;
 
-                            imm = *(int*) immp;
-                            ip += 4;
-                            break;
-                        case GlosOpImmediate.Qword:
-                            if (ip + 8 > len) return false;
+                                imm = *(int*) immp;
+                                ip += 4;
+                                break;
+                            case GlosOpImmediate.Qword:
+                                if (ip + 8 > len) return false;
 
-                            imm = *(long*) immp;
-                            ip += 8;
-                            break;
-                        case GlosOpImmediate.OnStack:
-                            immOnStack = true;
-                            break;
+                                imm = *(long*) immp;
+                                ip += 8;
+                                break;
+                            }
                         }
                     }
                 }
