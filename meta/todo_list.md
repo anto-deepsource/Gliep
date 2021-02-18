@@ -301,6 +301,14 @@
 
         When entering catch block, all stacks will be restored as if the `try` op were a `b` op, then something (to be determined) containing the exception message and a copy of execution context will be pushed to the stack.
 
+    *Update (2021/02/08)*
+
+    Maybe it's good to throw-then-catch an osl?
+
+    ```
+    1 + ([x, y] -> x + y) (try throw [2, 3, 4] catch[a, b] [a, b])
+    ```
+
 - [ ] *(2020/09/10)* *(Planning)* Use reflection to generate builtin functions, so they don't need to check parameters' types every time they're called
 
 - [ ] *(2020/12/11)* Coroutine system

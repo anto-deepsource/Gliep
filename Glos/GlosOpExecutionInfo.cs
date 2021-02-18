@@ -1,7 +1,7 @@
 namespace GeminiLab.Glos {
     public static class GlosOpExecutionInfo {
         // How many loops are required to execute this op
-        public static int[] Phases { get; } = {
+        public static byte[] Phases { get; } = {
             // 0x00
             1, 1, 1, 1, 1, 1, 1, 1,
             1, 1, 2, 2, 3, 3, 2, 2,
