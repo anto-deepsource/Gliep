@@ -24,6 +24,13 @@ namespace GeminiLab.XUnitTester.Gliep.Misc {
             return this;
         }
 
+        public GlosTableChecker Has(GlosValue key, GlosValue expectedValue) {
+            _keysVisited.Add(key);
+            Assert.True(Table.TryReadEntry(key, out var value));
+            Assert.Equal(expectedValue, value);
+            return this;
+        }
+
         public GlosTableChecker Has(GlosValue key, Action<GlosValue> valueChecker) {
             _keysVisited.Add(key);
             Assert.True(Table.TryReadEntry(key, out var value));
@@ -39,7 +46,7 @@ namespace GeminiLab.XUnitTester.Gliep.Misc {
         }
 
         private readonly HashSet<GlosValue> _keysVisited = new HashSet<GlosValue>();
-        public GlosTableChecker AssertAllKeyChecked() { 
+        public GlosTableChecker AssertAllKeyChecked() {
             Assert.Equal(Table.Count, _keysVisited.Count);
             foreach (var key in Table.Keys) {
                 Assert.Contains(key, _keysVisited);
