@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.1;net5</TargetFrameworks>
     <RootNamespace>GeminiLab.Glos</RootNamespace>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -10,6 +10,14 @@
     <Description>Glos, a stack-based virtual machine.</Description>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <Configurations>Develop;Preview;Release</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <LangVersion>8</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net5'">
+    <DefineConstants>CS9</DefineConstants>
     <LangVersion>9</LangVersion>
   </PropertyGroup>
 

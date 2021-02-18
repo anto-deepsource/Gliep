@@ -463,7 +463,7 @@ namespace GeminiLab.Glos {
 
 #region Local Functions
 
-#if !DEVELOP
+#if !DEVELOP && CS9
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             void callFunction(in GlosValue funv, int argc, int returnSize) {
@@ -495,7 +495,7 @@ namespace GeminiLab.Glos {
                 }
             }
 
-#if !DEVELOP
+#if !DEVELOP && CS9
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             void restoreStatus() {
@@ -516,7 +516,7 @@ namespace GeminiLab.Glos {
                 global = ctx.Global;
             }
 
-#if !DEVELOP
+#if !DEVELOP && CS9
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             void storeStatus() {
@@ -531,7 +531,7 @@ namespace GeminiLab.Glos {
                 frame.LastImm = lastImm;
             }
 
-#if !DEVELOP
+#if !DEVELOP && CS9
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             void executeArithmeticOperation(GlosOp op) {
@@ -545,7 +545,7 @@ namespace GeminiLab.Glos {
                 }
             }
 
-#if !DEVELOP
+#if !DEVELOP && CS9
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             void executeComparisonOperation(GlosOp op) {
@@ -663,7 +663,7 @@ namespace GeminiLab.Glos {
                 }
             }
 
-#if !DEVELOP
+#if !DEVELOP && CS9
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             void executeTableVectorOperator(GlosOp op) {
@@ -785,7 +785,7 @@ namespace GeminiLab.Glos {
                 }
             }
 
-#if !DEVELOP
+#if !DEVELOP && CS9
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             void executeUnaryOperation(GlosOp op) {

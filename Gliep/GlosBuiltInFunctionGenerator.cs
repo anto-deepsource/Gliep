@@ -71,7 +71,7 @@ namespace GeminiLab.Gliep {
 
             return ctx;
 
-#if !DEVELOP
+#if !DEVELOP && CS9
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
             void parseArgs(bool pure, ParameterInfo[] paramList, GlosValue[] args, List<object> dest) {

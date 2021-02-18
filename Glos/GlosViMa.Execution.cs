@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace GeminiLab.Glos {
     public partial class GlosViMa {
-        private readonly Stack<GlosCoroutine> _coroutineStack = new();
+        private readonly Stack<GlosCoroutine> _coroutineStack = new Stack<GlosCoroutine>();
 
         // TODO: unwrap coroutine stack when an exception occurs
         public void ClearCoroutines() {
@@ -48,7 +48,7 @@ namespace GeminiLab.Glos {
         }
 
         public GlosCoroutine NewCoroutine(GlosFunction function, GlosContext? context) {
-            return new(this, function, context);
+            return new GlosCoroutine(this, function, context);
         }
 
         public GlosCoroutine? CurrentCoroutine {
