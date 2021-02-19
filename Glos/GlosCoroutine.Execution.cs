@@ -80,41 +80,39 @@ namespace GeminiLab.Glos {
             var immt = GlosOpInfo.Immediates[opb];
 
             unchecked {
-                if (immt == GlosOpImmediate.Embedded) {
-                    imm = opb & 0x07;
-                } else if (immt == GlosOpImmediate.OnStack) {
-                    immOnStack = true;
-                } else if (immt != GlosOpImmediate.None) {
+                var imms = immt.ImmediateSize();
+
+                if (imms == 0) {
+                    if (immt == GlosOpImmediate.Embedded) {
+                        imm = opb & 0x07;
+                    } else if (immt == GlosOpImmediate.OnStack) {
+                        immOnStack = true;
+                    }
+                } else {
+                    if (ip + imms > len) {
+                        return false;
+                    }
+
                     unsafe {
                         fixed (byte* immp = &code[ip]) {
                             switch (immt) {
                             case GlosOpImmediate.Byte:
-                                if (ip + 1 > len) return false;
-
                                 imm = (sbyte) *immp;
-                                ip += 1;
                                 break;
                             case GlosOpImmediate.Word:
-                                if (ip + 2 > len) return false;
-
                                 imm = *(short*) immp;
-                                ip += 2;
                                 break;
                             case GlosOpImmediate.Dword:
-                                if (ip + 4 > len) return false;
-
                                 imm = *(int*) immp;
-                                ip += 4;
                                 break;
                             case GlosOpImmediate.Qword:
-                                if (ip + 8 > len) return false;
-
                                 imm = *(long*) immp;
-                                ip += 8;
                                 break;
                             }
                         }
                     }
+
+                    ip += imms;
                 }
             }
 

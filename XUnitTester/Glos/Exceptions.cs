@@ -38,6 +38,27 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
             GlosRuntimeExceptionCatcher.Catch<GlosUnexpectedEndOfCodeException>(() => {
                 Execute();
             });
+
+            fun = Builder.AddFunctionRaw(new[] {
+                (byte)GlosOp.Ld,
+                (byte)0,
+            }, 0);
+
+            Builder.Entry = fun;
+
+            GlosRuntimeExceptionCatcher.Catch<GlosUnexpectedEndOfCodeException>(() => {
+                Execute();
+            });
+
+            fun = Builder.AddFunctionRaw(new[] {
+                (byte)GlosOp.LdS,
+            }, 0);
+
+            Builder.Entry = fun;
+
+            GlosRuntimeExceptionCatcher.Catch<GlosUnexpectedEndOfCodeException>(() => {
+                Execute();
+            });
         }
 
         [Fact]
