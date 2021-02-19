@@ -34,7 +34,7 @@ namespace GeminiLab.Gliep {
                 if (m.ReturnType == glosValueArrayType) {
                     if (m.GetCustomAttribute<GlosBuiltInPureFunctionAttribute>() != null) {
                         builtinFns.Add((m, true));
-                    } else if (m.GetCustomAttribute<GlosBuiltInFunctionAttribute>() != null && m.GetParameters() is { Length: >0 } param && param[0].ParameterType == typeof(GlosCoroutine)) {
+                    } else if (m.GetCustomAttribute<GlosBuiltInFunctionAttribute>() != null && m.GetParameters() is { Length: var len } param && len > 0 && param[0].ParameterType == typeof(GlosCoroutine)) {
                         builtinFns.Add((m, false));
                     }
                 }

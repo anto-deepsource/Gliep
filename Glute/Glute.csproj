@@ -1,11 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Condition="'$(DisableNet5)' == 'True'">
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DisableNet5)' != 'True'">
+    <TargetFrameworks>netcoreapp3.1;net5</TargetFrameworks>
+  </PropertyGroup>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>GeminiLab.Glute</RootNamespace>
     <Nullable>enable</Nullable>
     <Configurations>Develop;Preview;Release</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <LangVersion>8</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net5'">
+    <DefineConstants>CS9</DefineConstants>
     <LangVersion>9</LangVersion>
   </PropertyGroup>
 

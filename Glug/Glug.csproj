@@ -1,7 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Condition="'$(DisableNet5)' == 'True'">
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DisableNet5)' != 'True'">
+    <TargetFrameworks>netstandard2.1;net5</TargetFrameworks>
+  </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net5</TargetFrameworks>
     <RootNamespace>GeminiLab.Glug</RootNamespace>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
