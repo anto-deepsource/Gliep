@@ -8,10 +8,6 @@ namespace GeminiLab.Glos {
 
         private ref GlosStackFrame callStackTop() => ref _callStack.StackTop();
 
-        private ref GlosStackFrame callStackTop(int count) {
-            return ref _callStack[_cptr - count - 1];
-        }
-
         private ref GlosStackFrame pushCallStackFrame() => ref _callStack.PushStack();
 
         private void popCallStackFrame() {
