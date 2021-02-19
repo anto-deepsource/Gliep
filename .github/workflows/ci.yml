@@ -1,0 +1,35 @@
+name: .NET
+
+on:
+  push:
+    branches:
+    - master
+    - dev
+    - f/*
+  pull_request:
+    branches:
+    - master
+    - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Develop --no-restore
+    - name: Pretest
+      run: mkdir coverage
+    - name: Test
+      run: dotnet test -nologo -p:CollectCoverage=true -p:CoverletOutputFormat=lcov -p:CoverletOutput="../coverage/lcov.info" -p:Exclude="\"[xunit.*]*\"" -p:ExcludeByAttribute="CompilerGeneratedAttribute" -v=m XUnitTester/XUnitTester.csproj
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: ./coverage/lcov.net5.info
