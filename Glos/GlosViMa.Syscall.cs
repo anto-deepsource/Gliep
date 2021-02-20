@@ -10,12 +10,12 @@ namespace GeminiLab.Glos {
         private readonly GlosSyscall?[] _syscalls = new GlosSyscall[MaxSyscallCount];
 
         public void SetSyscall(int index, GlosSyscall? syscall) {
-            if (index < 0 || index >= MaxSyscallCount) throw new ArgumentOutOfRangeException();
+            if (index < 0 || index >= MaxSyscallCount) throw new ArgumentOutOfRangeException(nameof(index));
             _syscalls[index] = syscall;
         }
 
         public GlosSyscall? GetSyscall(int index) {
-            if (index < 0 || index >= MaxSyscallCount) throw new ArgumentOutOfRangeException();
+            if (index < 0 || index >= MaxSyscallCount) throw new ArgumentOutOfRangeException(nameof(index));
             return _syscalls[index];
         }
     }

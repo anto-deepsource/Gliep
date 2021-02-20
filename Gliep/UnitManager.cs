@@ -55,7 +55,7 @@ namespace GeminiLab.Gliep {
 
             ParseRequireKey(key, currentLocation, out var isLibrary, out string? file);
 
-            if (isLibrary) throw new ArgumentOutOfRangeException();
+            if (isLibrary) throw new NotImplementedException();
 
             using var sr = new StreamReader(new FileStream(file!, FileMode.Open, FileAccess.Read));
 

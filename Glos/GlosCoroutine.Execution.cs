@@ -17,7 +17,7 @@ namespace GeminiLab.Glos {
         public GlosViMa Parent { get; }
 
         public void ClearToResume() {
-            if (Status != GlosCoroutineStatus.InStack) throw new ArgumentOutOfRangeException();
+            if (Status != GlosCoroutineStatus.InStack) throw new InvalidOperationException();
 
             Status = GlosCoroutineStatus.Suspend;
         }
@@ -49,7 +49,7 @@ namespace GeminiLab.Glos {
                     ExecResultType.Return => GlosCoroutineStatus.Stopped,
                     ExecResultType.Resume => GlosCoroutineStatus.InStack,
                     ExecResultType.Yield  => GlosCoroutineStatus.Suspend,
-                    _                     => throw new ArgumentOutOfRangeException()
+                    _                     => throw new NeverException()
                 };
 
                 return res;
@@ -60,7 +60,7 @@ namespace GeminiLab.Glos {
                 throw new InvalidOperationException();
             }
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new NeverException();
             }
         }
 
@@ -903,7 +903,7 @@ namespace GeminiLab.Glos {
             var result = execute(callStackBase, false);
 
             if (result.Result != ExecResultType.Return) {
-                throw new Exception();
+                throw new NeverException();
             }
 
             return result.ReturnValues;
