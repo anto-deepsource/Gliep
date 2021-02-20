@@ -3225,7 +3225,7 @@ resharper_xunit_xunit_test_with_console_output_highlighting=warning
 indent_style=space
 indent_size=2
 
-[{*.yaml,*.yml}]
+[{*.yaml,*.yml,*.csproj}]
 indent_style=space
 indent_size=2
 
