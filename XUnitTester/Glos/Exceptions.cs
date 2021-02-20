@@ -135,7 +135,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 Execute();
             });
 
-            Assert.Equal(GlosValueType.Table, exception.Expected);
+            Assert.Equal(new[] { GlosValueType.Table }, exception.Expected);
             Assert.Equal(GlosValueType.Integer, exception.Value.Type);
             Assert.Equal(1, exception.Value.AssumeInteger());
         }

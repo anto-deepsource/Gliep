@@ -1,27 +1,14 @@
 using System;
 
 namespace GeminiLab.Glos {
+    // Exceptions here carries no human-readable string message
     public class GlosException : Exception {
-        // public GlosException() : base() { }
-        public GlosException(string message) : base(message) { }
-        public GlosException(string message, Exception? innerException) : base(message, innerException) { }
+        public GlosException(Exception? innerException = null) : base(null, innerException) { }
     }
 
     public class GlosRuntimeException : GlosException {
         public GlosRuntimeException(GlosCoroutine coroutine, Exception innerException)
-            : base(string.Format(i18n.Strings.DefaultMessageGlosRuntimeExceptionWithInner, innerException.GetType().Name, innerException.Message), innerException) {
-            ViMa = coroutine.Parent;
-            Coroutine = coroutine;
-        }
-
-        public GlosRuntimeException(GlosCoroutine coroutine, string? message = null)
-            : base(message ?? i18n.Strings.DefaultMessageGlosRuntimeException) {
-            ViMa = coroutine.Parent;
-            Coroutine = coroutine;
-        }
-
-        public GlosRuntimeException(GlosCoroutine coroutine, string message, Exception innerException)
-            : base(message, innerException) {
+            : base(innerException) {
             ViMa = coroutine.Parent;
             Coroutine = coroutine;
         }
@@ -31,13 +18,10 @@ namespace GeminiLab.Glos {
 
         private GlosStackFrame[]? _callStack = null;
         public GlosStackFrame[] CallStack => _callStack ??= Coroutine.CallStackFrames.ToArray();
-        
-        
     }
 
     public class GlosUnknownOpException : GlosException {
-        public GlosUnknownOpException(byte op, string? message = null)
-            : base(message ?? string.Format(i18n.Strings.DefaultMessageGlosUnknownOpException, op)) {
+        public GlosUnknownOpException(byte op) {
             Op = op;
         }
 
@@ -45,13 +29,11 @@ namespace GeminiLab.Glos {
     }
 
     public class GlosUnexpectedEndOfCodeException : GlosException {
-        public GlosUnexpectedEndOfCodeException(string? message = null)
-            : base(message ?? i18n.Strings.DefaultMessageGlosUnexpectedEndOfCodeException) { }
+        public GlosUnexpectedEndOfCodeException(string? message = null) { }
     }
 
     public class GlosLocalVariableIndexOutOfRangeException : GlosException {
-        public GlosLocalVariableIndexOutOfRangeException(int index, string? message = null)
-            : base(message ?? string.Format(i18n.Strings.DefaultMessageGlosLocalVariableIndexOutOfRangeException, index)) {
+        public GlosLocalVariableIndexOutOfRangeException(int index) {
             Index = index;
         }
 
@@ -59,8 +41,7 @@ namespace GeminiLab.Glos {
     }
 
     public class GlosStringIndexOutOfRangeException : GlosException {
-        public GlosStringIndexOutOfRangeException(int index, string? message = null)
-            : base(message ?? "") { // TODO: add exception message here
+        public GlosStringIndexOutOfRangeException(int index) {
             Index = index;
         }
 
@@ -68,8 +49,7 @@ namespace GeminiLab.Glos {
     }
 
     public class GlosFunctionIndexOutOfRangeException : GlosException {
-        public GlosFunctionIndexOutOfRangeException(int index, string? message = null)
-            : base(message ?? "") { // TODO: add exception message here
+        public GlosFunctionIndexOutOfRangeException(int index) {
             Index = index;
         }
 
@@ -77,13 +57,11 @@ namespace GeminiLab.Glos {
     }
 
     public class GlosInvalidInstructionPointerException : GlosException {
-        public GlosInvalidInstructionPointerException(string? message = null)
-            : base(message ?? string.Format(i18n.Strings.DefaultMessageGlosInvalidInstructionPointerException)) { }
+        public GlosInvalidInstructionPointerException() { }
     }
 
     public class GlosInvalidBinaryOperandTypeException : GlosException {
-        public GlosInvalidBinaryOperandTypeException(GlosOp op, GlosValue left, GlosValue right, string? message = null)
-            : base(message ?? string.Format(i18n.Strings.DefaultMessageGlosInvalidBinaryOperandTypeException, op, left.Type, right.Type)) {
+        public GlosInvalidBinaryOperandTypeException(GlosOp op, GlosValue left, GlosValue right) {
             Op = op;
             Left = left;
             Right = right;
@@ -95,8 +73,7 @@ namespace GeminiLab.Glos {
     }
 
     public class GlosInvalidUnaryOperandTypeException : GlosException {
-        public GlosInvalidUnaryOperandTypeException(GlosOp op, GlosValue operand, string? message = null)
-            : base(message ?? string.Format(i18n.Strings.DefaultMessageGlosInvalidUnaryOperandTypeException, op, operand.Type)) {
+        public GlosInvalidUnaryOperandTypeException(GlosOp op, GlosValue operand) {
             Op = op;
             Operand = operand;
         }
@@ -106,19 +83,17 @@ namespace GeminiLab.Glos {
     }
 
     public class GlosValueTypeAssertionFailedException : GlosException {
-        public GlosValueTypeAssertionFailedException(GlosValue value, GlosValueType expected, string? message = null)
-            : base(message ?? string.Format(i18n.Strings.DefaultMessageGlosValueTypeAssertionFailedException, expected, value.Type)) {
+        public GlosValueTypeAssertionFailedException(GlosValue value, params GlosValueType[] expected) {
             Value = value;
             Expected = expected;
         }
 
         public GlosValue Value { get; }
-        public GlosValueType Expected { get; }
+        public GlosValueType[] Expected { get; }
     }
 
     public class GlosValueNotCallableException : GlosException {
-        public GlosValueNotCallableException(GlosValue value, string? message = null)
-            : base(message ?? string.Format(i18n.Strings.DefaultMessageGlosValueNotCallableException, value.ToString())) {
+        public GlosValueNotCallableException(GlosValue value) {
             Value = value;
         }
 
