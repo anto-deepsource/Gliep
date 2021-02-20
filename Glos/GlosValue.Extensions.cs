@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace GeminiLab.Glos {
     public static class GlosValueExtensions {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetNil(this ref GlosValue v) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = null;
@@ -10,6 +11,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetInteger(this ref GlosValue v, long value) {
             v.ValueNumber.Integer = value;
             v.ValueObject = null;
@@ -18,6 +20,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetFloat(this ref GlosValue v, double value) {
             v.ValueNumber.Float = value;
             v.ValueObject = null;
@@ -26,6 +29,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetFloatByBinaryPresentation(this ref GlosValue v, ulong representation) {
             v.ValueNumber.Integer = unchecked((long) representation);
             v.ValueObject = null;
@@ -34,6 +38,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetBoolean(this ref GlosValue v, bool value) {
             v.ValueNumber.Integer = value ? -1L : 0L;
             v.ValueObject = null;
@@ -42,6 +47,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetTable(this ref GlosValue v, GlosTable value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
@@ -50,6 +56,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetString(this ref GlosValue v, string value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
@@ -58,6 +65,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetFunction(this ref GlosValue v, GlosFunction fun) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = fun;
@@ -66,6 +74,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetEFunction(this ref GlosValue v, GlosEFunction value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
@@ -74,6 +83,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetVector(this ref GlosValue v, GlosVector value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
@@ -82,6 +92,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetPureEFunction(this ref GlosValue v, GlosPureEFunction value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
@@ -90,6 +101,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetAsyncEFunction(this ref GlosValue v, IGlosAsyncEFunction value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
@@ -98,6 +110,7 @@ namespace GeminiLab.Glos {
             return ref v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetCoroutine(this ref GlosValue v, GlosCoroutine value) {
             v.ValueNumber.Integer = 0;
             v.ValueObject = value;
