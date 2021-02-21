@@ -1,3 +1,3 @@
 echo "this script works with cmd or bash, but cannot work with powershell, well done M$"
-dotnet test -nologo -p:Configuration=Develop -p:CollectCoverage=true -p:CoverletOutputFormat=opencover -p:Exclude="\"[xunit.*]*,[GeminiLab.Core2*]*\"" -p:ExcludeByAttribute="CompilerGeneratedAttribute" -v=m XUnitTester/XUnitTester.csproj
+dotnet test -nologo -p:Configuration=Develop -p:DisableNet5=True -p:CollectCoverage=true -p:CoverletOutputFormat=opencover -p:Exclude="\"[xunit.*]*,[GeminiLab.Core2*]*\"" -p:ExcludeByAttribute="CompilerGeneratedAttribute" -v=m XUnitTester/XUnitTester.csproj
 reportgenerator -reports:./XUnitTester/coverage.opencover.xml -targetdir:report.ignore

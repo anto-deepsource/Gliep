@@ -311,13 +311,13 @@
 
 - [ ] *(2020/09/10)* *(Planning)* Use reflection to generate builtin functions, so they don't need to check parameters' types every time they're called
 
-- [ ] *(2020/12/11)* Coroutine system
+- [x] *(2020/12/11)* Coroutine system
     
-    - [ ] Add new `GlosValueType`: `Coroutine`
+    - [x] Add new `GlosValueType`: `Coroutine`
 
-    - [ ] Add `mkc`, `resume`, `yield` op. `resume` works like `call`, `yield` works like `ret`
+    - [x] Add `mkc`, `resume`, `yield` op. `resume` works like `call`, `yield` works like `ret`
 
-    - [ ] Add operators for coroutine creating, resuming and yielding (and possible destroying, but it's convenient enough to exit and destroy a coroutine with `return`). Here is a proposal:
+    - [x] Add operators for coroutine creating, resuming and yielding (and possible destroying, but it's convenient enough to exit and destroy a coroutine with `return`). Here is a proposal:
 
         ```
         c = -> fn [a, b] (
