@@ -414,8 +414,8 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
             var code = @"
                 # Evil metatable
                 mt = {
-                    .__ren: [t, k] -> k,
-                    .__uen: [t, k, v] -> (),
+                    .__ren: [t, k] -> [k, t], # the second element should be ignored
+                    .__uen: [t, k, v] -> (),  # uen does nothing
                 };
                 
                 `meta(!a = { .x: 1, .y: 2 }) = mt;
