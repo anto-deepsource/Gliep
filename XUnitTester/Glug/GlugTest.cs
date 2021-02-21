@@ -276,7 +276,6 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .MoveNext().AssertEnd();
         }
 
-
         [Fact]
         public void LogicalInteger128() {
             var code = @"
@@ -310,6 +309,48 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                     .MoveNext().AssertInteger((long)0xaaaa55555555aaaaul)
                     .MoveNext().AssertInteger((long)0xffffffff00000000ul)
                     .MoveNext().AssertInteger((long)0x00000000fffffffful)
+                    .MoveNext().AssertEnd();
+            }
+        }
+
+        [Fact]
+        public void Integer128() {
+            var code = @"
+                i128 = {
+                    .__lss: [x, y] -> if (x.hi ~= y.hi) x.hi < y.hi else x.lo < y.lo,
+                    .__equ: [x, y] -> x.hi == y.hi && x.lo == y.lo,
+                    .__and: [x, y] -> i128.new[x.hi & y.hi, x.lo & y.lo],
+                    .__orr: [x, y] -> i128.new[x.hi | y.hi, x.lo | y.lo],
+                    .__xor: [x, y] -> i128.new[x.hi ^ y.hi, x.lo ^ y.lo],
+                    .__not: v -> i128.new[~(x.hi), ~(x.lo)],
+
+                    .new: [hi, lo] -> (rv = { .hi: hi, .lo: lo }; `meta rv = i128; rv),
+                };
+
+                x = i128.new[0x00000000ffffffff, 0xffffffff00000000];
+                y = i128.new[0x3333cccc3333cccc, 0x5555aaaa5555aaaa];
+                a = x & y;
+                b = x | y;
+                c = x ^ y;
+                d = ~x;
+
+                [ a.hi, a.lo, b.hi, b.lo, c.hi, c.lo, d.hi, d.lo, x == y, x ~= y, x < y, x > y ];
+            ";
+
+            unchecked {
+                GlosValueArrayChecker.Create(Execute(code))
+                    .FirstOne().AssertInteger((long)0x000000003333ccccul)
+                    .MoveNext().AssertInteger((long)0x5555aaaa00000000ul)
+                    .MoveNext().AssertInteger((long)0x3333ccccfffffffful)
+                    .MoveNext().AssertInteger((long)0xffffffff5555aaaaul)
+                    .MoveNext().AssertInteger((long)0x3333cccccccc3333ul)
+                    .MoveNext().AssertInteger((long)0xaaaa55555555aaaaul)
+                    .MoveNext().AssertInteger((long)0xffffffff00000000ul)
+                    .MoveNext().AssertInteger((long)0x00000000fffffffful)
+                    .MoveNext().AssertFalse()
+                    .MoveNext().AssertTrue()
+                    .MoveNext().AssertTrue()
+                    .MoveNext().AssertFalse()
                     .MoveNext().AssertEnd();
             }
         }
