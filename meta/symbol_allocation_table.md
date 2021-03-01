@@ -14,13 +14,14 @@
 - `+`: addition
 - `,`: separator in lists and table literals
 - `-`: subtraction
-  - `->`: right arrow in lambdas and function definitions
+  - `->`: right arrow in lambdas and function definitions and coroutine creation
 - `.`: index by name
   - `.!`: index locally by name
 - `/`: division
 - `:`: separator between key and value in table literals
 - `;`: statements separator
 - `<`: less than
+  - `<-`: coroutine resuming and yielding
   - `<<`: left shift
   - `<=`: less than or equal to
   - `<|`: pseudo-index head
