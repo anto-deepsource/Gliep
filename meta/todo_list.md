@@ -314,11 +314,11 @@
     Should allow `ret` (i.e. pop item from call stack) in a try block.
 
     ```
-    000000: ld.0
-    000001: try 00000f      ; enter try block
-    000006: ld.1
-    000007: ldnil
-    000008: add
+    000000: try 00000f      ; enter try block
+    000005: ld.1
+    000006: ldnil
+    000007: add
+    000008: ret
     000009: endtry          ; leave try block
     00000a: b 000011
     00000f: ld.neg1         ; enter catch block
