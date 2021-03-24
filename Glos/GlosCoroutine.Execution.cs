@@ -133,6 +133,7 @@ namespace GeminiLab.Glos {
             frame.InstructionPointer = 0;
             frame.NextInstructionPointer = 0;
             frame.DelimiterStackBase = _dptr;
+            frame.TryStackBase = _tptr;
 
             frame.ReturnSize = returnSize;
 
@@ -153,6 +154,7 @@ namespace GeminiLab.Glos {
             frame.InstructionPointer = -1;
             frame.NextInstructionPointer = -1;
             frame.DelimiterStackBase = _dptr;
+            frame.TryStackBase = _tptr;
 
             frame.ReturnSize = returnSize;
         }
@@ -408,6 +410,15 @@ namespace GeminiLab.Glos {
                     case GlosOpCategory.Syscall:
                         Parent.GetSyscall((int) imms)?.Invoke(_stack, _callStack, _delStack);
                         break;
+                    case GlosOpCategory.Others when op == GlosOp.Try || op == GlosOp.TryS:
+                        pushTryStackFrame(nip + (int) imms);
+                        break;
+                    case GlosOpCategory.Others when op == GlosOp.EndTry:
+                        popTryStackFrame();
+                        break;
+                    case GlosOpCategory.Others when op == GlosOp.Throw:
+                        throw new NotImplementedException();
+                        break;
                     case GlosOpCategory.Others when op == GlosOp.Dup:
                         pushStack();
                         stackTop() = stackTop(1);
@@ -478,6 +489,7 @@ namespace GeminiLab.Glos {
                         }
 
                         _stack.AsSpan(rtb, retc).CopyTo(_stack.AsSpan(callStackTop().StackBase, retc));
+                        popCurrentFrameTry();
                         popUntil(callStackTop().StackBase + retc);
                         popCurrentFrameDelimiter();
                         popCallStackFrame();

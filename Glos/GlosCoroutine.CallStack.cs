@@ -11,7 +11,13 @@ namespace GeminiLab.Glos {
         private ref GlosStackFrame pushCallStackFrame() => ref _callStack.PushStack();
 
         private void popCallStackFrame() {
-            _callStack.PopStack().Function = null!;
+            if (_cptr - 1 < _clmt) {
+                throw new InvalidOperationException();
+            }
+            
+            ref var popped = ref _callStack.PopStack();
+            popped.Function = null!;
+            popped.Call = null!;
         }
 
         public ReadOnlySpan<GlosStackFrame> CallStackFrames => _callStack.AsSpan(0, _cptr);

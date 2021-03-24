@@ -1,3 +1,5 @@
+using System;
+
 namespace GeminiLab.Glos {
     public partial class GlosCoroutine {
         private readonly GlosStack<int> _delStack = new GlosStack<int>();
@@ -8,7 +10,13 @@ namespace GeminiLab.Glos {
 
         private int peekDelimiter() => hasDelimiter() ? _delStack.StackTop() : callStackTop().PrivateStackBase;
 
-        private int popDelimiter() => hasDelimiter() ? _delStack.PopStack() : callStackTop().PrivateStackBase;
+        private int popDelimiter() {
+            if (_dptr - 1 < _dlmt) {
+                throw new InvalidOperationException();
+            }
+            
+            return hasDelimiter() ? _delStack.PopStack() : callStackTop().PrivateStackBase;
+        }
 
         private void popCurrentFrameDelimiter() {
             while (hasDelimiter()) popDelimiter();

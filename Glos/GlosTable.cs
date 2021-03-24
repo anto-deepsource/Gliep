@@ -18,20 +18,20 @@ namespace GeminiLab.Glos {
         public GlosTable() {
             resize(3);
         }
-        
+
         public int Count => _count;
 
         private KeyCollection? _keys;
 
         public IEnumerable<GlosValue> Keys => _keys ??= new KeyCollection(this);
-        
+
         // e.g.
         // 
         // var eid = -1;
         // while ((eid = NextEntry(hash, eid)) >= 0) { /* your code */ }
         public int NextEntry(ulong hash, int entryId) {
             var next = -1;
-            
+
             if (entryId == -1) {
                 next = getBucket(hash) - 1;
             } else {
@@ -58,7 +58,7 @@ namespace GeminiLab.Glos {
 
             ref var bucket = ref getBucket(hash);
             ref var entry = ref _entries[_count];
-                
+
             entry.Hash = hash;
             entry.Next = bucket - 1;
             entry.Key = key;
@@ -66,10 +66,10 @@ namespace GeminiLab.Glos {
 
             _count = bucket = _count + 1;
         }
-        
+
         public bool TryReadEntry(in GlosValue key, out GlosValue value) {
             var hash = key.Hash();
-            
+
             var eid = -1;
             while ((eid = NextEntry(hash, eid)) >= 0) {
                 ref var entry = ref GetEntryAt(eid);
@@ -87,7 +87,7 @@ namespace GeminiLab.Glos {
 
         public void UpdateEntry(in GlosValue key, in GlosValue value) {
             var hash = key.Hash();
-            
+
             var eid = -1;
             while ((eid = NextEntry(hash, eid)) >= 0) {
                 ref var entry = ref GetEntryAt(eid);
@@ -116,12 +116,12 @@ namespace GeminiLab.Glos {
                 bucket = i + 1;
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ref int getBucket(ulong hash) {
             return ref _buckets[hash % (uint) _size];
         }
-        
+
         [StructLayout(LayoutKind.Auto)]
         public struct Entry {
             public ulong Hash;
@@ -130,7 +130,7 @@ namespace GeminiLab.Glos {
             public GlosValue Key;
             public GlosValue Value;
         }
-        
+
         private static class Hashing {
             private static readonly int[] Primes = {
                 3, 5, 7, 11, 17, 23, 29, 37, 47, 59, 71, 89, 107, 131, 163, 197, 239, 293, 353, 431, 521, 631, 761,
@@ -143,7 +143,7 @@ namespace GeminiLab.Glos {
                 397452101, 476942527, 572331049, 686797261, 824156741, 988988137, 1186785773, 1424142949,
                 1708971541, 2050765853, 2146435069,
             };
-            
+
             public static int GetPrime(int n) {
                 foreach (var prime in Primes) {
                     if (prime >= n) {
@@ -154,7 +154,7 @@ namespace GeminiLab.Glos {
                 return Primes[^0];
             }
         }
-        
+
         public bool TryGetMetamethod(string name, out GlosValue fun) {
             fun = default;
 
@@ -171,7 +171,7 @@ namespace GeminiLab.Glos {
             public KeyEnumerator(GlosTable table) {
                 _table = table;
             }
-            
+
             private GlosTable _table;
             private int       _ptr = -1;
 
@@ -195,14 +195,14 @@ namespace GeminiLab.Glos {
 
             public void Dispose() { }
         }
-        
+
         private class KeyCollection : IEnumerable<GlosValue> {
             public KeyCollection(GlosTable table) {
                 _table = table;
             }
 
             private GlosTable _table;
-            
+
             public IEnumerator<GlosValue> GetEnumerator()  => new KeyEnumerator(_table);
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }

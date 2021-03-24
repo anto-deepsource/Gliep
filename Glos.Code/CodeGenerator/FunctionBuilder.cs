@@ -161,6 +161,11 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendBn(Label target) => AppendInstruction(GlosOp.Bn, target: target);
         public void AppendBnn(Label target) => AppendInstruction(GlosOp.Bnn, target: target);
 
+        // exception
+        public void AppendTry(Label target) => AppendInstruction(GlosOp.Try, target: target);
+        public void AppendEndTry() => AppendInstruction(GlosOp.EndTry);
+        public void AppendThrow() => AppendInstruction(GlosOp.Throw);
+        
         // stack auxiliary
         public void AppendDup() => AppendInstruction(GlosOp.Dup);
         public void AppendPop() => AppendInstruction(GlosOp.Pop);
@@ -275,6 +280,10 @@ namespace GeminiLab.Glos.CodeGenerator {
                     } else if (op == GlosOp.SysC0) {
                         buff.AddOp(GlosOp.SysC0 + (byte) (0x07 & imm));
                     } else if (GlosOpInfo.Categories[(byte) op] == GlosOpCategory.Branch) {
+                        buff.AddOp(op);
+                        _labels[target!].Add(buff.Count);
+                        buff.AddInteger32(int.MaxValue);
+                    } else if (op == GlosOp.Try || op == GlosOp.TryS) {
                         buff.AddOp(op);
                         _labels[target!].Add(buff.Count);
                         buff.AddInteger32(int.MaxValue);

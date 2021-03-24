@@ -116,6 +116,11 @@ namespace GeminiLab.Glos {
         BnS     = 0x8b,
         BnnS    = 0x8c,
 
+        Try     = 0x90,
+        TryS    = 0x91,
+        EndTry  = 0x92,
+        Throw   = 0x93,
+
         Dup     = 0xa0,
         Pop     = 0xa1,
 

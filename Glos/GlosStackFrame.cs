@@ -14,6 +14,7 @@
         public byte                     PhaseCount;
         public long                     LastImm;
         public int                      DelimiterStackBase;
+        public int                      TryStackBase;
         public int                      ReturnSize;
         public GlosContext              Context;
     }

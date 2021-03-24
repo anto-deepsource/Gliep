@@ -12,6 +12,10 @@ namespace GeminiLab.Glos {
 
         // TODO: add stack underflow check
         private void popStack() {
+            if (_sptr - 1 < _slmt) {
+                throw new InvalidOperationException();
+            }
+            
             _stack.PopStack().SetNil();
         }
 

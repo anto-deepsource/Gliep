@@ -309,6 +309,24 @@
     1 + ([x, y] -> x + y) (try throw [2, 3, 4] catch[a, b] [a, b])
     ```
 
+    *Update (2021/03/24)*
+
+    Should allow `ret` (i.e. pop item from call stack) in a try block.
+
+    ```
+    000000: ld.0
+    000001: try 00000f      ; enter try block
+    000006: ld.1
+    000007: ldnil
+    000008: add
+    000009: endtry          ; leave try block
+    00000a: b 000011
+    00000f: ld.neg1         ; enter catch block
+    000010: ret             ; leave catch block
+    000011: add
+    000012: ret
+    ```
+
 - [ ] *(2020/09/10)* *(Planning)* Use reflection to generate builtin functions, so they don't need to check parameters' types every time they're called
 
 - [x] *(2020/12/11)* Coroutine system
