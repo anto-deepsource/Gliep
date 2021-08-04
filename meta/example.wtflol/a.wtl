@@ -1,0 +1,35 @@
+preset "lol";
+
+team with "medium" "{{flagdeco|CHN}} RNG" with "full" "{{flagdeco|CHN}} Royal never give up" is "RNG";
+team with "medium" "{{flagdeco|AUS}} PGG" with "full" "{{flagdeco|AUS}} Pentanet.GG" is "PGG";
+team with "medium" "{{flagdeco|RUS}} UOL" with "full" "{{flagdeco|RUS}} Unicorns of Love" is "UOL";
+
+games with "time" "5月6日" are
+  "RNG 1-0 PGG"
+  "PGG 0-1 UOL"
+  ;
+
+games on "5月7日" are
+  "PGG 0-1 RNG"
+  "UOL 0-1 RNG"
+  ;
+
+games on "5月8日" are
+  "RNG 1-0 UOL"
+  "UOL 0-1 PGG"
+  ;
+
+games on "5月9日" are
+  "UOL 0-1 RNG"
+  "UOL 1-0 PGG"
+  "RNG 1-0 PGG"
+  "RNG 1-0 UOL"
+  "PGG 1-0 UOL"
+  "PGG 0-1 RNG"
+  ;
+
+games on "5月9日" with "series" "加赛" are
+  "UOL 0-1 PGG"
+  ;
+
+output[];
