@@ -105,6 +105,8 @@ namespace GeminiLab.Gliep {
                             dest.Add(pi.AssertString());
                         } else if (paramType == typeof(GlosVector)) {
                             dest.Add(pi.AssertVector());
+                        } else if (paramType == typeof(GlosTable)) {
+                            dest.Add(pi.AssertTable());
                         }
                     }
                 }

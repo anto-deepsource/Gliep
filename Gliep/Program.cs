@@ -56,6 +56,21 @@ namespace GeminiLab.Gliep {
             };
         }
 
+        [GlosBuiltInPureFunction("itert")]
+        public GlosValue[] IterT(GlosTable table) {
+            var keyEnum = table.Keys.GetEnumerator();
+
+            return new GlosValue[] {
+                (GlosPureEFunction) (p => {
+                    if (keyEnum.MoveNext()) {
+                        return new[] { keyEnum.Current };
+                    } else {
+                        return new[] { GlosValue.NewNil() };
+                    }
+                })
+            };
+        }
+
         [GlosBuiltInPureFunction("__built_in_sqrt")]
         public GlosValue[] Sqrt(double val) {
             return new GlosValue[] {
