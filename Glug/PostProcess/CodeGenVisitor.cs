@@ -68,7 +68,7 @@ namespace GeminiLab.Glug.PostProcess {
 
             _delCount[fun] = 0;
             visitForAny(val.Body, fun);
-            fun.AppendRetIfNone();
+            fun.AppendTailRetIfNecessary();
 
             if (parent != null) {
                 var self = info.Variable;

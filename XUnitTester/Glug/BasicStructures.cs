@@ -83,7 +83,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 ) else (
                     3;
                 );
-                [a, b, c, d, e]
+                [a, b, c, d, e, ([] -> if (true) (return) else (return))[]]
             ";
 
             GlosValueArrayChecker.Create(Execute(code))
@@ -91,6 +91,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glug {
                 .MoveNext().AssertNil()
                 .MoveNext().AssertInteger(4)
                 .MoveNext().AssertInteger(5)
+                .MoveNext().AssertNil()
                 .MoveNext().AssertNil()
                 .MoveNext().AssertEnd();
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GeminiLab.Glos.CodeGenerator {
     public class FunctionBuilder {
@@ -190,8 +191,15 @@ namespace GeminiLab.Glos.CodeGenerator {
         // syscall
         public void AppendSyscall(int imm) => AppendInstruction(GlosOp.SysC0, immediate: imm);
 
-        public void AppendRetIfNone() {
-            if (_instructions[^1].OpCode != GlosOp.Ret) AppendRet();
+        public void AppendTailRetIfNecessary() {
+            // we should append a tail Ret if
+            bool necessary = false;
+            // a. the last instruction is not Ret, or
+            necessary |= _instructions[^1].OpCode != GlosOp.Ret;
+            // b. any label points to the end of function 
+            necessary |= _labels.Keys.Any(l => l.TargetCounter >= _instructions.Count);
+
+            if (necessary) AppendRet();
         }
 
 #endregion
