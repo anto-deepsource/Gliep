@@ -6,9 +6,9 @@ namespace GeminiLab.Glos {
         
         private int _tptr => _tryStack.Count;
 
-        private ref GlosTryStackFrame tryStackTop() => ref _tryStack.StackTop();
+        private ref GlosTryStackFrame peekTry() => ref _tryStack.StackTop();
 
-        private ref GlosTryStackFrame pushTryStackFrame(int dest) {
+        private ref GlosTryStackFrame pushTry(int dest) {
             ref var pushed = ref _tryStack.PushStack();
 
             pushed.StackPointer = _sptr;
@@ -19,13 +19,14 @@ namespace GeminiLab.Glos {
             return ref pushed;
         }
 
-        private void popTryStackFrame() {
+        private void popTry() {
             if (callStackTop().TryStackBase >= _tptr) {
                 return;
             }
 
             _tryStack.PopStack();
 
+            /*
             if (_tryStack.Count > 0) {
                 ref var t = ref tryStackTop();
 
@@ -35,13 +36,18 @@ namespace GeminiLab.Glos {
             } else {
                 _slmt = _clmt = _dlmt = -1;
             }
+            */
+        }
+
+        private bool hasTry() {
+            return callStackTop().TryStackBase < _tptr;
         }
 
         private void popCurrentFrameTry() {
             var tBase = callStackTop().TryStackBase;
 
             while (_tptr > tBase) {
-                popTryStackFrame();
+                popTry();
             }
         }
     }

@@ -2,6 +2,10 @@
 using System.Runtime.CompilerServices;
 
 namespace GeminiLab.Glos {
+    public class GlosUserException : GlosException {
+        
+    }
+    
     public enum GlosCoroutineStatus : byte {
         Invalid,
         Initial,
@@ -411,10 +415,10 @@ namespace GeminiLab.Glos {
                         Parent.GetSyscall((int) imms)?.Invoke(_stack, _callStack, _delStack);
                         break;
                     case GlosOpCategory.Others when op == GlosOp.Try || op == GlosOp.TryS:
-                        pushTryStackFrame(nip + (int) imms);
+                        pushTry(nip + (int) imms);
                         break;
                     case GlosOpCategory.Others when op == GlosOp.EndTry:
-                        popTryStackFrame();
+                        popTry();
                         break;
                     case GlosOpCategory.Others when op == GlosOp.Throw:
                         throw new NotImplementedException();

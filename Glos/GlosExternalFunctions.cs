@@ -10,6 +10,7 @@ namespace GeminiLab.Glos {
         Resume,
         Yield,
         Call,
+        Throw,
     }
 
     public struct AsyncEFunctionResumeResult {
@@ -31,6 +32,10 @@ namespace GeminiLab.Glos {
 
         public static AsyncEFunctionResumeResult Call(GlosValue function, params GlosValue[] values) {
             return new AsyncEFunctionResumeResult { Type = AsyncEFunctionResumeResultType.Call, Value = function, Arguments = values };
+        }
+
+        public static AsyncEFunctionResumeResult Throw(params GlosValue[] values) {
+            return new AsyncEFunctionResumeResult { Type = AsyncEFunctionResumeResultType.Throw, Arguments = values };
         }
     }
 
