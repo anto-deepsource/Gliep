@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 
 namespace GeminiLab.Glos {
@@ -120,6 +121,15 @@ namespace GeminiLab.Glos {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref GlosValue SetException(this ref GlosValue v, Exception value) {
+            v.ValueNumber.Integer = 0;
+            v.ValueObject = value;
+            v.Type = GlosValueType.Exception;
+
+            return ref v;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AssertNil(this in GlosValue v) {
             if (v.Type != GlosValueType.Nil) throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Nil);
         }
@@ -202,6 +212,13 @@ namespace GeminiLab.Glos {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Exception AssertException(this in GlosValue v) {
+            if (v.Type == GlosValueType.Exception) return v.AssumeException();
+
+            throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Exception);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long AssumeInteger(this in GlosValue v) => v.ValueNumber.Integer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -233,6 +250,9 @@ namespace GeminiLab.Glos {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GlosCoroutine AssumeCoroutine(this in GlosValue v) => (GlosCoroutine) v.ValueObject!;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Exception AssumeException(this in GlosValue v) => (Exception) v.ValueObject!;
 
         public static double ToFloat(this in GlosValue v) {
             if (v.Type == GlosValueType.Float) return v.ValueNumber.Float;

@@ -1,3 +1,5 @@
+using System;
+
 namespace GeminiLab.Glos {
     public partial struct GlosValue {
         public static implicit operator GlosValue(long v) => NewInteger(v);
@@ -10,6 +12,7 @@ namespace GeminiLab.Glos {
         public static implicit operator GlosValue(GlosVector v) => NewVector(v);
         public static implicit operator GlosValue(GlosPureEFunction v) => NewPureEFunction(v);
         public static implicit operator GlosValue(GlosCoroutine v) => NewCoroutine(v);
+        public static implicit operator GlosValue(Exception v) => NewException(v);
 
         // Unfortunately, C# do not allow this.
         // public static implicit operator GlosValue(IGlosAsyncEFunction v) => NewAsyncEFunction(v);
@@ -84,6 +87,12 @@ namespace GeminiLab.Glos {
         public static GlosValue NewCoroutine(GlosCoroutine value) {
             var rv = new GlosValue();
             rv.SetCoroutine(value);
+            return rv;
+        }
+
+        public static GlosValue NewException(Exception value) {
+            var rv = new GlosValue();
+            rv.SetException(value);
             return rv;
         }
 

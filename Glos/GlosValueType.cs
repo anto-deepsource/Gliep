@@ -16,6 +16,7 @@ namespace GeminiLab.Glos {
         PureEFunction  = 0x86,
         AsyncEFunction = 0x87,
         Coroutine      = 0x88,
+        Exception      = 0x89,
     }
 
     public static class GlosValueTypeExtensions {
@@ -33,6 +34,7 @@ namespace GeminiLab.Glos {
                 GlosValueType.PureEFunction  => "function",
                 GlosValueType.AsyncEFunction => "function",
                 GlosValueType.Coroutine      => "coroutine",
+                GlosValueType.Exception      => "exception",
                 _                            => throw new ArgumentOutOfRangeException(nameof(type), type, null)
             };
     }

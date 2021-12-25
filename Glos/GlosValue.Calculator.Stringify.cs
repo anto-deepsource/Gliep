@@ -22,6 +22,7 @@ namespace GeminiLab.Glos {
                     GlosValueType.PureEFunction  => $"<pure efunction: {RuntimeHelpers.GetHashCode(v.AssumePureEFunction()):x8}>",
                     GlosValueType.AsyncEFunction => $"<async efunction: {RuntimeHelpers.GetHashCode(v.AssumeAsyncEFunction()):x8}>",
                     GlosValueType.Coroutine      => $"<coroutine: {RuntimeHelpers.GetHashCode(v.AssumeCoroutine()):x8}>", // TODO: better stringify
+                    GlosValueType.Exception      => $"<exception: {v.AssertException().Message}>",
                     _                            => throw new ArgumentOutOfRangeException()
                 };
             }

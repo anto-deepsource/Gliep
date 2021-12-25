@@ -167,6 +167,7 @@ namespace GeminiLab.Glos {
             Return,
             Resume,
             Yield,
+            Throw,
         }
 
         public ref struct ExecResult {
