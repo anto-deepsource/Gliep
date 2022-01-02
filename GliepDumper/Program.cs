@@ -97,9 +97,7 @@ namespace GeminiLab.Gliep.Dumper {
                      || op == GlosOp.ShpRvS) {
                         opText += $" {imms}";
                     } else if (op == GlosOp.LdFlt) {
-                        IntegerFloatUnion ifu = default;
-                        ifu.Integer = imms;
-                        opText += $" {ifu.Float:E6}";
+                        opText += $" {BitConverter.Int64BitsToDouble(imms):E6}";
                     } else if (GlosOpInfo.Categories[(int) op] == GlosOpCategory.Branch) {
                         var target = ip + imms;
                         opText += $" <{target:X6}>";

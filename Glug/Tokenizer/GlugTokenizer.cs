@@ -219,10 +219,6 @@ namespace GeminiLab.Glug.Tokenizer {
             });
         }
 
-        private static unsafe long FloatToLong(double f) {
-            return *(long*) &f;
-        }
-
         private static GlugToken? ReadNextToken(string line, ref int ptr, string source, int row) {
             int len = line.Length;
 
@@ -245,7 +241,7 @@ namespace GeminiLab.Glug.Tokenizer {
                         rv.ValueInt = ri;
                     } else {
                         rv.Type = GlugTokenType.LiteralFloat;
-                        rv.ValueInt = FloatToLong(rf);
+                        rv.ValueInt = BitConverter.DoubleToInt64Bits(rf);
                     }
 
                     return rv;

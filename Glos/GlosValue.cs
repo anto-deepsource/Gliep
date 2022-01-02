@@ -1,23 +1,17 @@
 using System.Runtime.InteropServices;
 
 namespace GeminiLab.Glos {
-    [StructLayout(LayoutKind.Explicit, Size = 8)]
-    public struct IntegerFloatUnion {
-        [FieldOffset(0)] public long   Integer;
-        [FieldOffset(0)] public double Float;
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GlosValueNumber {
+        public long   Integer;
+        public double Float;
     }
 
-    [StructLayout(LayoutKind.Auto)]
+    [StructLayout(LayoutKind.Sequential)]
     public partial struct GlosValue {
-        public GlosValueType     Type;
-        public IntegerFloatUnion ValueNumber;
-        public object?           ValueObject;
-
-        /*
-        // hash assigned or calculated
-        private bool _hashAssigned;
-        private ulong _hashCode;
-        */
+        public GlosValueType   Type;
+        public GlosValueNumber ValueNumber;
+        public object?         ValueObject;
 
         public override string ToString() {
             return Calculator.DebugStringify(this);

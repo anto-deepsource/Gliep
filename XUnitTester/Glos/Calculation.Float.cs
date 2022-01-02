@@ -15,15 +15,12 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
         };
 
         public static IEnumerable<object[]> GetFloatBiOpTestCases(int count) {
-            IntegerFloatUnion ifu = default;
             var opc = FloatBiOpList.MakeChooser();
             var ran = new U64ToI64RNG(DefaultRNG.U64);
             for (int i = 0; i < count; ++i) {
                 var op = opc.Next();
-                ifu.Integer = ran.Next();
-                var opl = ifu.Float;
-                ifu.Integer = ran.Next();
-                var opr = ifu.Float;
+                var opl = BitConverter.Int64BitsToDouble(ran.Next());
+                var opr = BitConverter.Int64BitsToDouble(ran.Next());
                 double result;
 
                 if (op == GlosOp.Equ || op == GlosOp.Neq) {

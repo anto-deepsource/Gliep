@@ -6,6 +6,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetNil(this ref GlosValue v) {
             v.ValueNumber.Integer = 0;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = null;
             v.Type = GlosValueType.Nil;
 
@@ -15,6 +16,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetInteger(this ref GlosValue v, long value) {
             v.ValueNumber.Integer = value;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = null;
             v.Type = GlosValueType.Integer;
 
@@ -23,6 +25,7 @@ namespace GeminiLab.Glos {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetFloat(this ref GlosValue v, double value) {
+            v.ValueNumber.Integer = 0;
             v.ValueNumber.Float = value;
             v.ValueObject = null;
             v.Type = GlosValueType.Float;
@@ -32,7 +35,8 @@ namespace GeminiLab.Glos {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetFloatByBinaryPresentation(this ref GlosValue v, ulong representation) {
-            v.ValueNumber.Integer = unchecked((long) representation);
+            v.ValueNumber.Integer = 0;
+            v.ValueNumber.Float = BitConverter.Int64BitsToDouble(unchecked((long) representation));
             v.ValueObject = null;
             v.Type = GlosValueType.Float;
 
@@ -42,6 +46,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetBoolean(this ref GlosValue v, bool value) {
             v.ValueNumber.Integer = value ? -1L : 0L;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = null;
             v.Type = GlosValueType.Boolean;
 
@@ -51,6 +56,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetTable(this ref GlosValue v, GlosTable value) {
             v.ValueNumber.Integer = 0;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = value;
             v.Type = GlosValueType.Table;
 
@@ -60,6 +66,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetString(this ref GlosValue v, string value) {
             v.ValueNumber.Integer = 0;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = value;
             v.Type = GlosValueType.String;
 
@@ -69,6 +76,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetFunction(this ref GlosValue v, GlosFunction fun) {
             v.ValueNumber.Integer = 0;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = fun;
             v.Type = GlosValueType.Function;
 
@@ -78,6 +86,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetEFunction(this ref GlosValue v, GlosEFunction value) {
             v.ValueNumber.Integer = 0;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = value;
             v.Type = GlosValueType.EFunction;
 
@@ -87,6 +96,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetVector(this ref GlosValue v, GlosVector value) {
             v.ValueNumber.Integer = 0;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = value;
             v.Type = GlosValueType.Vector;
 
@@ -96,6 +106,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetPureEFunction(this ref GlosValue v, GlosPureEFunction value) {
             v.ValueNumber.Integer = 0;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = value;
             v.Type = GlosValueType.PureEFunction;
 
@@ -105,6 +116,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetAsyncEFunction(this ref GlosValue v, IGlosAsyncEFunction value) {
             v.ValueNumber.Integer = 0;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = value;
             v.Type = GlosValueType.AsyncEFunction;
 
@@ -114,6 +126,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetCoroutine(this ref GlosValue v, GlosCoroutine value) {
             v.ValueNumber.Integer = 0;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = value;
             v.Type = GlosValueType.Coroutine;
 
@@ -123,6 +136,7 @@ namespace GeminiLab.Glos {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref GlosValue SetException(this ref GlosValue v, Exception value) {
             v.ValueNumber.Integer = 0;
+            v.ValueNumber.Float = 0.0;
             v.ValueObject = value;
             v.Type = GlosValueType.Exception;
 
@@ -260,6 +274,12 @@ namespace GeminiLab.Glos {
 
             throw new GlosValueTypeAssertionFailedException(v, GlosValueType.Float);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong AssertFloatRaw(this in GlosValue v) => unchecked((ulong) BitConverter.DoubleToInt64Bits(v.AssertFloat()));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong AssumeFloatRaw(this in GlosValue v) => unchecked((ulong) BitConverter.DoubleToInt64Bits(v.AssumeFloat()));
 
         public static bool Truthy(this in GlosValue v) {
             if (v.Type == GlosValueType.Nil) return false;

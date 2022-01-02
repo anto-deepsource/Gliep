@@ -69,11 +69,11 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
                 .FirstOne().AssertFloat(9360.0)
                 .MoveNext().AssertFloat(9360.0)
                 .MoveNext().AssertFloat(0.0)
-                .MoveNext().AssertFloat(0x3d70000000000000ul)
+                .MoveNext().AssertFloatRaw(0x3d70000000000000ul)
                 .MoveNext().AssertFloat(21902400.0)
-                .MoveNext().AssertFloat(0x4174e34400000001ul)
+                .MoveNext().AssertFloatRaw(0x4174e34400000001ul)
                 .MoveNext().AssertFloat(1.0)
-                .MoveNext().AssertFloat(0x3ff0000000000001ul)
+                .MoveNext().AssertFloatRaw(0x3ff0000000000001ul)
                 .MoveNext().AssertFloat(-4680.0)
                 .MoveNext().AssertEnd();
         }

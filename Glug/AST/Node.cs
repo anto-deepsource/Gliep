@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using GeminiLab.Glos;
 
@@ -29,7 +29,7 @@ namespace GeminiLab.Glug.AST {
     }
 
     public class LiteralFloat : Literal {
-        public unsafe LiteralFloat(long b) : this(*(double*) &b) { }
+        public LiteralFloat(long b) : this(BitConverter.Int64BitsToDouble(b)) { }
 
         public LiteralFloat(double value) {
             Value = value;

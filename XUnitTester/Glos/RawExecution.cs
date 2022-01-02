@@ -129,7 +129,7 @@ namespace GeminiLab.XUnitTester.Gliep.Glos {
 
             GlosValueArrayChecker.Create(res)
                 .FirstOne().AssertNil()
-                .MoveNext().AssertFloat(0x40e02cba12000000ul)
+                .MoveNext().AssertFloatRaw(0x40e02cba12000000ul)
                 .MoveNext().AssertTrue()
                 .MoveNext().AssertFalse()
                 .MoveNext().AssertInteger(3)

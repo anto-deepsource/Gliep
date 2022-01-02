@@ -94,24 +94,21 @@ namespace GeminiLab.XUnitTester.Gliep.Misc {
             return this;
         }
 
-        public GlosValueArrayItemChecker AssertFloat(ulong binaryRepresentation) {
+        public GlosValueArrayItemChecker AssertFloatRaw(ulong binaryRepresentation) {
             AssertPositionInRange();
-            Current.AssertFloat();
-            Assert.Equal(unchecked((long)binaryRepresentation), Current.ValueNumber.Integer);
+            Assert.Equal(binaryRepresentation, Current.AssertFloatRaw());
             return this;
         }
 
-        public GlosValueArrayItemChecker AssertFloat(Action<ulong> binaryRepresentationChecker) {
+        public GlosValueArrayItemChecker AssertFloatRaw(Action<ulong> binaryRepresentationChecker) {
             AssertPositionInRange();
-            Current.AssertFloat();
-            binaryRepresentationChecker(unchecked((ulong)Current.ValueNumber.Integer));
+            binaryRepresentationChecker(Current.AssertFloatRaw());
             return this;
         }
 
-        public GlosValueArrayItemChecker AssertFloat(Predicate<ulong> binaryRepresentationPredicate) {
+        public GlosValueArrayItemChecker AssertFloatRaw(Predicate<ulong> binaryRepresentationPredicate) {
             AssertPositionInRange();
-            Current.AssertFloat();
-            Assert.True(binaryRepresentationPredicate(unchecked((ulong)Current.ValueNumber.Integer)));
+            Assert.True(binaryRepresentationPredicate(Current.AssertFloatRaw()));
             return this;
         }
 
@@ -227,7 +224,7 @@ namespace GeminiLab.XUnitTester.Gliep.Misc {
         }
 
         public static GlosValueArrayChecker Create(Memory<GlosValue> target) => new GlosValueArrayChecker(target);
-        
+
         public GlosValueArrayItemChecker FirstOne() => new GlosValueArrayItemChecker(this, 0);
     }
 }

@@ -128,7 +128,7 @@ namespace GeminiLab.Glos.CodeGenerator {
         public void AppendLd(ulong imm) => AppendInstruction(GlosOp.Ld, immediate: unchecked((long) imm));
 
         // load (float)
-        public unsafe void AppendLdFlt(double value) => AppendInstruction(GlosOp.LdFlt, immediate: *(long*) &value);
+        public void AppendLdFlt(double value) => AppendInstruction(GlosOp.LdFlt, immediate: BitConverter.DoubleToInt64Bits(value));
         public void AppendLdFltRaw(ulong value) => AppendInstruction(GlosOp.LdFlt, immediate: unchecked((long) value));
 
         // load string and function
